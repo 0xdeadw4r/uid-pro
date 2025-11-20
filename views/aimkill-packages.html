@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aimkill Key Manager - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: #0a0a0a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header {
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            color: #999;
+            margin: 0.5rem 0 0 0;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+            color: #FCD34D;
+            font-size: 12px;
+        }
+
+        .info-box {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3B82F6;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 2rem;
+            color: #93C5FD;
+            font-size: 12px;
+        }
+
+        .section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 1.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .package-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .package-card:hover {
+            border-color: #FFFFFF;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+        }
+
+        .package-card.selected {
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .package-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .package-credits {
+            font-size: 0.9rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .package-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            background: #222;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .submit-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            width: 100%;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #FFFFFF;
+        }
+
+        .submit-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .keys-output {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .keys-output h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 1rem 0;
+        }
+
+        .key-item {
+            background: #222;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+
+        .copy-btn {
+            background: #3B82F6;
+            color: #000;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        .copy-btn:hover {
+            background: #1D4ED8;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .error-box {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #FCA5A5;
+            font-size: 12px;
+            display: none;
+        }
+
+        .success-box {
+            background: rgba(16, 185, 129, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            color: #A7F3D0;
+            font-size: 12px;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 12px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .packages-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .package-card {
+                padding: 1.5rem 1.25rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+
+            .section h2 {
+                font-size: 1.2rem;
+            }
+
+            .form-section {
+                padding: 1.25rem;
+            }
+
+            .stat-card {
+                padding: 1.25rem;
+            }
+
+            .stat-value {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+
+            .package-name {
+                font-size: 1.1rem;
+            }
+
+            .package-credits {
+                font-size: 2rem;
+            }
+
+            .section {
+                padding: 1.25rem;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 14px;
+                padding: 0.75rem;
+            }
+
+            .submit-btn {
+                font-size: 12px;
+                padding: 0.8rem 1.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h1>👤 Aimkill Account Creator</h1>
+            <p>Create Aimkill user accounts with username and password</p>
+        </div>
+
+        <div class="info-box">
+            ℹ️ Create Aimkill user accounts here. Username must start with "DC". Select a duration package and enter account details. All accounts are created via GenzAuth API.
+        </div>
+
+        <div class="error-box" id="errorBox"></div>
+        <div class="success-box" id="successBox"></div>
+
+        <div class="section">
+            <h2>Your Credits</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Current Balance</div>
+                    <div class="stat-value" id="creditBalance">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Account Type</div>
+                    <div class="stat-value" id="accountType" style="font-size: 0.9rem;">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Select Package</h2>
+            <div class="packages-grid" id="packagesGrid"></div>
+        </div>
+
+        <div class="section">
+            <h2>Create User Account</h2>
+            <form id="createUserForm">
+                <div class="form-section">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username (must start with DC)</label>
+                            <input type="text" id="username" placeholder="DCUsername" required 
+                                pattern="^DC.*" title="Username must start with DC">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="password" placeholder="Enter password" required minlength="6">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Selected Package</label>
+                            <input type="text" id="selectedPackageDisplay" readonly disabled
+                                style="background: #333; cursor: not-allowed;">
+                        </div>
+                        <div class="form-group">
+                            <label>Credits Required</label>
+                            <input type="text" id="creditsRequired" readonly disabled
+                                style="background: #333; cursor: not-allowed;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="createBtn">Create Account</button>
+            </form>
+
+            <div class="keys-output" id="accountOutput" style="display: none;">
+                <h3>✅ Account Created Successfully</h3>
+                <div id="accountDetails"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        let selectedPackage = null;
+        let userCredits = 0;
+        let packagesData = {}; // Store packages loaded from backend
+
+        const PACKAGES = {
+            '1day': { days: 1, credits: 3, display: '1 Day', price: 2.99 },
+            '3day': { days: 3, credits: 8, display: '3 Days', price: 7.99 },
+            '7day': { days: 7, credits: 15, display: '7 Days', price: 14.99 },
+            '15day': { days: 15, credits: 30, display: '15 Days', price: 29.99 },
+            '30day': { days: 30, credits: 50, display: '30 Days', price: 49.99 },
+            'lifetime': { days: 365, credits: 100, display: 'Lifetime (1 Year)', price: 99.99 }
+        };
+
+        function showError(message) {
+            const box = document.getElementById('errorBox');
+            box.textContent = '❌ ' + message;
+            box.style.display = 'block';
+            document.getElementById('successBox').style.display = 'none';
+        }
+
+        function showSuccess(message) {
+            const box = document.getElementById('successBox');
+            box.textContent = '✅ ' + message;
+            box.style.display = 'block';
+            document.getElementById('errorBox').style.display = 'none';
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/api/user', { credentials: 'include' });
+                const user = await response.json();
+
+                userCredits = user.credits || 0;
+                document.getElementById('creditBalance').textContent = userCredits;
+
+                if (user.accountType === 'AIMKILL') {
+                    document.getElementById('accountType').textContent = 'AIMKILL';
+                } else {
+                    showError('This page is only for Aimkill accounts!');
+                    setTimeout(() => {
+                        window.location.href = '/dashboard';
+                    }, 2000);
+                }
+
+                if (user.isAdmin || user.isOwner) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                showError('Failed to load user information');
+            }
+        }
+
+        async function loadPackages() {
+            try {
+                const response = await fetch('/api/aimkill/packages', { credentials: 'include' });
+                packagesData = await response.json(); // Store fetched packages
+
+                renderPackages();
+            } catch (error) {
+                console.error('Error loading packages:', error);
+                showError('Failed to load packages');
+            }
+        }
+
+        function renderPackages() {
+            const grid = document.getElementById('packagesGrid');
+            grid.innerHTML = '';
+
+            Object.entries(packagesData).forEach(([key, pkg]) => {
+                const card = document.createElement('div');
+                card.className = 'package-card';
+                card.innerHTML = `
+                    <div class="package-name">${pkg.display}</div>
+                    <div class="package-credits">${pkg.credits} Credits</div>
+                    <div class="package-price">$${pkg.price.toFixed(2)}</div>
+                `;
+
+                // Pass the key to selectPackage
+                card.onclick = () => selectPackage(key, card);
+                grid.appendChild(card);
+            });
+        }
+
+        function selectPackage(packageId, cardElement) {
+            document.querySelectorAll('.package-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            cardElement.classList.add('selected');
+
+            const pkg = packagesData[packageId]; // Use packagesData
+            selectedPackage = { 
+                id: packageId, 
+                name: pkg.display, 
+                credits: pkg.credits, 
+                days: pkg.days 
+            };
+
+            document.getElementById('selectedPackageDisplay').value = pkg.display;
+            updateCreditsRequired();
+        }
+
+        function updateCreditsRequired() {
+            if (!selectedPackage) {
+                document.getElementById('creditsRequired').value = '-';
+                return;
+            }
+
+            const required = selectedPackage.credits;
+            document.getElementById('creditsRequired').value = required + ' Credits';
+        }
+
+        document.getElementById('createUserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedPackage) {
+                showError('Please select a package first');
+                return;
+            }
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!username.startsWith('DC')) {
+                showError('Username must start with "DC"');
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                return;
+            }
+
+            const requiredCredits = selectedPackage.credits;
+            if (userCredits < requiredCredits) {
+                showError(`Insufficient credits! Need ${requiredCredits}, you have ${userCredits}`);
+                return;
+            }
+
+            const btn = document.getElementById('createBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating Account...';
+
+            try {
+                const response = await fetch('/api/aimkill/create-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        packageId: selectedPackage.id
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    showError(data.error || 'Failed to create account');
+                } else {
+                    showSuccess(`Successfully created account "${username}" via GenzAuth API!`);
+                    displayAccountDetails(username, selectedPackage.name);
+                    loadUserInfo();
+                    document.getElementById('createUserForm').reset();
+                    selectedPackage = null;
+                    document.querySelectorAll('.package-card').forEach(card => {
+                        card.classList.remove('selected');
+                    });
+                    updateCreditsRequired();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        });
+
+        function displayAccountDetails(username, packageName) {
+            const details = document.getElementById('accountDetails');
+            details.innerHTML = `
+                <div class="key-item">
+                    <span>Username: ${username}</span>
+                </div>
+                <div class="key-item">
+                    <span>Package: ${packageName}</span>
+                </div>
+                <p style="margin-top: 1rem; color: #999; font-size: 12px;">Account has been created in both GenzAuth API and database.</p>
+            `;
+            document.getElementById('accountOutput').style.display = 'block';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserInfo();
+            loadPackages(); // Call loadPackages on page load
+        });
+    </script>
+</body>
+
+</html>

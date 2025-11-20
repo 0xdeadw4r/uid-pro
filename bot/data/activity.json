@@ -1,0 +1,274 @@
+{
+  "activities": [
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-25T09:20:52.845Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-25T09:19:32.009Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-25T09:19:29.308Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-25T09:18:50.817Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-25T09:18:33.678Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:56:52.102Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:16:52.207Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-delete",
+      "description": "Deleted UID 2211445578",
+      "timestamp": "2025-10-24T20:16:50.182Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:16:42.043Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-delete",
+      "description": "Deleted UID 265786579",
+      "timestamp": "2025-10-24T20:16:39.157Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:16:28.146Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:16:19.797Z"
+    },
+    {
+      "username": "blackace",
+      "type": "uid-create",
+      "description": "Created UID 265786579 with 3 Days package",
+      "timestamp": "2025-10-24T20:16:04.231Z"
+    },
+    {
+      "username": "blackace",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:15:46.247Z"
+    },
+    {
+      "username": "admin",
+      "type": "credit",
+      "description": "Gave 100 credits to blackace",
+      "timestamp": "2025-10-24T20:15:32.251Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:15:11.773Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-create",
+      "description": "Created UID 2211445578 with 3 Days package",
+      "timestamp": "2025-10-24T20:15:06.385Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:14:15.328Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:14:12.588Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:14:05.664Z"
+    },
+    {
+      "username": "blackace",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:13:56.258Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:11:46.548Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:11:41.778Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:50.625Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:50.395Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:50.180Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:49.284Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:46.846Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-create",
+      "description": "Created UID 2211665828 with 30 Days package",
+      "timestamp": "2025-10-24T20:08:43.865Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-delete",
+      "description": "Deleted UID 2211665828",
+      "timestamp": "2025-10-24T20:08:34.321Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:08:04.276Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-list",
+      "description": "Viewed UID list",
+      "timestamp": "2025-10-24T20:07:58.949Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:07:53.547Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-create",
+      "description": "Created UID 2211665828 with 30 Days package",
+      "timestamp": "2025-10-24T20:02:24.569Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:02:07.816Z"
+    },
+    {
+      "username": "blackace",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:01:34.533Z"
+    },
+    {
+      "username": "blackace",
+      "type": "security",
+      "description": "Password changed",
+      "timestamp": "2025-10-24T20:01:21.414Z"
+    },
+    {
+      "username": "blackace",
+      "type": "uid-delete",
+      "description": "Deleted UID 2211665828",
+      "timestamp": "2025-10-24T20:00:34.232Z"
+    },
+    {
+      "username": "blackace",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T20:00:22.480Z"
+    },
+    {
+      "username": "admin",
+      "type": "admin",
+      "description": "Created account for blackace",
+      "timestamp": "2025-10-24T20:00:11.434Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T19:59:53.092Z"
+    },
+    {
+      "username": "admin",
+      "type": "credit",
+      "description": "Gave 1000 credits to admin",
+      "timestamp": "2025-10-24T19:56:15.843Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-create",
+      "description": "Created UID 2211665828 with 30 Days package",
+      "timestamp": "2025-10-24T19:55:59.263Z"
+    },
+    {
+      "username": "admin",
+      "type": "uid-delete",
+      "description": "Deleted UID 2211665828",
+      "timestamp": "2025-10-24T19:55:47.713Z"
+    },
+    {
+      "username": "admin",
+      "type": "login",
+      "description": "Logged in successfully",
+      "timestamp": "2025-10-24T19:54:40.854Z"
+    }
+  ]
+}

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Packages - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: #0f0f0f;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .packages-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            letter-spacing: -1px;
+        }
+
+        .credits-badge {
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .package-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1.25rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            font-size: 14px;
+            color: #ccc;
+            line-height: 1.6;
+        }
+
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .package-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem 1.5rem;
+            transition: all 0.3s ease;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .package-card:hover {
+            border-color: #FFFFFF;
+            background: #222;
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+        }
+
+        .package-card.popular {
+            border: 2px solid #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.5rem 1rem;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-radius: 0 8px 0 8px;
+        }
+
+        .package-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
+        }
+
+        .hours {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.3rem;
+        }
+
+        .credits {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .package-card button {
+            width: 100%;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 0.9rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+        }
+
+        .package-card button:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        .package-card button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .create-uid-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+
+        .create-uid-section:hover {
+            border-color: #FFFFFF;
+            box-shadow: 0 8px 24px rgba(255, 255, 255, 0.2);
+        }
+
+        .create-uid-section h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .create-uid-section input,
+        .create-uid-section select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: #222;
+            border: 1px solid #333;
+            color: #FFFFFF;
+            border-radius: 4px;
+            font-size: 14px;
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .create-uid-section input:focus,
+        .create-uid-section select:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: #2a2a2a;
+        }
+
+        .create-uid-section input::placeholder {
+            color: #666;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 1rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #message {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 13px;
+            display: none;
+        }
+
+        #message.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid #FFFFFF;
+            color: #FFFFFF;
+        }
+
+        #message.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid #FFFFFF;
+            color: #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1rem;
+            }
+
+            .packages-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .package-card {
+                padding: 1.5rem 1.25rem;
+            }
+
+            .create-uid-section {
+                padding: 1.5rem;
+            }
+
+            .create-uid-section h3 {
+                font-size: 1.2rem;
+            }
+
+            .packages-title {
+                font-size: 1.5rem;
+            }
+
+            .package-info {
+                padding: 1rem;
+                font-size: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .packages-title {
+                font-size: 1.2rem;
+            }
+
+            .package-card h3 {
+                font-size: 1.1rem;
+            }
+
+            .hours {
+                font-size: 1.5rem;
+            }
+
+            .price {
+                font-size: 1.3rem;
+            }
+
+            .credits {
+                font-size: 11px;
+            }
+
+            .create-uid-section {
+                padding: 1.25rem;
+            }
+
+            input,
+            select {
+                font-size: 14px;
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2 class="packages-title">Duration Packages</h2>
+            <div class="credits-badge">
+                <span id="userCredits">0</span> Credits
+            </div>
+        </div>
+
+        <div class="package-info">
+            Select a package below based on how long you need the UID to remain active. Each package costs a different
+            number of credits.
+        </div>
+
+        <div id="packagesGrid" class="packages-grid"></div>
+
+        <div class="create-uid-section">
+            <h3>Create New UID</h3>
+            <form id="createUidForm">
+                <input type="text" id="uid" placeholder="Enter UID (e.g., 123456789)" required pattern="[0-9]+"
+                    title="UID must contain only numbers">
+                <select id="packageSelect" required>
+                    <option value="">Select Duration Package</option>
+                </select>
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary" id="createBtn">Create UID</button>
+                </div>
+            </form>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        let packages = {};
+        let userCredits = 0;
+        const createBtn = document.getElementById('createBtn');
+
+        async function loadPackages() {
+            const user = await fetchUser();
+            if (!user) return;
+
+            userCredits = user.credits;
+            document.getElementById('userCredits').textContent = userCredits;
+
+            if (user.isAdmin || user.isSuperAdmin || user.isOwner || user.isLimitedAdmin) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+
+            const response = await fetch('/api/packages', {
+                credentials: 'include'
+            });
+            packages = await response.json();
+
+            const grid = document.getElementById('packagesGrid');
+            const select = document.getElementById('packageSelect');
+
+            Object.entries(packages).forEach(([id, pkg]) => {
+                const card = document.createElement('div');
+                card.className = `package-card ${pkg.popular ? 'popular' : ''}`;
+
+                const canAfford = userCredits >= pkg.credits;
+
+                card.innerHTML = `
+                    ${pkg.popular ? '<div class="popular-badge">Popular</div>' : ''}
+                    <h3>${pkg.name}</h3>
+                    <div class="hours">${pkg.hours} Hours</div>
+                    <div class="price">$${pkg.price.toFixed(2)}</div>
+                    <div class="credits">${pkg.credits} Credits</div>
+                    <button onclick="selectPackage('${id}')" ${!canAfford ? 'disabled' : ''}>
+                        ${canAfford ? 'Select' : 'Insufficient Credits'}
+                    </button>
+                `;
+
+                grid.appendChild(card);
+
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = `${pkg.name} (${pkg.hours}h) - ${pkg.credits} Credits`;
+                if (!canAfford) {
+                    option.disabled = true;
+                    option.textContent += ' [Not Enough Credits]';
+                }
+                select.appendChild(option);
+            });
+        }
+
+        function selectPackage(packageId) {
+            document.getElementById('packageSelect').value = packageId;
+            document.getElementById('uid').focus();
+            window.toast?.info(`Selected ${packages[packageId].name} package`) || alert(`Selected ${packages[packageId].name} package`);
+        }
+
+        document.getElementById('createUidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const uid = document.getElementById('uid').value.trim();
+            const packageId = document.getElementById('packageSelect').value;
+
+            if (!packageId) {
+                window.toast?.error('Please select a duration package') || alert('Please select a duration package');
+                return;
+            }
+
+            if (!/^[0-9]+$/.test(uid)) {
+                window.toast?.error('UID must contain only numbers') || alert('UID must contain only numbers');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/api/create-uid', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, packageId }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    window.toast?.success(`UID ${data.uid} created! Credits: ${data.creditsRemaining}`) || alert(`UID created successfully!`);
+                    userCredits = data.creditsRemaining;
+                    document.getElementById('userCredits').textContent = userCredits;
+                    document.getElementById('createUidForm').reset();
+
+                    setTimeout(() => {
+                        location.reload();
+                    }, 2000);
+                } else {
+                    if (data.requires2FA) {
+                        window.toast?.warning('Enable 2FA in Security settings') || alert('Enable 2FA in Security settings');
+                    } else if (data.error && data.error.includes('Insufficient')) {
+                        window.toast?.error(`Not enough credits! You have ${data.current}, but need ${data.required}`) || alert(`Not enough credits!`);
+                    } else if (data.error && data.error.includes('already exists')) {
+                        window.toast?.error('This UID already exists') || alert('This UID already exists');
+                    } else {
+                        window.toast?.error(data.error || 'Failed to create UID') || alert('Failed to create UID');
+                    }
+                    createBtn.disabled = false;
+                    createBtn.textContent = 'Create UID';
+                }
+            } catch (error) {
+                window.toast?.error('Connection error. Please try again.') || alert('Connection error');
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create UID';
+            }
+        });
+
+        loadPackages();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Buy Credits - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: #0a0a0a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .header h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+        }
+
+        .credits-badge {
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .admin-section {
+            background: var(--surface-dark);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-section h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 0 0 1rem 0;
+        }
+
+        .section-description {
+            font-size: 13px;
+            color: #999;
+            margin: 0;
+        }
+
+        .credit-packages {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .package-card {
+            background: var(--surface-dark);
+            border: 2px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .package-card:hover {
+            border-color: #FFFFFF;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 32px rgba(255, 255, 255, 0.3);
+        }
+
+        .package-card.popular {
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            right: 20px;
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .package-card h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 0 0 1rem 0;
+        }
+
+        .package-credits {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #FFFFFF;
+            margin: 1rem 0;
+        }
+
+        .package-price {
+            font-size: 1.5rem;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .package-savings {
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .buy-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .buy-btn:hover {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .buy-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background: var(--surface-dark);
+            max-width: 500px;
+            margin: 3% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+            color: #e0e0e0;
+        }
+
+        .modal-header p {
+            color: #999;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .payment-info {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid #333;
+        }
+
+        .payment-amount {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .amount-label {
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .amount-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .address-section {
+            margin-top: 1.5rem;
+        }
+
+        .address-label {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .address-box {
+            background: #222;
+            padding: 1rem;
+            border: 1px solid #333;
+            border-radius: 6px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #FFFFFF;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 700;
+        }
+
+        .address-box:hover {
+            border-color: #FFFFFF;
+            background: #2a2a2a;
+        }
+
+        .warning-box {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 6px;
+        }
+
+        .warning-box strong {
+            color: #FCD34D;
+            font-size: 13px;
+        }
+
+        .warning-box p {
+            margin: 0.5rem 0 0 0;
+            font-size: 12px;
+            color: #FFFFFF;
+        }
+
+        .status-info {
+            text-align: center;
+            padding: 1rem;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid #3B82F6;
+            border-radius: 6px;
+            margin-top: 1.5rem;
+        }
+
+        .status-info p {
+            margin: 0.5rem 0;
+            font-size: 12px;
+            color: #93C5FD;
+        }
+
+        .status-info strong {
+            color: #3B82F6;
+        }
+
+        .close-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #333;
+            color: #e0e0e0;
+            border: 1px solid #444;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .close-btn:hover {
+            background: #444;
+            border-color: #FFFFFF;
+        }
+
+        .copy-hint {
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            margin-top: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 1rem;
+            }
+
+            .header h2 {
+                font-size: 1.5rem;
+            }
+
+            .credit-packages {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .admin-section {
+                padding: 1.5rem;
+            }
+
+            .package-card {
+                padding: 1.5rem 1.25rem;
+            }
+
+            .modal-content {
+                margin: 10% auto;
+                padding: 1.5rem;
+                max-width: 90%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .header h2 {
+                font-size: 1.2rem;
+            }
+
+            .package-credits {
+                font-size: 2.5rem;
+            }
+
+            .package-price {
+                font-size: 1.2rem;
+            }
+
+            .modal-content {
+                padding: 1.25rem;
+            }
+
+            .amount-value {
+                font-size: 1.5rem;
+            }
+
+            .address-box {
+                font-size: 10px;
+                word-break: break-all;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Buy Credits</h2>
+            <div class="credits-badge">
+                <span id="userCredits">0</span> Credits
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>Credit Packages</h3>
+            <p class="section-description">Purchase credits to create UIDs. Pay securely with cryptocurrency (USDT).</p>
+        </div>
+
+        <div class="credit-packages">
+            <div class="package-card">
+                <h3>Starter</h3>
+                <div class="package-credits">15</div>
+                <div class="package-price">$15.00</div>
+                <button class="buy-btn" onclick="buyCredits(15, 15)">Buy Now</button>
+            </div>
+
+            <div class="package-card popular">
+                <span class="popular-badge">POPULAR</span>
+                <h3>Pro</h3>
+                <div class="package-credits">50</div>
+                <div class="package-price">$45.00</div>
+                <div class="package-savings">Save $5!</div>
+                <button class="buy-btn" onclick="buyCredits(50, 45)">Buy Now</button>
+            </div>
+
+            <div class="package-card">
+                <h3>Ultimate</h3>
+                <div class="package-credits">100</div>
+                <div class="package-price">$85.00</div>
+                <div class="package-savings">Save $15!</div>
+                <button class="buy-btn" onclick="buyCredits(100, 85)">Buy Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Complete Your Payment</h2>
+                <p>Pay with USDT (Tron Network)</p>
+            </div>
+
+            <div class="payment-info">
+                <div class="payment-amount">
+                    <div class="amount-label">Amount to Send:</div>
+                    <div class="amount-value" id="payAmount"></div>
+                </div>
+
+                <div class="address-section">
+                    <div class="address-label">Send to this address:</div>
+                    <div class="address-box" id="payAddress" onclick="copyAddress()"></div>
+                    <div class="copy-hint">Click to copy address</div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Important:</strong>
+                <p>Use USDT TRC20 (Tron network) ONLY! Sending other coins or using wrong network will result in loss of
+                    funds.</p>
+            </div>
+
+            <div class="status-info">
+                <p><strong>Checking payment status automatically...</strong></p>
+                <p>Credits will be added once payment is confirmed (usually 1-5 minutes)</p>
+            </div>
+
+            <button class="close-btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        let checkInterval;
+        let currentPaymentId = null;
+
+        async function buyCredits(credits, price) {
+            try {
+                window.toast?.info('Creating payment request...') || alert('Creating payment request...');
+
+                const response = await fetch('/api/payment/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credits }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('paymentModal').style.display = 'block';
+                    document.getElementById('payAmount').textContent = `${data.payAmount} ${data.payCurrency}`;
+                    document.getElementById('payAddress').textContent = data.payAddress;
+
+                    currentPaymentId = data.paymentId;
+                    checkPaymentStatus(data.paymentId);
+                    window.toast?.success('Payment request created! Send USDT to the address shown.') || alert('Payment request created!');
+                } else {
+                    window.toast?.error(data.error || 'Failed to create payment') || alert('Failed to create payment');
+                }
+            } catch (error) {
+                console.error('Payment error:', error);
+                window.toast?.error('Failed to create payment. Please try again.') || alert('Failed to create payment');
+            }
+        }
+
+        function copyAddress() {
+            const address = document.getElementById('payAddress').textContent;
+            navigator.clipboard.writeText(address).then(() => {
+                window.toast?.success('Address copied to clipboard!') || alert('Address copied!');
+            }).catch(() => {
+                window.toast?.error('Failed to copy address') || alert('Failed to copy address');
+            });
+        }
+
+        function checkPaymentStatus(paymentId) {
+            let checkCount = 0;
+            const maxChecks = 120;
+
+            checkInterval = setInterval(async () => {
+                try {
+                    checkCount++;
+
+                    const response = await fetch(`/api/payment/status/${paymentId}`, {
+                        credentials: 'include'
+                    });
+                    const data = await response.json();
+
+                    if (data.invoiceStatus === 'paid' || data.paymentStatus === 'finished') {
+                        clearInterval(checkInterval);
+                        closeModal();
+                        window.toast?.success(`${data.credits} credits added successfully!`) || alert('Credits added!');
+                        setTimeout(() => location.reload(), 2000);
+                    } else if (data.paymentStatus === 'failed' || data.paymentStatus === 'expired') {
+                        clearInterval(checkInterval);
+                        closeModal();
+                        window.toast?.error('Payment failed or expired. Please try again.') || alert('Payment failed');
+                    } else if (checkCount >= maxChecks) {
+                        clearInterval(checkInterval);
+                        window.toast?.warning('Payment check timed out. Please check your credits later.') || alert('Timeout');
+                    }
+                } catch (error) {
+                    console.error('Status check error:', error);
+                }
+            }, 5000);
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+            if (checkInterval) {
+                clearInterval(checkInterval);
+            }
+            currentPaymentId = null;
+        }
+
+        async function loadCredits() {
+            const user = await fetchUser();
+            if (user) {
+                document.getElementById('userCredits').textContent = user.credits;
+                if (user.isAdmin || user.isOwner || user.isSuperAdmin || user.isLimitedAdmin) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            }
+        }
+
+        document.getElementById('paymentModal').addEventListener('click', function (e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        loadCredits();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,2211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .admin-header {
+            margin-bottom: 2rem;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .admin-header p {
+            color: #999;
+            margin: 0.5rem 0 0 0;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            overflow-x: auto;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #999;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: #FFFFFF;
+        }
+
+        .tab-btn.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+        }
+
+        .subtabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .subtab-btn {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #999;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .subtab-btn:hover {
+            color: #FFFFFF;
+        }
+
+        .subtab-btn.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .subtab-content {
+            display: none;
+        }
+
+        .subtab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0 0 1.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 1.5rem 0 1rem 0;
+        }
+
+        .form-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.8rem;
+            background: #222;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .settings-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .setting-item {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(229, 9, 20, 0.02);
+            border: 1px solid #333;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .setting-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: #FFFFFF;
+        }
+
+        .setting-control {
+            position: relative;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .toggle-checkbox {
+            display: none;
+        }
+
+        .toggle-label {
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+            background: #333;
+            border-radius: 12px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #444;
+        }
+
+        .toggle-label::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-checkbox:checked+.toggle-label {
+            background: #FFFFFF;
+            border-color: #FFFFFF;
+        }
+
+        .toggle-checkbox:checked+.toggle-label::after {
+            transform: translateX(24px);
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            display: block;
+            font-weight: 700;
+            color: #e0e0e0;
+            font-size: 14px;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+
+        .setting-description {
+            font-size: 12px;
+            color: #999;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .submit-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .secondary-btn {
+            background: #3B82F6;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .secondary-btn:hover {
+            background: #1D4ED8;
+            transform: translateY(-1px);
+        }
+
+        .danger-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .danger-btn:hover {
+            background: #DC2626;
+            transform: translateY(-1px);
+        }
+
+        .warning-btn {
+            background: #F59E0B;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .warning-btn:hover {
+            background: #D97706;
+            transform: translateY(-1px);
+        }
+
+        .success-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 12px;
+            text-transform: uppercase;
+            transition: all 0.2s;
+        }
+
+        .success-btn:hover {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #222;
+            color: #FFFFFF;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 700;
+            border-bottom: 2px solid #333;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+            color: #e0e0e0;
+            font-size: 13px;
+        }
+
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 6px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-size: 13px;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 3px solid #FFFFFF;
+            color: #FFFFFF;
+            display: block;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid #FFFFFF;
+            color: #FCA5A5;
+            display: block;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-active {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .status-paused {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .status-verified {
+            color: #FFFFFF;
+        }
+
+        .status-unverified {
+            color: #999;
+        }
+
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 1rem 0.75rem;
+                margin-bottom: 70px;
+            }
+
+            .admin-header {
+                margin-bottom: 1.5rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.5rem;
+                letter-spacing: 1px;
+            }
+
+            .admin-header p {
+                font-size: 12px;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+                padding-bottom: 0;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 0.8rem;
+                font-size: 10px;
+            }
+
+            .subtabs {
+                gap: 0.25rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .subtab-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 10px;
+            }
+
+            .section {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .section h2 {
+                font-size: 1.2rem;
+            }
+
+            .section h3 {
+                font-size: 1rem;
+            }
+
+            .form-section {
+                padding: 1.25rem;
+            }
+
+            .form-row,
+            .form-row-3 {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                font-size: 14px;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .button-group button {
+                width: 100%;
+            }
+
+            .setting-item {
+                flex-direction: row;
+                padding: 1.25rem;
+            }
+
+            .setting-title {
+                font-size: 13px;
+            }
+
+            .setting-description {
+                font-size: 11px;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th,
+            td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-container {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .admin-header h1 {
+                font-size: 1.2rem;
+            }
+
+            .tab-btn {
+                padding: 0.5rem 0.6rem;
+                font-size: 9px;
+            }
+
+            .stat-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 1.25rem;
+            }
+
+            .form-section {
+                padding: 1rem;
+            }
+
+            .submit-btn,
+            .secondary-btn,
+            .danger-btn,
+            .warning-btn,
+            .success-btn {
+                font-size: 11px;
+                padding: 0.75rem 1.25rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Admin Control Panel</h1>
+            <p>Manage users, members, UIDs, and system settings</p>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('dashboard', this)">Dashboard</button>
+            <button class="tab-btn" onclick="switchTab('members', this)">Members</button>
+            <button class="tab-btn" onclick="switchTab('users', this)">Users</button>
+            <button class="tab-btn" onclick="switchTab('uids', this)">UIDs</button>
+            <button class="tab-btn" onclick="switchTab('api-keys', this)">API Keys</button>
+            <button class="tab-btn" onclick="switchTab('packages', this)">Packages</button>
+            <button class="tab-btn" id="discordRestoreTab" onclick="switchTab('discord-restore', this)" style="display: none;">Discord Restore</button>
+            <button class="tab-btn" onclick="switchTab('verified-users', this)">Verified Users</button>
+            <button class="tab-btn" onclick="switchTab('settings', this)">Settings</button>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard-tab" class="tab-content active">
+            <div class="section">
+                <h2>System Statistics</h2>
+                <div class="stat-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Users</div>
+                        <div class="stat-value" id="totalUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Admins</div>
+                        <div class="stat-value" id="totalAdmins">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total Guests</div>
+                        <div class="stat-value" id="totalGuests">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Total UIDs</div>
+                        <div class="stat-value" id="totalUIDs">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Quick Actions</h2>
+                <div class="button-group">
+                    <button class="secondary-btn" onclick="loadStats()">Refresh Stats</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Tab (GUEST PASS RESTORE) -->
+        <div id="members-tab" class="tab-content">
+            <div class="section">
+                <h2>Guest Pass Restoration</h2>
+                <div id="memberMessage" class="message"></div>
+
+                <div class="form-section">
+                    <h3>Restore All Guest Passes to Single Time</h3>
+                    <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                        Restore all guest member passes in a single operation.
+                    </p>
+
+                    <div class="button-group">
+                        <button class="success-btn" onclick="restoreAllGuestPasses()" style="padding: 1rem 2rem; font-size: 14px; flex: 1;">Restore All Guest Passes</button>
+                        <button class="danger-btn" onclick="disableAllGuestPasses()" style="padding: 1rem 2rem; font-size: 14px; flex: 1;">Disable All Passes</button>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Individual Guest Pass Action</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Guest Username</label>
+                            <input type="text" id="guestPassUsername" placeholder="Enter guest username">
+                        </div>
+                        <div class="form-group">
+                            <label>Action</label>
+                            <select id="guestPassAction">
+                                <option value="restore">Restore Pass</option>
+                                <option value="disable">Disable Pass</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="submit-btn" onclick="performGuestPassAction()">Apply Action</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>Guest Members Status</h2>
+                <div class="table-container" id="guestPassTableContainer">
+                    <p>Loading guest pass data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Tab with Subtabs -->
+        <div id="users-tab" class="tab-content">
+            <div class="subtabs">
+                <button class="subtab-btn active" onclick="switchSubtab('regular-users', this)">Regular Users</button>
+                <button class="subtab-btn" onclick="switchSubtab('guest-users', this)">Guest Users</button>
+            </div>
+
+            <!-- Regular Users Subtab -->
+            <div id="regular-users" class="subtab-content active">
+                <div class="section">
+                    <h2>Create New Account</h2>
+                    <div class="form-section">
+                        <h3>Account Information</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="newUsername" placeholder="Enter username">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="newPassword" placeholder="Enter password">
+                            </div>
+                        </div>
+
+                        <h3>Account Type</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Account Type</label>
+                                <select id="newAccountType">
+                                    <option value="UID_MANAGER">Dominus Manager</option>
+                                    <option value="AIMKILL">Aimkill</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Initial Credits</label>
+                                <input type="number" id="newCredits" placeholder="0" min="0">
+                            </div>
+                        </div>
+
+                        <h3>Permissions</h3>
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="newIsOwner" class="toggle-checkbox">
+                                    <label for="newIsOwner" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Owner Account</label>
+                                    <p class="setting-description">Full system access and control</p>
+                                </div>
+                            </div>
+
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="newIsAdmin" class="toggle-checkbox">
+                                    <label for="newIsAdmin" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Admin Account</label>
+                                    <p class="setting-description">Administrative privileges</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="submit-btn" onclick="createNewAccount()">Create Account</button>
+                    </div>
+                </div>
+
+                <div class="section">
+                    <h2>Regular Users</h2>
+                    <div class="table-container" id="regularUsersTableContainer">
+                        <p>Loading users...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest Users Subtab -->
+            <div id="guest-users" class="subtab-content">
+                <div class="section">
+                    <h2>Guest Accounts</h2>
+                    <div class="table-container" id="guestUsersTableContainer">
+                        <p>Loading guests...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UIDs Tab -->
+        <div id="uids-tab" class="tab-content">
+            <div class="section">
+                <h2>All UIDs</h2>
+                <div class="table-container" id="uidsTableContainer">
+                    <p>Loading UIDs...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Keys Tab -->
+        <div id="api-keys-tab" class="tab-content">
+            <div class="section">
+                <h2>API-Generated Keys</h2>
+                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                    View and manage all API-generated user:pass pairs. These are stored separately from actual user accounts.
+                </p>
+                <div class="button-group">
+                    <button class="secondary-btn" onclick="loadApiKeys()">Refresh List</button>
+                    <button onclick="massDeleteAllApiKeys()"
+                        style="background: #DC2626; color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 700; text-transform: uppercase;">
+                        🗑️ Mass Delete All API Keys
+                    </button>
+                </div>
+                <div id="apiKeysTableContainer" style="margin-top: 1.5rem;">
+                    <p style="text-align: center; color: #999;">Loading API keys...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Discord Restore Tab -->
+        <div id="discord-restore-tab" class="tab-content">
+            <div class="section">
+                <h2>Discord Server Restoration</h2>
+                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                    Restore verified Discord members to a new server using saved OAuth tokens.
+                </p>
+
+                <div class="form-section">
+                    <h3>Restoration Statistics</h3>
+                    <div class="stat-grid" id="restorationStats">
+                        <div class="stat-card">
+                            <div class="stat-label">Discord Verified Users</div>
+                            <div class="stat-value" id="totalDiscordUsers">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Users with Tokens</div>
+                            <div class="stat-value" id="usersWithTokens">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Valid Tokens</div>
+                            <div class="stat-value" id="usersWithValidTokens">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-label">Restorable Users</div>
+                            <div class="stat-value" id="restorableUsers">-</div>
+                        </div>
+                    </div>
+                    <button class="secondary-btn" onclick="loadRestorationStats()" style="margin-top: 1rem;">Refresh Stats</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>Restore All Members to New Server</h3>
+                    <p style="color: #999; margin-bottom: 1rem; font-size: 13px;">
+                        Add all Discord-verified users to a new server using their saved OAuth tokens.
+                    </p>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>New Guild/Server ID</label>
+                            <input type="text" id="newGuildId" placeholder="Enter Discord server ID">
+                        </div>
+                        <div class="form-group">
+                            <label>Bot Token</label>
+                            <input type="password" id="botToken" placeholder="Enter your bot token">
+                        </div>
+                    </div>
+                    <button class="submit-btn" onclick="restoreAllMembers()">
+                        🔄 Start Restoration Process
+                    </button>
+                    <div id="restorationMessage" style="margin-top: 1rem; display: none;"></div>
+                    <div id="restorationProgress" style="margin-top: 1rem; display: none;">
+                        <div style="background: #333; border-radius: 4px; overflow: hidden; height: 8px;">
+                            <div id="progressBar" style="background: #10B981; height: 100%; width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                        <p id="progressText" style="margin-top: 0.5rem; color: #999; font-size: 13px;"></p>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Add Single User to Server</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input type="text" id="singleUsername" placeholder="Enter username">
+                        </div>
+                        <div class="form-group">
+                            <label>Guild/Server ID</label>
+                            <input type="text" id="singleGuildId" placeholder="Enter Discord server ID">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bot Token</label>
+                        <input type="password" id="singleBotToken" placeholder="Enter your bot token">
+                    </div>
+                    <button class="submit-btn" onclick="addSingleUserToGuild()">Add User to Server</button>
+                    <div id="singleUserMessage" style="margin-top: 1rem; display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Verified Users Tab -->
+        <div id="verified-users-tab" class="tab-content">
+            <div class="section">
+                <h2>Discord Verified Users</h2>
+                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                    Manage all users who have verified their Discord accounts
+                </p>
+
+                <div id="verifiedUsersMessage" class="message"></div>
+
+                <div class="button-group" style="margin-bottom: 2rem;">
+                    <button class="secondary-btn" onclick="loadVerifiedUsers()">Refresh List</button>
+                    <button class="danger-btn" onclick="unverifyAllUsers()">
+                        🗑️ Unverify Discord (Everyone)
+                    </button>
+                    <button class="warning-btn" onclick="unverifyAllSocial()">
+                        📱 Unverify Social Media (Everyone)
+                    </button>
+                </div>
+
+                <div class="stat-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Verified Users</div>
+                        <div class="stat-value" id="totalVerifiedUsers">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Verified Guests</div>
+                        <div class="stat-value" id="totalVerifiedGuests">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Verified Regular Users</div>
+                        <div class="stat-value" id="totalVerifiedRegular">0</div>
+                    </div>
+                </div>
+
+                <div class="table-container" id="verifiedUsersTableContainer">
+                    <p style="text-align: center; color: #999;">Loading verified users...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Packages Tab -->
+        <div id="packages-tab" class="tab-content">
+            <div class="section">
+                <h2>Package Management</h2>
+                <p style="color: #999; margin-bottom: 2rem;">Configure pricing, credits, and durations for Aimkill packages</p>
+
+                <!-- Add New Package Form -->
+                <div class="form-section" style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3B82F6; margin-bottom: 2rem;">
+                    <h3 style="color: #3B82F6; margin-bottom: 1rem;">➕ Add New Custom Package</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label>Package Key (e.g., "2day", "custom1")</label>
+                            <input type="text" id="newPackageKey" placeholder="custompackage"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="newPackageDisplay" placeholder="Custom Package"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Days</label>
+                            <input type="number" id="newPackageDays" placeholder="7"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Credits Required</label>
+                            <input type="number" id="newPackageCredits" placeholder="10"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Price ($)</label>
+                            <input type="number" step="0.01" id="newPackagePrice" placeholder="19.99"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                    </div>
+                    <button class="success-btn" onclick="addNewAimkillPackage()" style="margin-top: 1rem; width: 100%;">Add Package</button>
+                </div>
+
+                <!-- Aimkill Packages -->
+                <div id="aimkill-packages">
+                    <div id="aimkillPackagesMessage" class="message"></div>
+                    <h3 style="color: #fff; margin-bottom: 1rem;">Existing Packages</h3>
+                    <div id="aimkillPackagesList"></div>
+                    <button class="submit-btn" onclick="saveAimkillPackages()" style="margin-top: 1.5rem;">Save All Aimkill Packages</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-content">
+            <div class="section">
+                <h2>System Settings</h2>
+
+                <div class="form-section">
+                    <h3>GenzAuth API Configuration</h3>
+                    <p style="color: #999; margin-bottom: 1rem; font-size: 13px;">
+                        Configure the GenzAuth seller key for Aimkill account management
+                    </p>
+                    <div id="genzauthMessage" class="message"></div>
+                    <div class="form-group">
+                        <label>GenzAuth Seller Key</label>
+                        <input type="password" id="genzauthSellerKey" placeholder="Enter GenzAuth seller key">
+                    </div>
+                    <button class="submit-btn" onclick="saveGenzAuthKey()">Update GenzAuth Key</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>Guest Configuration</h3>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-control">
+                                <input type="checkbox" id="allowGuestUID" class="toggle-checkbox" onchange="saveGuestSettings()">
+                                <label for="allowGuestUID" class="toggle-label"></label>
+                            </div>
+                            <div class="setting-info">
+                                <label class="setting-title">Allow Guest Free UID</label>
+                                <p class="setting-description">Enable guests to create free UIDs</p>
+                            </div>
+                        </div>
+
+                        <div class="setting-item">
+                            <div class="setting-control">
+                                <input type="checkbox" id="allowGuestAimkill" class="toggle-checkbox" onchange="saveGuestSettings()">
+                                <label for="allowGuestAimkill" class="toggle-label"></label>
+                            </div>
+                            <div class="setting-info">
+                                <label class="setting-title">Allow Guest Free Aimkill</label>
+                                <p class="setting-description">Enable guests to generate free Aimkill keys and accounts</p>
+                            </div>
+                        </div>
+
+                        <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                            <div class="setting-info" style="width: 100%;">
+                                <label class="setting-title">Maximum Guest Pass Duration</label>
+                                <p class="setting-description" style="margin-bottom: 0.5rem;">Set the maximum duration guests can use for their free pass</p>
+                                <select id="guestPassMaxDuration" onchange="saveGuestSettings()" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
+                                    <option value="1day">1 Day</option>
+                                    <option value="3days">3 Days</option>
+                                    <option value="7days">7 Days</option>
+                                    <option value="15days">15 Days</option>
+                                    <option value="30days">30 Days</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Social Media Verification</h3>
+
+                    <div class="settings-list">
+                        <div class="setting-item">
+                            <div class="setting-control">
+                                <input type="checkbox" id="requireSocialVerification" class="toggle-checkbox" onchange="saveGuestSettings()">
+                                <label for="requireSocialVerification" class="toggle-label"></label>
+                            </div>
+                            <div class="setting-info">
+                                <label class="setting-title">Require Social Media Verification</label>
+                                <p class="setting-description">Guests must subscribe to YouTube and follow on Instagram before using free passes</p>
+                            </div>
+                        </div>
+
+                        <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                            <div class="setting-info" style="width: 100%;">
+                                <label class="setting-title">YouTube Channel URL</label>
+                                <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your YouTube channel URL for subscribers</p>
+                                <input type="url" id="youtubeChannelUrl" placeholder="https://youtube.com/@yourchannel" 
+                                    onchange="saveGuestSettings()"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
+                            </div>
+                        </div>
+
+                        <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                            <div class="setting-info" style="width: 100%;">
+                                <label class="setting-title">Instagram Profile URL</label>
+                                <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your Instagram profile URL for followers</p>
+                                <input type="url" id="instagramProfileUrl" placeholder="https://instagram.com/yourprofile" 
+                                    onchange="saveGuestSettings()"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        function switchTab(tabName, btn) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tabs .tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            btn.classList.add('active');
+
+            if (tabName === 'members') {
+                loadGuestPassData();
+            }
+            if (tabName === 'users') {
+                loadRegularUsersList();
+                loadGuestsList();
+            }
+            if (tabName === 'uids') loadUIDsList();
+            if (tabName === 'api-keys') loadApiKeys();
+            if (tabName === 'discord-restore') loadRestorationStats();
+            if (tabName === 'dashboard') loadStats();
+            if (tabName === 'settings') {
+                loadGuestSettings();
+                loadGenzAuthKey();
+            }
+            if (tabName === 'packages') {
+                loadPackages();
+            }
+            if (tabName === 'verified-users') {
+                loadVerifiedUsers();
+            }
+        }
+
+        function switchSubtab(subtabName, btn) {
+            document.querySelectorAll('.subtab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.subtabs .subtab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(subtabName).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function showMessage(message, type = 'success', targetId = 'memberMessage') {
+            const msgDiv = document.getElementById(targetId);
+            msgDiv.className = `message ${type}`;
+            msgDiv.textContent = message;
+            msgDiv.style.display = 'block';
+
+            setTimeout(() => msgDiv.style.display = 'none', 5000);
+        }
+
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/admin/stats', { credentials: 'include' });
+                const data = await response.json();
+
+                document.getElementById('totalUsers').textContent = data.totalUsers || 0;
+                document.getElementById('totalAdmins').textContent = data.totalAdmins || 0;
+                document.getElementById('totalGuests').textContent = data.totalGuests || 0;
+                document.getElementById('totalUIDs').textContent = data.totalUIDs || 0;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function restoreAllGuestPasses() {
+            if (!confirm('Restore all guest passes to single time?')) return;
+
+            try {
+                const response = await fetch('/api/admin/restore-all-guest-passes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`${data.count} guest passes restored successfully`, 'success', 'memberMessage');
+                    loadGuestPassData();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed'), 'error', 'memberMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'memberMessage');
+            }
+        }
+
+        async function disableAllGuestPasses() {
+            if (!confirm('Disable all guest passes?')) return;
+
+            try {
+                const response = await fetch('/api/admin/disable-all-guest-passes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`${data.count} guest passes disabled successfully`, 'success', 'memberMessage');
+                    loadGuestPassData();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed'), 'error', 'memberMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'memberMessage');
+            }
+        }
+
+        async function performGuestPassAction() {
+            const username = document.getElementById('guestPassUsername').value;
+            const action = document.getElementById('guestPassAction').value;
+
+            if (!username) {
+                showMessage('Please enter guest username', 'error', 'memberMessage');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/guest-pass-action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, action }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message, 'success', 'memberMessage');
+                    document.getElementById('guestPassUsername').value = '';
+                    loadGuestPassData();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed'), 'error', 'memberMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'memberMessage');
+            }
+        }
+
+        async function loadGuestPassData() {
+            try {
+                const response = await fetch('/api/admin/guest-passes', { credentials: 'include' });
+                const guests = await response.json();
+
+                let html = '<table><thead><tr><th>Username</th><th>Pass Status</th><th>Last Updated</th></tr></thead><tbody>';
+
+                if (guests.length === 0) {
+                    html += '<tr><td colspan="3" style="text-align: center; color: #999;">No guest data found</td></tr>';
+                } else {
+                    guests.forEach(guest => {
+                        const passStatus = guest.passActive ? '<span class="status-active">Active</span>' : '<span class="status-paused">Inactive</span>';
+                        const lastUpdated = guest.lastUpdated ? new Date(guest.lastUpdated).toLocaleString() : 'Never';
+                        html += `
+                            <tr>
+                                <td>${guest.username}</td>
+                                <td>${passStatus}</td>
+                                <td>${lastUpdated}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                document.getElementById('guestPassTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading guest pass data:', error);
+                document.getElementById('guestPassTableContainer').innerHTML =
+                    '<p style="color: #999;">No guest pass data available</p>';
+            }
+        }
+
+        async function loadRegularUsersList() {
+            try {
+                const response = await fetch('/api/admin/users', { credentials: 'include' });
+                const allUsers = await response.json();
+
+                const regularUsers = allUsers.filter(user => !user.isGuest);
+
+                let html = '<table><thead><tr><th>Username</th><th>Credits</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead><tbody>';
+
+                if (regularUsers.length === 0) {
+                    html += '<tr><td colspan="5" style="text-align: center; color: #999;">No regular users found</td></tr>';
+                } else {
+                    regularUsers.forEach(user => {
+                        const status = user.isPaused ? '<span class="status-paused">Paused</span>' : '<span class="status-active">Active</span>';
+                        const fingerprintStatus = user.networkFingerprint ? '🔒' : '🔓';
+
+                        let userRole = '';
+                        if (user.isSuperAdmin) userRole = ' <span style="color: #FFFFFF; font-weight: 700;">[SUPER ADMIN]</span>';
+                        else if (user.isOwner) userRole = ' <span style="color: #3B82F6; font-weight: 700;">[OWNER]</span>';
+                        else if (user.isAdmin) userRole = ' <span style="color: #10B981; font-weight: 700;">[ADMIN]</span>';
+
+                        const isProtected = user.isAdmin || user.isOwner || user.isSuperAdmin;
+
+                        html += `
+                            <tr>
+                                <td>${user.username} ${fingerprintStatus}${userRole}</td>
+                                <td>${user.credits}</td>
+                                <td>${user.accountType || 'UID_MANAGER'}</td>
+                                <td>${status}</td>
+                                <td>
+                                    <button class="secondary-btn" onclick="pauseUser('${user.username}')">
+                                        ${user.isPaused ? 'Resume' : 'Pause'}
+                                    </button>
+                                    ${user.networkFingerprint ? `<button class="warning-btn" onclick="resetFingerprint('${user.username}')" title="Reset device lock">🔓 Reset Device</button>` : ''}
+                                    ${isProtected ? '<button class="danger-btn" onclick="deleteUser(\'' + user.username + '\')">Delete (Admin Only)</button>' : '<button class="danger-btn" onclick="deleteUser(\'' + user.username + '\')">Delete</button>'}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                document.getElementById('regularUsersTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading users:', error);
+                document.getElementById('regularUsersTableContainer').innerHTML = '<p style="color: #FFFFFF;">Error loading users</p>';
+            }
+        }
+
+        async function loadGuestsList() {
+            try {
+                const response = await fetch('/api/admin/guests', { credentials: 'include' });
+                const guests = await response.json();
+
+                let html = '<table><thead><tr><th>Username</th><th>Discord</th><th>Pass Used</th><th>Pass Type</th><th>Created</th></tr></thead><tbody>';
+
+                if (guests.length === 0) {
+                    html += '<tr><td colspan="5" style="text-align: center; color: #999;">No guest accounts found</td></tr>';
+                } else {
+                    guests.forEach(guest => {
+                        const created = new Date(guest.createdAt).toLocaleDateString();
+                        const discord = guest.discordVerified ? '<span class="status-verified">Verified</span>' : '<span class="status-unverified">Not Verified</span>';
+                        const passUsed = guest.guestPassUsed ? '<span class="status-paused">Used</span>' : '<span class="status-verified">Available</span>';
+                        html += `
+                            <tr>
+                                <td>${guest.username}</td>
+                                <td>${discord}</td>
+                                <td>${passUsed}</td>
+                                <td>${guest.guestPassType || '-'}</td>
+                                <td>${created}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                document.getElementById('guestUsersTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading guests:', error);
+                document.getElementById('guestUsersTableContainer').innerHTML = '<p style="color: #FFFFFF;">Error loading guests</p>';
+            }
+        }
+
+        async function loadUIDsList() {
+            try {
+                const response = await fetch('/api/admin/uids', { credentials: 'include' });
+                const data = await response.json();
+                const uids = data.uids || [];
+
+                let html = '<table><thead><tr><th>UID</th><th>Created By</th><th>Status</th><th>Expires</th><th>Time Left</th></tr></thead><tbody>';
+
+                if (uids.length === 0) {
+                    html += '<tr><td colspan="5" style="text-align: center; color: #999;">No UIDs found</td></tr>';
+                } else {
+                    uids.forEach(uid => {
+                        html += `
+                            <tr>
+                                <td>${uid.uid}</td>
+                                <td>${uid.createdBy}</td>
+                                <td>${uid.status}</td>
+                                <td>${new Date(uid.expiresAt).toLocaleString()}</td>
+                                <td>${uid.timeLeft}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                document.getElementById('uidsTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading UIDs:', error);
+                document.getElementById('uidsTableContainer').innerHTML = '<p style="color: #FFFFFF;">Error loading UIDs</p>';
+            }
+        }
+
+        async function loadApiKeys() {
+            try {
+                const response = await fetch('/api/admin/api-keys', { credentials: 'include' });
+                const data = await response.json();
+
+                if (!data.success || !data.keys) {
+                    document.getElementById('apiKeysTableContainer').innerHTML = '<p style="color: #FFFFFF;">Error loading API keys</p>';
+                    return;
+                }
+
+                const keys = data.keys;
+                let html = '<table><thead><tr><th>Username</th><th>Password</th><th>Created By</th><th>Status</th><th>Expires</th><th>Time Left</th><th>Actions</th></tr></thead><tbody>';
+
+                if (keys.length === 0) {
+                    html += '<tr><td colspan="7" style="text-align: center; color: #999;">No API keys found</td></tr>';
+                } else {
+                    keys.forEach(key => {
+                        const statusColor = key.status === 'active' ? '#10B981' : '#EF4444';
+                        html += `
+                            <tr>
+                                <td style="font-family: monospace; color: #FFFFFF;">${key.username}</td>
+                                <td style="font-family: monospace; color: #FFFFFF;">${key.password}</td>
+                                <td>${key.createdBy}</td>
+                                <td style="color: ${statusColor}; font-weight: 700; text-transform: capitalize;">${key.status}</td>
+                                <td>${new Date(key.expiresAt).toLocaleString()}</td>
+                                <td>${key.timeLeft}</td>
+                                <td>
+                                    <button onclick="deleteApiKey('${key.username}')"
+                                        style="background: #EF4444; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700;">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                html += `<p style="margin-top: 1rem; color: #999; font-size: 13px;">Total API Keys: ${keys.length}</p>`;
+                document.getElementById('apiKeysTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading API keys:', error);
+                document.getElementById('apiKeysTableContainer').innerHTML = '<p style="color: #FFFFFF;">Error loading API keys</p>';
+            }
+        }
+
+        async function deleteApiKey(username) {
+            if (!confirm(`Delete API key for ${username}?\n\nThis will delete the account from both the API and database.`)) return;
+
+            try {
+                const response = await fetch('/api/admin/delete-api-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('API key deleted successfully');
+                    loadApiKeys();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to delete API key'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function massDeleteAllApiKeys() {
+            if (!confirm('Are you sure you want to delete ALL API-generated keys?\n\nThis action is irreversible and will delete all keys from both the API and the database.')) return;
+
+            try {
+                const response = await fetch('/api/admin/mass-delete-api-keys', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`Successfully deleted ${data.deletedCount} API keys.`);
+                    loadApiKeys();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to delete API keys'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+
+        async function createNewAccount() {
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const isOwner = document.getElementById('newIsOwner').checked;
+            const isAdmin = document.getElementById('newIsAdmin').checked;
+            const accountType = document.getElementById('newAccountType').value;
+            const credits = parseInt(document.getElementById('newCredits').value) || 0;
+
+            if (!username || !password) {
+                alert('Please enter username and password');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/create-account', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, isOwner, isAdmin, accountType, credits }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('Account created successfully');
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('newCredits').value = '';
+                    document.getElementById('newIsOwner').checked = false;
+                    document.getElementById('newIsAdmin').checked = false;
+                    loadRegularUsersList();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed to create account'));
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+
+        async function pauseUser(username) {
+            try {
+                const response = await fetch('/api/admin/pause-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    loadRegularUsersList();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function deleteUser(username) {
+            if (!confirm(`Delete user ${username}?`)) return;
+
+            try {
+                const response = await fetch('/api/admin/delete-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert('User deleted successfully');
+                    loadRegularUsersList();
+                } else {
+                    alert('Error: ' + (data.error || 'Failed'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function resetFingerprint(username) {
+            if (!confirm(`Reset device lock for ${username}?\n\nThis will allow them to login from any device again.`)) return;
+
+            try {
+                const response = await fetch('/api/admin/reset-network', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`✅ ${data.message}`);
+                    loadRegularUsersList();
+                } else {
+                    alert('❌ Error: ' + (data.error || 'Failed to reset device lock'));
+                }
+            } catch (error) {
+                alert('❌ Connection error');
+            }
+        }
+
+        async function loadGuestSettings() {
+            try {
+                const response = await fetch('/api/guest-settings', { credentials: 'include' });
+                const settings = await response.json();
+                document.getElementById('allowGuestUID').checked = settings.allowGuestFreeUID || false;
+                document.getElementById('allowGuestAimkill').checked = settings.allowGuestFreeAimkill || false;
+                document.getElementById('guestPassMaxDuration').value = settings.guestPassMaxDuration || '1day';
+                document.getElementById('requireSocialVerification').checked = settings.requireSocialVerification || false;
+                document.getElementById('youtubeChannelUrl').value = settings.youtubeChannelUrl || '';
+                document.getElementById('instagramProfileUrl').value = settings.instagramProfileUrl || '';
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        async function saveGuestSettings() {
+            const allowUID = document.getElementById('allowGuestUID').checked;
+            const allowAimkill = document.getElementById('allowGuestAimkill').checked;
+            const maxDuration = document.getElementById('guestPassMaxDuration').value;
+            const requireSocial = document.getElementById('requireSocialVerification').checked;
+            const youtubeUrl = document.getElementById('youtubeChannelUrl').value.trim();
+            const instagramUrl = document.getElementById('instagramProfileUrl').value.trim();
+
+            try {
+                const response = await fetch('/api/admin/guest-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        allowGuestFreeUID: allowUID,
+                        allowGuestFreeAimkill: allowAimkill,
+                        guestPassMaxDuration: maxDuration,
+                        requireSocialVerification: requireSocial,
+                        youtubeChannelUrl: youtubeUrl,
+                        instagramProfileUrl: instagramUrl
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    console.log('Settings saved');
+                } else {
+                    console.error('Error saving settings');
+                }
+            } catch (error) {
+                console.error('Connection error', error);
+            }
+        }
+
+        async function loadGenzAuthKey() {
+            try {
+                const response = await fetch('/api/admin/genzauth-config', { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.configured) {
+                    document.getElementById('genzauthSellerKey').placeholder = '••••••••••••••••';
+                } else {
+                    document.getElementById('genzauthSellerKey').placeholder = 'Not configured - Enter seller key';
+                }
+            } catch (error) {
+                console.error('Error loading GenzAuth config:', error);
+            }
+        }
+
+        async function saveGenzAuthKey() {
+            const sellerKey = document.getElementById('genzauthSellerKey').value.trim();
+
+            if (!sellerKey) {
+                showMessage('GenzAuth seller key is required', 'error', 'genzauthMessage');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/genzauth-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sellerKey }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('GenzAuth seller key updated successfully and applied immediately!', 'success', 'genzauthMessage');
+                    document.getElementById('genzauthSellerKey').value = '';
+                    loadGenzAuthKey();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed to update key'), 'error', 'genzauthMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'genzauthMessage');
+            }
+        }
+
+        async function loadRestorationStats() {
+            try {
+                const response = await fetch('/api/admin/restoration-stats', { credentials: 'include' });
+                const stats = await response.json();
+
+                document.getElementById('totalDiscordUsers').textContent = stats.totalDiscordUsers || 0;
+                document.getElementById('usersWithTokens').textContent = stats.usersWithTokens || 0;
+                document.getElementById('usersWithValidTokens').textContent = stats.usersWithValidTokens || 0;
+                document.getElementById('restorableUsers').textContent = stats.restorable || 0;
+            } catch (error) {
+                console.error('Error loading restoration stats:', error);
+            }
+        }
+
+        async function restoreAllMembers() {
+            const guildId = document.getElementById('newGuildId').value.trim();
+            const botToken = document.getElementById('botToken').value.trim();
+            const messageDiv = document.getElementById('restorationMessage');
+            const progressDiv = document.getElementById('restorationProgress');
+
+            if (!guildId || !botToken) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Please enter both Guild ID and Bot Token';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            if (!confirm('Start restoration process? This may take several minutes.')) {
+                return;
+            }
+
+            messageDiv.style.display = 'none';
+            progressDiv.style.display = 'block';
+            document.getElementById('progressBar').style.width = '0%';
+            document.getElementById('progressText').textContent = 'Starting restoration...';
+
+            try {
+                const response = await fetch('/api/admin/restore-members', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ newGuildId: guildId, botToken }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    const successRate = (data.stats.success / data.stats.total * 100).toFixed(1);
+                    document.getElementById('progressBar').style.width = '100%';
+                    document.getElementById('progressText').textContent =
+                        `Completed: ${data.stats.success}/${data.stats.total} users (${successRate}%)`;
+
+                    messageDiv.className = 'message success';
+                    messageDiv.innerHTML = `
+                        <strong>Restoration Complete!</strong><br>
+                        Success: ${data.stats.success}<br>
+                        Failed: ${data.stats.failed}<br>
+                        Total: ${data.stats.total}
+                    `;
+                    messageDiv.style.display = 'block';
+
+                    loadRestorationStats();
+                } else {
+                    throw new Error(data.error || 'Restoration failed');
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Error: ' + error.message;
+                messageDiv.style.display = 'block';
+                progressDiv.style.display = 'none';
+            }
+        }
+
+        async function addSingleUserToGuild() {
+            const username = document.getElementById('singleUsername').value.trim();
+            const guildId = document.getElementById('singleGuildId').value.trim();
+            const botToken = document.getElementById('singleBotToken').value.trim();
+            const messageDiv = document.getElementById('singleUserMessage');
+
+            if (!username || !guildId || !botToken) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Please fill in all fields';
+                messageDiv.style.display = 'block';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/add-to-guild', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, guildId, botToken }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    messageDiv.className = 'message success';
+                    messageDiv.textContent = data.message;
+                    messageDiv.style.display = 'block';
+
+                    document.getElementById('singleUsername').value = '';
+                    document.getElementById('singleGuildId').value = '';
+                    document.getElementById('singleBotToken').value = '';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = 'Error: ' + (data.error || 'Failed to add user');
+                    messageDiv.style.display = 'block';
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Connection error: ' + error.message;
+                messageDiv.style.display = 'block';
+            }
+        }
+
+        async function loadVerifiedUsers() {
+            try {
+                const response = await fetch('/api/admin/verified-users', { credentials: 'include' });
+                const data = await response.json();
+
+                if (!data.success) {
+                    document.getElementById('verifiedUsersTableContainer').innerHTML = 
+                        '<p style="color: #999;">Error loading verified users</p>';
+                    return;
+                }
+
+                const users = data.users || [];
+
+                // Update stats
+                document.getElementById('totalVerifiedUsers').textContent = users.length;
+                document.getElementById('totalVerifiedGuests').textContent = 
+                    users.filter(u => u.isGuest).length;
+                document.getElementById('totalVerifiedRegular').textContent = 
+                    users.filter(u => !u.isGuest).length;
+
+                let html = `
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Discord Username</th>
+                                <th>Discord ID</th>
+                                <th>User Type</th>
+                                <th>Social Verified</th>
+                                <th>Verified At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                if (users.length === 0) {
+                    html += '<tr><td colspan="6" style="text-align: center; color: #999;">No verified users found</td></tr>';
+                } else {
+                    users.forEach(user => {
+                        const userType = user.isGuest ? 
+                            '<span class="badge-warning">Guest</span>' : 
+                            '<span class="badge-success">Regular</span>';
+                        const verifiedDate = user.discordVerifiedAt ? 
+                            new Date(user.discordVerifiedAt).toLocaleString() : 
+                            'Unknown';
+                        
+                        // Social verification status
+                        const socialVerified = (user.youtubeSubscribed && user.instagramFollowed) ? 
+                            '<span class="status-verified">✓ Yes</span>' : 
+                            '<span class="status-unverified">✗ No</span>';
+
+                        html += `
+                            <tr>
+                                <td>${user.username}</td>
+                                <td>${user.discordUsername || 'N/A'}</td>
+                                <td style="font-family: monospace; font-size: 12px;">${user.discordId || 'N/A'}</td>
+                                <td>${userType}</td>
+                                <td>${socialVerified}</td>
+                                <td>${verifiedDate}</td>
+                                <td>
+                                    <button class="danger-btn" onclick="unverifyUser('${user.username}')" style="margin-bottom: 0.5rem;">
+                                        Unverify Discord
+                                    </button>
+                                    <button class="warning-btn" onclick="unverifySocial('${user.username}')">
+                                        Unverify Social
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                html += '</tbody></table>';
+                document.getElementById('verifiedUsersTableContainer').innerHTML = html;
+            } catch (error) {
+                console.error('Error loading verified users:', error);
+                document.getElementById('verifiedUsersTableContainer').innerHTML = 
+                    '<p style="color: #999;">Error loading verified users</p>';
+            }
+        }
+
+        async function unverifyUser(username) {
+            if (!confirm(`Unverify ${username}?\n\nThis will remove their Discord verification.`)) return;
+
+            try {
+                const response = await fetch('/api/admin/unverify-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`${username} has been unverified successfully`, 'success', 'verifiedUsersMessage');
+                    loadVerifiedUsers();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed to unverify user'), 'error', 'verifiedUsersMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'verifiedUsersMessage');
+            }
+        }
+
+        async function unverifyAllUsers() {
+            if (!confirm('⚠️ WARNING: Unverify ALL Discord-verified users?\n\nThis will remove Discord verification from all users. This action cannot be undone easily.')) return;
+
+            try {
+                const response = await fetch('/api/admin/unverify-all-users', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`Successfully unverified ${data.count} users`, 'success', 'verifiedUsersMessage');
+                    loadVerifiedUsers();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed to unverify users'), 'error', 'verifiedUsersMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'verifiedUsersMessage');
+            }
+        }
+
+        async function unverifySocial(username) {
+            if (!confirm(`Unverify social media (YouTube/Instagram) for ${username}?`)) return;
+
+            try {
+                const response = await fetch('/api/admin/unverify-social', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`${username} social media unverified successfully`, 'success', 'verifiedUsersMessage');
+                    loadVerifiedUsers();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed to unverify social media'), 'error', 'verifiedUsersMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'verifiedUsersMessage');
+            }
+        }
+
+        async function unverifyAllSocial() {
+            if (!confirm('⚠️ WARNING: Unverify ALL social media verifications?\n\nThis will remove YouTube/Instagram verification from all users.')) return;
+
+            try {
+                const response = await fetch('/api/admin/unverify-all-social', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(`Successfully unverified social media for ${data.count} users`, 'success', 'verifiedUsersMessage');
+                    loadVerifiedUsers();
+                } else {
+                    showMessage('Error: ' + (data.error || 'Failed to unverify social media'), 'error', 'verifiedUsersMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'verifiedUsersMessage');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            loadStats();
+
+            // Show Discord Restore tab only for main admin (username: admin)
+            try {
+                const response = await fetch('/api/user', { credentials: 'include' });
+                const user = await response.json();
+
+                if (user.username === 'admin') {
+                    document.getElementById('discordRestoreTab').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error checking user:', error);
+            }
+        });
+
+        // Package Management Functions
+        let currentPackages = { aimkill: {} };
+
+        async function loadPackages() {
+            try {
+                const response = await fetch('/api/admin/packages-config', { credentials: 'include' });
+                const data = await response.json();
+
+                currentPackages.aimkill = data.aimkill || {};
+                renderAimkillPackages();
+            } catch (error) {
+                console.error('Error loading packages:', error);
+                showMessage('Failed to load packages', 'error', 'aimkillPackagesMessage');
+            }
+        }
+
+        function renderAimkillPackages() {
+            const container = document.getElementById('aimkillPackagesList');
+            let html = '';
+
+            Object.keys(currentPackages.aimkill).forEach(key => {
+                const pkg = currentPackages.aimkill[key];
+                html += `
+                    <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px; position: relative;">
+                        <h3 style="margin-bottom: 1rem; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Original Key: ${key}</span>
+                            <button onclick="deleteAimkillPackage('${key}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 11px;">Delete</button>
+                        </h3>
+                        <div class="form-group">
+                            <label>New Package Key (Optional)</label>
+                            <input type="text" id="aimkill_${key}_newkey" value="${key}"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label>Display Name</label>
+                                <input type="text" id="aimkill_${key}_display" value="${pkg.display || ''}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Days</label>
+                                <input type="number" id="aimkill_${key}_days" value="${pkg.days || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Credits Required</label>
+                                <input type="number" id="aimkill_${key}_credits" value="${pkg.credits || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Price ($)</label>
+                                <input type="number" step="0.01" id="aimkill_${key}_price" value="${pkg.price || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function deleteAimkillPackage(packageKey) {
+            if (!confirm(`Delete package "${packageKey}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            delete currentPackages.aimkill[packageKey];
+            renderAimkillPackages();
+            showMessage(`Package "${packageKey}" will be deleted when you save changes`, 'success', 'aimkillPackagesMessage');
+        }
+
+        function addNewAimkillPackage() {
+            const key = document.getElementById('newPackageKey').value.trim();
+            const display = document.getElementById('newPackageDisplay').value.trim();
+            const days = parseInt(document.getElementById('newPackageDays').value);
+            const credits = parseInt(document.getElementById('newPackageCredits').value);
+            const price = parseFloat(document.getElementById('newPackagePrice').value);
+
+            if (!key || !display || isNaN(days) || isNaN(credits) || isNaN(price)) {
+                showMessage('Please fill in all fields for the new package', 'error', 'aimkillPackagesMessage');
+                return;
+            }
+
+            if (currentPackages.aimkill[key]) {
+                showMessage(`Package "${key}" already exists. Use a different key.`, 'error', 'aimkillPackagesMessage');
+                return;
+            }
+
+            currentPackages.aimkill[key] = {
+                display: display,
+                days: days,
+                credits: credits,
+                price: price
+            };
+
+            // Clear form
+            document.getElementById('newPackageKey').value = '';
+            document.getElementById('newPackageDisplay').value = '';
+            document.getElementById('newPackageDays').value = '';
+            document.getElementById('newPackageCredits').value = '';
+            document.getElementById('newPackagePrice').value = '';
+
+            renderAimkillPackages();
+            showMessage(`Package "${key}" added! Click "Save All Aimkill Packages" to apply changes.`, 'success', 'aimkillPackagesMessage');
+        }
+
+        async function saveAimkillPackages() {
+            const packages = {};
+
+            Object.keys(currentPackages.aimkill).forEach(key => {
+                const newKeyInput = document.getElementById(`aimkill_${key}_newkey`);
+                const newKey = newKeyInput ? newKeyInput.value.trim() : key;
+                const packageKey = newKey || key; // Use new key if provided, otherwise use old key
+
+                // Check if the key is already in the packages object (meaning it was renamed from another key)
+                if (packages.hasOwnProperty(packageKey) && packageKey !== key) {
+                    showMessage(`Error: Package key "${packageKey}" is duplicated. Please ensure all keys are unique.`, 'error', 'aimkillPackagesMessage');
+                    newKeyInput.style.borderColor = 'red'; // Highlight the conflicting input
+                    return; // Stop saving if duplicate key found
+                }
+
+                packages[packageKey] = {
+                    display: document.getElementById(`aimkill_${key}_display`).value,
+                    days: parseInt(document.getElementById(`aimkill_${key}_days`).value),
+                    credits: parseInt(document.getElementById(`aimkill_${key}_credits`).value),
+                    price: parseFloat(document.getElementById(`aimkill_${key}_price`).value)
+                };
+            });
+
+            // If any duplicate key error occurred, packages might not be fully populated or might be incorrect.
+            // We need to re-validate before sending. A simple check is to see if the number of keys matches.
+            // However, direct comparison can be tricky if keys were not changed.
+            // A more robust check would involve tracking changes and ensuring no collisions.
+            // For simplicity, we'll rely on the immediate error message and prevent saving if a duplicate is detected during iteration.
+
+            // If we reached here, it means no duplicate key was found during the iteration.
+            try {
+                const response = await fetch('/api/admin/packages-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ aimkill: packages }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage('Aimkill packages updated successfully!', 'success', 'aimkillPackagesMessage');
+                    loadPackages(); // Reload to reflect any key changes and ensure state is clean
+                } else {
+                    showMessage(data.error || 'Failed to update Aimkill packages', 'error', 'aimkillPackagesMessage');
+                }
+            } catch (error) {
+                showMessage('Connection error', 'error', 'aimkillPackagesMessage');
+            }
+        }
+    </script>
+</body>
+
+</html>

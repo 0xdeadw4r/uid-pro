@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Invoices - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .invoice-section {
+            background: var(--surface-dark);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .invoice-section h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin-bottom: 1.5rem;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .invoice-table th,
+        .invoice-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #333;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .invoice-table th {
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #FFFFFF;
+        }
+
+        .invoice-table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .invoice-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .invoice-status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-paid {
+            background: rgba(16, 185, 129, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .download-btn {
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .download-btn:hover {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .download-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #999;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .invoice-section {
+                padding: 1.5rem;
+            }
+
+            .invoice-table {
+                font-size: 11px;
+                display: block;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .invoice-table thead,
+            .invoice-table tbody,
+            .invoice-table tr {
+                display: table;
+                width: 100%;
+                table-layout: fixed;
+            }
+
+            .invoice-table th,
+            .invoice-table td {
+                padding: 0.6rem 0.4rem;
+                font-size: 10px;
+            }
+
+            .download-btn {
+                padding: 0.5rem 0.6rem;
+                font-size: 10px;
+            }
+
+            .invoice-status {
+                font-size: 9px;
+                padding: 0.3rem 0.6rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .invoice-section {
+                padding: 1.25rem;
+            }
+
+            .invoice-section h3 {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>My Invoices</h2>
+        </div>
+
+        <div class="invoice-section">
+            <h3>Invoice History</h3>
+            <div id="invoicesList">
+                <div class="empty-state">Loading invoices...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        async function loadInvoices() {
+            const container = document.getElementById('invoicesList');
+
+            try {
+                const response = await fetch('/api/invoices', {
+                    credentials: 'include'
+                });
+                const invoices = await response.json();
+
+                if (invoices.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No invoices found</div>';
+                    return;
+                }
+
+                let tableHTML = `
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                invoices.forEach(invoice => {
+                    const date = new Date(invoice.createdAt).toLocaleDateString('en-IN');
+                    const statusClass = invoice.status === 'paid' ? 'status-paid' : 'status-pending';
+
+                    tableHTML += `
+                        <tr>
+                            <td><strong>${invoice.invoiceNumber}</strong></td>
+                            <td>${date}</td>
+                            <td>${invoice.type.replace('_', ' ').toUpperCase()}</td>
+                            <td>${invoice.currency} ${invoice.total.toFixed(2)}</td>
+                            <td><span class="invoice-status ${statusClass}">${invoice.status.toUpperCase()}</span></td>
+                            <td>
+                                <button class="download-btn" onclick="downloadInvoice('${invoice.invoiceNumber}')">
+                                    Download PDF
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHTML += `
+                        </tbody>
+                    </table>
+                `;
+
+                container.innerHTML = tableHTML;
+            } catch (error) {
+                console.error('Load invoices error:', error);
+                container.innerHTML = '<div class="empty-state">Failed to load invoices</div>';
+            }
+        }
+
+        function downloadInvoice(invoiceNumber) {
+            window.open(`/api/invoice/${invoiceNumber}/pdf`, '_blank');
+        }
+
+        // Load user info for admin check
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await fetchUser();
+            if (user && (user.isAdmin || user.isSuperAdmin || user.isOwner || user.isLimitedAdmin)) {
+                document.getElementById('adminLink').style.display = 'block';
+            }
+            loadInvoices();
+        });
+    </script>
+</body>
+
+</html>

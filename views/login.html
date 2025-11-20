@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #000;
+            color: #000;
+            overflow: hidden;
+        }
+
+        .login-wrapper {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+
+        /* Left Side - Background Video */
+        .login-left {
+            flex: 1;
+            position: relative;
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .video-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.9) 100%);
+            z-index: 1;
+        }
+
+        .bg-brand {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .bg-brand-logo {
+            font-size: 120px;
+            font-weight: 900;
+            color: #FFFFFF;
+            text-shadow: 0 0 40px rgba(255, 255, 255, 0.6);
+            letter-spacing: -8px;
+            margin-bottom: 20px;
+            line-height: 1;
+        }
+
+        .bg-brand-text {
+            font-size: 48px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            color: #000;
+            text-transform: uppercase;
+        }
+
+        /* Right Side - Login Form */
+        .login-right {
+            flex: 1;
+            background: #141414;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .login-form-container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .login-form-header {
+            margin-bottom: 40px;
+        }
+
+        .login-form-header h1 {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+            color: #FFFFFF;
+        }
+
+        .login-form-header p {
+            font-size: 14px;
+            color: #CCCCCC;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            color: #FFFFFF;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #FFFFFF;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #FFFFFF 0%, #E0E0E0 100%);
+            border: none;
+            border-radius: 4px;
+            color: #000 !important;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            background: linear-gradient(135deg, #FFFFFF 0%, #D0D0D0 100%);
+            color: #000 !important;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(255, 255, 255, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error {
+            background: rgba(255, 255, 255, 0.15);
+            color: #CCCCCC;
+            padding: 12px 16px;
+            border-radius: 4px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: none;
+        }
+
+        .error.show {
+            display: block;
+        }
+
+        .twofa-field {
+            display: none;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+        }
+
+        .twofa-field p {
+            font-size: 12px;
+            color: #FFFFFF;
+            margin-bottom: 10px;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 30px 0;
+            color: #999999;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .discord-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            background: #5865F2;
+            border: none;
+            border-radius: 4px;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .discord-btn:hover {
+            background: #4752C4;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(88, 101, 242, 0.3);
+        }
+
+        .discord-btn svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        @media (max-width: 1024px) {
+            .login-left {
+                display: none;
+            }
+
+            .login-right {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .login-wrapper {
+                flex-direction: column;
+            }
+
+            .login-left {
+                display: flex;
+                min-height: 200px;
+                height: auto;
+            }
+
+            .bg-brand-logo {
+                font-size: 60px;
+                letter-spacing: -4px;
+            }
+
+            .bg-brand-text {
+                font-size: 28px;
+            }
+
+            .login-right {
+                padding: 20px;
+                min-height: calc(100vh - 200px);
+            }
+
+            .login-form-header h1 {
+                font-size: 32px;
+            }
+
+            .form-group input {
+                font-size: 16px;
+                padding: 12px 14px;
+            }
+
+            .login-btn,
+            .discord-btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-left {
+                min-height: 150px;
+            }
+
+            .bg-brand-logo {
+                font-size: 40px;
+                letter-spacing: -2px;
+            }
+
+            .bg-brand-text {
+                font-size: 20px;
+            }
+
+            .login-form-header h1 {
+                font-size: 24px;
+            }
+
+            .login-form-header p {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-wrapper">
+        <!-- Left Side -->
+        <div class="login-left">
+            <div class="video-background"></div>
+            <div class="bg-brand">
+                <div class="bg-brand-logo">𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</div>
+                <div class="bg-brand-text">CHEATS</div>
+            </div>
+        </div>
+
+        <!-- Right Side -->
+        <div class="login-right">
+            <div class="login-form-container">
+                <div class="login-form-header">
+                    <h1>Sign In</h1>
+                    <p>Enter your credentials to continue</p>
+                </div>
+
+                <div id="error" class="error"></div>
+
+                <form id="loginForm">
+                    <div class="form-group">
+                        <input type="text" id="username" placeholder="Username" required autofocus
+                            autocomplete="username">
+                    </div>
+
+                    <div class="form-group">
+                        <input type="password" id="password" placeholder="Password" required
+                            autocomplete="current-password">
+                    </div>
+
+                    <div id="2faField" class="twofa-field">
+                        <p>Two-Factor Authentication</p>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <input type="text" id="twoFactorCode" placeholder="6-digit code" maxlength="6"
+                                autocomplete="one-time-code">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="login-btn" id="loginBtn">Sign In</button>
+                </form>
+
+                <div class="divider">OR</div>
+
+                <a href="/auth/discord" class="discord-btn">
+                    <svg viewBox="0 0 71 55" fill="currentColor">
+                        <path
+                            d="M60.1045 4.8978C55.5792 2.8214 50.7265 1.2916 45.6527 0.41542C45.5603 0.39851 45.468 0.440769 45.4204 0.525289C44.7963 1.6353 44.105 3.0834 43.6209 4.2216C38.1637 3.4046 32.7345 3.4046 27.3892 4.2216C26.905 3.0581 26.1886 1.6353 25.5617 0.525289C25.5141 0.443589 25.4218 0.40133 25.3294 0.41542C20.2584 1.2888 15.4057 2.8186 10.8776 4.8978C10.8384 4.9147 10.8048 4.9429 10.7825 4.9795C1.57795 18.7309 -0.943561 32.1443 0.293408 45.3914C0.299005 45.4562 0.335386 45.5182 0.385761 45.5576C6.45866 50.0174 12.3413 52.7249 18.1147 54.5195C18.2071 54.5477 18.305 54.5139 18.3638 54.4378C19.7295 52.5728 20.9469 50.6063 21.9907 48.5383C22.0523 48.4172 21.9935 48.2735 21.8676 48.2256C19.9366 47.4931 18.0979 46.6 16.3292 45.5858C16.1893 45.5041 16.1781 45.304 16.3068 45.2082C16.679 44.9293 17.0513 44.6391 17.4067 44.3461C17.471 44.2926 17.5606 44.2813 17.6362 44.3151C29.2558 49.6202 41.8354 49.6202 53.3179 44.3151C53.3935 44.2785 53.4831 44.2898 53.5502 44.3433C53.9057 44.6363 54.2779 44.9293 54.6529 45.2082C54.7816 45.304 54.7732 45.5041 54.6333 45.5858C52.8646 46.6197 51.0259 47.4931 49.0921 48.2228C48.9662 48.2707 48.9102 48.4172 48.9718 48.5383C50.038 50.6034 51.2554 52.5699 52.5959 54.435C52.6519 54.5139 52.7526 54.5477 52.845 54.5195C58.6464 52.7249 64.529 50.0174 70.6019 45.5576C70.6551 45.5182 70.6887 45.459 70.6943 45.3942C72.1747 30.0791 68.2147 16.7757 60.1968 4.9823C60.1772 4.9429 60.1437 4.9147 60.1045 4.8978ZM23.7259 37.3253C20.2276 37.3253 17.3451 34.1136 17.3451 30.1693C17.3451 26.225 20.1717 23.0133 23.7259 23.0133C27.308 23.0133 30.1626 26.2532 30.1066 30.1693C30.1066 34.1136 27.28 37.3253 23.7259 37.3253ZM47.3178 37.3253C43.8196 37.3253 40.9371 34.1136 40.9371 30.1693C40.9371 26.225 43.7636 23.0133 47.3178 23.0133C50.9 23.0133 53.7545 26.2532 53.6986 30.1693C53.6986 34.1136 50.9 37.3253 47.3178 37.3253Z" />
+                    </svg>
+                    <span>Discord</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORIGINAL SCRIPT - NO CHANGES -->
+    <script>
+        const form = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const errorDiv = document.getElementById('error');
+        const twoFAField = document.getElementById('2faField');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const twoFactorInput = document.getElementById('twoFactorCode');
+
+        function showError(msg) {
+            errorDiv.textContent = msg;
+            errorDiv.classList.add('show');
+            setTimeout(() => errorDiv.classList.remove('show'), 4000);
+        }
+
+        [usernameInput, passwordInput, twoFactorInput].forEach(input => {
+            input?.addEventListener('input', () => errorDiv.classList.remove('show'));
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value;
+            const token = twoFactorInput?.value || null;
+
+            if (!username || !password) {
+                showError('Please enter your credentials');
+                return;
+            }
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'SIGNING IN...';
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, token }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.requires2FA) {
+                    twoFAField.style.display = 'block';
+                    twoFactorInput.focus();
+                    loginBtn.textContent = 'VERIFY CODE';
+                    loginBtn.disabled = false;
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    loginBtn.textContent = 'REDIRECTING...';
+                    setTimeout(() => window.location.href = '/dashboard', 600);
+                } else {
+                    showError(data.error || 'Login failed');
+                    loginBtn.textContent = 'SIGN IN';
+                    loginBtn.disabled = false;
+                }
+            } catch (error) {
+                showError('Connection error');
+                loginBtn.textContent = 'SIGN IN';
+                loginBtn.disabled = false;
+            }
+        });
+
+        twoFactorInput?.addEventListener('input', (e) => {
+            if (e.target.value.length === 6) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        });
+    </script>
+</body>
+
+</html>

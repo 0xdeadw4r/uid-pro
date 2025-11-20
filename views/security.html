@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Security Settings - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .security-section {
+            background: var(--surface-dark);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .security-section h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 0 0 1rem 0;
+        }
+
+        .section-description {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+        }
+
+        .status-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-top: 1px solid #333;
+        }
+
+        .status-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #e0e0e0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-enabled {
+            background: rgba(16, 185, 129, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .status-disabled {
+            background: rgba(245, 158, 11, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .qr-code-container {
+            text-align: center;
+            margin: 1.5rem 0;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .qr-code-container img {
+            border: 2px solid #333;
+            border-radius: 6px;
+            padding: 1rem;
+            background: var(--surface-dark);
+            max-width: 280px;
+        }
+
+        .backup-codes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+            margin: 1.5rem 0;
+        }
+
+        .backup-code {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.8rem;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            font-weight: 600;
+            color: #e0e0e0;
+        }
+
+        .info-notice {
+            background: rgba(59, 130, 246, 0.1);
+            border-left: 3px solid #3B82F6;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 13px;
+            color: #93C5FD;
+            line-height: 1.5;
+        }
+
+        .warning-notice {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 13px;
+            color: #FCD34D;
+            line-height: 1.5;
+        }
+
+        .step-label {
+            font-weight: 700;
+            font-size: 13px;
+            color: #e0e0e0;
+            margin: 1.5rem 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-enable {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-enable:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-enable:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-disable {
+            background: #DC2626;
+            color: #000;
+            border: none;
+            padding: 0.9rem 1.5rem;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+        }
+
+        .btn-disable:hover:not(:disabled) {
+            background: #B91C1C;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 38, 38, 0.4);
+        }
+
+        .btn-disable:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .form-group input::placeholder {
+            color: #666;
+        }
+
+        .manual-code {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 0.75rem 1rem;
+            display: inline-block;
+            margin-top: 0.75rem;
+            border-radius: 6px;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            border: 1px solid #333;
+            color: #FFFFFF;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .message.success {
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid #FFFFFF;
+            color: #FFFFFF;
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #FFFFFF;
+            color: #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .security-section {
+                padding: 1.5rem;
+            }
+
+            .security-section h3 {
+                font-size: 1.1rem;
+            }
+
+            .backup-codes {
+                grid-template-columns: 1fr;
+            }
+
+            .qr-code-container {
+                padding: 1.5rem 1rem;
+            }
+
+            .qr-code-container img {
+                max-width: 100%;
+                width: 240px;
+            }
+
+            .status-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .security-section {
+                padding: 1.25rem;
+            }
+
+            .section-description {
+                font-size: 12px;
+            }
+
+            .form-group input {
+                font-size: 14px;
+            }
+
+            .btn-enable,
+            .btn-disable {
+                font-size: 12px;
+                padding: 0.8rem 1.25rem;
+            }
+
+            .backup-code {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header">
+            <h2>Security Settings</h2>
+        </div>
+
+        <div id="statusMessage" class="message" style="display: none;"></div>
+
+        <!-- Mandatory 2FA Notice -->
+        <div class="warning-notice">
+            <strong>Security Requirement:</strong> Two-Factor Authentication is mandatory for creating UIDs. Please
+            enable 2FA below to access UID creation features.
+        </div>
+
+        <!-- 2FA Status Section -->
+        <div class="security-section">
+            <h3>Two-Factor Authentication</h3>
+            <p class="section-description">
+                Protect your account with an additional layer of security. When enabled, you'll need to enter a code
+                from your authenticator app during login.
+            </p>
+
+            <div class="status-row">
+                <div>
+                    <span class="status-label">Current Status:</span>
+                    <span id="2faStatus" class="status-badge status-disabled">Disabled</span>
+                </div>
+                <div id="2faControls"></div>
+            </div>
+        </div>
+
+        <!-- Setup 2FA Section -->
+        <div id="setup2fa" style="display: none;" class="security-section">
+            <h3>Enable Two-Factor Authentication</h3>
+
+            <div class="info-notice">
+                <strong>Required:</strong> Download an authenticator app like Google Authenticator, Microsoft
+                Authenticator, or Authy on your smartphone before proceeding.
+            </div>
+
+            <div class="step-label">Step 1: Scan QR Code</div>
+            <p class="section-description">Scan this QR code with your authenticator app:</p>
+            <div class="qr-code-container" id="qrCodeContainer"></div>
+
+            <div class="step-label">Step 2: Verify Setup</div>
+            <p class="section-description">Enter the 6-digit code from your authenticator app to complete setup:</p>
+            <form id="verify2faForm">
+                <div class="form-group">
+                    <input type="text" id="verifyToken" placeholder="Enter 6-digit code" maxlength="6"
+                        pattern="[0-9]{6}" required>
+                </div>
+                <button type="submit" class="btn-enable">Verify and Enable 2FA</button>
+            </form>
+        </div>
+
+        <!-- Backup Codes Display -->
+        <div id="backupCodesDisplay" style="display: none;" class="security-section">
+            <h3>Save Your Backup Codes</h3>
+            <div class="warning-notice">
+                <strong>Important:</strong> Save these codes in a safe place. Each code can be used once if you lose
+                access to your authenticator app.
+            </div>
+            <div class="backup-codes" id="backupCodesList"></div>
+            <button onclick="hideBackupCodes()" class="btn-enable">I've Saved My Codes</button>
+        </div>
+
+        <!-- Disable 2FA Section -->
+        <div id="disable2fa" style="display: none;" class="security-section">
+            <h3>Disable Two-Factor Authentication</h3>
+            <div class="warning-notice">
+                <strong>Warning:</strong> Disabling 2FA will reduce your account security and remove access to UID
+                creation features.
+            </div>
+            <form id="disable2faForm">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="disablePassword" placeholder="Enter your password" required>
+                </div>
+                <div class="form-group">
+                    <label>2FA Code</label>
+                    <input type="text" id="disableToken" placeholder="Enter 6-digit code" maxlength="6" required>
+                </div>
+                <button type="submit" class="btn-disable">Disable 2FA</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        let twoFactorEnabled = false;
+
+        async function load2FAStatus() {
+            try {
+                const response = await fetch('/api/2fa/status', {
+                    credentials: 'include'
+                });
+                const data = await response.json();
+
+                twoFactorEnabled = data.enabled;
+
+                const statusBadge = document.getElementById('2faStatus');
+                const controls = document.getElementById('2faControls');
+
+                if (data.enabled) {
+                    statusBadge.textContent = 'Enabled';
+                    statusBadge.className = 'status-badge status-enabled';
+                    controls.innerHTML = '<button onclick="showDisable2FA()" class="btn-disable" style="font-size: 13px; padding: 0.75rem 1.5rem;">Disable 2FA</button>';
+                } else {
+                    statusBadge.textContent = 'Disabled';
+                    statusBadge.className = 'status-badge status-disabled';
+                    controls.innerHTML = '<button onclick="setup2FA()" class="btn-enable" style="font-size: 13px; padding: 0.75rem 1.5rem;">Enable 2FA</button>';
+                }
+
+                const userResponse = await fetch('/api/user', { credentials: 'include' });
+                const user = await userResponse.json();
+                if (user.isAdmin || user.isSuperAdmin || user.isOwner || user.isLimitedAdmin) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to load 2FA status:', error);
+                window.toast?.error('Failed to load 2FA status') || alert('Failed to load 2FA status');
+            }
+        }
+
+        async function setup2FA() {
+            try {
+                const response = await fetch('/api/2fa/setup', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.toast?.info('Scan the QR code with your authenticator app') || alert('Scan the QR code with your authenticator app');
+                    document.getElementById('setup2fa').style.display = 'block';
+                    document.getElementById('qrCodeContainer').innerHTML = `
+                        <img src="${data.qrCode}" alt="QR Code">
+                        <p class="section-description" style="margin-top: 1rem;">
+                            Cannot scan? Enter this code manually:<br>
+                            <span class="manual-code">${data.secret}</span>
+                        </p>
+                    `;
+                    document.getElementById('setup2fa').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    window.toast?.error(data.error || 'Failed to setup 2FA') || alert('Failed to setup 2FA');
+                }
+            } catch (error) {
+                window.toast?.error('Failed to setup 2FA') || alert('Failed to setup 2FA');
+            }
+        }
+
+        document.getElementById('verify2faForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const token = document.getElementById('verifyToken').value;
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Verifying...';
+
+            try {
+                const response = await fetch('/api/2fa/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.toast?.success('2FA enabled successfully! Save your backup codes.') || alert('2FA enabled successfully!');
+                    document.getElementById('setup2fa').style.display = 'none';
+
+                    const codesHtml = data.backupCodes.map(code =>
+                        `<div class="backup-code">${code}</div>`
+                    ).join('');
+                    document.getElementById('backupCodesList').innerHTML = codesHtml;
+                    document.getElementById('backupCodesDisplay').style.display = 'block';
+                    document.getElementById('backupCodesDisplay').scrollIntoView({ behavior: 'smooth' });
+
+                    load2FAStatus();
+                } else {
+                    window.toast?.error(data.error || 'Invalid verification code') || alert('Invalid verification code');
+                    btn.disabled = false;
+                    btn.textContent = 'Verify and Enable 2FA';
+                }
+            } catch (error) {
+                window.toast?.error('Failed to verify code') || alert('Failed to verify code');
+                btn.disabled = false;
+                btn.textContent = 'Verify and Enable 2FA';
+            }
+        });
+
+        function hideBackupCodes() {
+            document.getElementById('backupCodesDisplay').style.display = 'none';
+            window.toast?.success('2FA is now active! You can create UIDs.') || alert('2FA is now active!');
+        }
+
+        function showDisable2FA() {
+            document.getElementById('disable2fa').style.display = 'block';
+            document.getElementById('disable2fa').scrollIntoView({ behavior: 'smooth' });
+            window.toast?.warning('Disabling 2FA will remove UID creation access') || alert('Disabling 2FA will remove UID creation access');
+        }
+
+        document.getElementById('disable2faForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const password = document.getElementById('disablePassword').value;
+            const token = document.getElementById('disableToken').value;
+            const btn = e.target.querySelector('button');
+            btn.disabled = true;
+            btn.textContent = 'Disabling...';
+
+            try {
+                const response = await fetch('/api/2fa/disable', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password, token }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    window.toast?.success('2FA disabled successfully') || alert('2FA disabled successfully');
+                    document.getElementById('disable2fa').style.display = 'none';
+                    load2FAStatus();
+                } else {
+                    window.toast?.error(data.error || 'Failed to disable 2FA') || alert('Failed to disable 2FA');
+                    btn.disabled = false;
+                    btn.textContent = 'Disable 2FA';
+                }
+            } catch (error) {
+                window.toast?.error('Failed to disable 2FA') || alert('Failed to disable 2FA');
+                btn.disabled = false;
+                btn.textContent = 'Disable 2FA';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', load2FAStatus);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,16 @@
+{
+  "users": {
+    "admin": {
+      "username": "admin",
+      "password": "admin123",
+      "isAdmin": true,
+      "createdAt": "2025-10-25T00:00:00.000Z"
+    },
+    "blackace": {
+      "username": "blackace",
+      "password": "prayag1234",
+      "isAdmin": false,
+      "createdAt": "2025-10-24T20:00:11.433Z"
+    }
+  }
+}

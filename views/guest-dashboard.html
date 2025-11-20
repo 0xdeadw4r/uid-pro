@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Guest Pass - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: #0a0a0a;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .guest-badge {
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            display: inline-block;
+            margin-left: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+        }
+
+        .nav-links button {
+            padding: 0.5rem 1rem !important;
+            font-size: 12px !important;
+            min-width: auto !important;
+            white-space: nowrap !important;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #999;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-btn:hover {
+            color: #FFFFFF;
+        }
+
+        .tab-btn.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .discord-verify-card {
+            background: linear-gradient(135deg, #5865F2 0%, #4752C4 100%);
+            color: #000;
+            padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1rem, 5vw, 2rem);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(88, 101, 242, 0.3);
+            border: 1px solid rgba(88, 101, 242, 0.5);
+        }
+
+        .discord-verify-card h2 {
+            margin: 0 0 clamp(0.5rem, 2vw, 1rem) 0;
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
+            font-weight: 700;
+        }
+
+        .discord-verify-card p {
+            margin-bottom: clamp(0.5rem, 2vw, 1rem);
+            opacity: 0.95;
+            font-size: clamp(13px, 3vw, 15px);
+            line-height: 1.6;
+        }
+
+        .discord-btn {
+            background: #fff;
+            color: #5865F2;
+            padding: clamp(0.6rem, 2vw, 0.9rem) clamp(1.5rem, 4vw, 2.25rem);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: clamp(12px, 3vw, 14px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .guest-status-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .guest-status-card h2 {
+            margin: 0 0 clamp(1rem, 3vw, 1.5rem) 0;
+            font-size: clamp(1.25rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: clamp(0.4rem, 2vw, 0.65rem) clamp(0.75rem, 3vw, 1.25rem);
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: clamp(10px, 2.5vw, 12px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .status-verified {
+            background: rgba(16, 185, 129, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        .status-available {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3B82F6;
+            border: 1px solid #3B82F6;
+        }
+
+        .status-disabled {
+            background: rgba(107, 114, 128, 0.15);
+            color: #9CA3AF;
+            border: 1px solid #9CA3AF;
+        }
+
+        .create-form {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: clamp(1.5rem, 4vw, 2rem);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-bottom: 2rem;
+        }
+
+        .create-form h3 {
+            margin: 0 0 clamp(1rem, 3vw, 1.5rem) 0;
+            font-size: clamp(1.1rem, 4vw, 1.5rem);
+            font-weight: 700;
+            color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: clamp(0.3rem, 2vw, 0.5rem);
+            font-size: clamp(11px, 2.5vw, 13px);
+            font-weight: 600;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: clamp(0.6rem, 2vw, 0.85rem) clamp(0.7rem, 2vw, 1rem);
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: clamp(12px, 3vw, 14px);
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-group input::placeholder {
+            color: #666;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary {
+            background: #FFFFFF;
+            color: #000;
+            padding: clamp(0.7rem, 2vw, 0.9rem) clamp(1.5rem, 4vw, 2rem);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: clamp(12px, 3vw, 14px);
+            width: 100%;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-sizing: border-box;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: #FFFFFF;
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+            transform: none;
+        }
+
+        .disabled-message {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            border-radius: 6px;
+            color: #FCA5A5;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+
+        .limitations-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-top: clamp(1.5rem, 3vw, 2rem);
+            border-radius: 6px;
+        }
+
+        .limitations-card h4 {
+            margin: 0 0 clamp(0.75rem, 2vw, 1rem) 0;
+            color: #e0e0e0;
+            font-weight: 700;
+            font-size: clamp(11px, 2.5vw, 13px);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .limitations-card ul {
+            margin: 0;
+            padding-left: clamp(1rem, 3vw, 1.5rem);
+            color: #999;
+            font-size: clamp(11px, 2.5vw, 13px);
+            line-height: 1.8;
+        }
+
+        .limitations-card li {
+            margin-bottom: 0.5rem;
+        }
+
+        .keys-output {
+            background: #1a1a1a;
+            border: 2px solid #FFFFFF;
+            border-radius: 6px;
+            padding: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .keys-output h4 {
+            margin: 0 0 clamp(0.75rem, 2vw, 1rem) 0;
+            color: #FFFFFF;
+            font-weight: 700;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+
+        .key-item {
+            background: #222;
+            border: 1px solid #FFFFFF;
+            border-radius: 4px;
+            padding: clamp(0.6rem, 2vw, 0.8rem);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: 'Courier New', monospace;
+            font-size: clamp(10px, 2.5vw, 12px);
+            word-break: break-all;
+            gap: 0.5rem;
+        }
+
+        .key-text {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .copy-btn {
+            background: #3B82F6;
+            color: #000;
+            border: none;
+            padding: clamp(0.3rem, 1.5vw, 0.4rem) clamp(0.6rem, 2vw, 0.8rem);
+            border-radius: 4px;
+            font-size: clamp(10px, 2vw, 11px);
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #1D4ED8;
+        }
+
+        .pass-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: 1.5rem;
+            border-radius: 6px;
+            color: #FCD34D;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+
+        /* Social Media Verification Card */
+        .verify-card {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: #fff;
+            padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1rem, 5vw, 2rem);
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+        }
+
+        .verify-card h2 {
+            margin: 0 0 clamp(0.5rem, 2vw, 1rem) 0;
+            font-size: clamp(1.25rem, 5vw, 1.75rem);
+            font-weight: 700;
+        }
+
+        .verify-card p {
+            margin-bottom: clamp(0.5rem, 2vw, 1rem);
+            opacity: 0.95;
+            font-size: clamp(13px, 3vw, 15px);
+            line-height: 1.6;
+        }
+
+        .verify-card .btn-primary {
+            background: #fff;
+            color: #3b82f6;
+            padding: clamp(0.6rem, 2vw, 0.9rem) clamp(1.5rem, 4vw, 2.25rem);
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: clamp(12px, 3vw, 14px);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .verify-card .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+        }
+
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+            }
+
+            .guest-status-card,
+            .create-form {
+                padding: 1.25rem;
+            }
+
+            .tabs {
+                gap: 0.5rem;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 1rem;
+                font-size: 11px;
+            }
+
+            .key-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .copy-btn {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 1rem auto;
+            }
+
+            .guest-badge {
+                display: block;
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+
+            .tabs {
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>
+                𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬
+                <span class="guest-badge">GUEST</span>
+            </h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">Theme</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Discord Verification Required -->
+        <div id="discordRequired" class="guest-status-card" style="display: none;">
+            <h2>🔒 Discord Verification Required</h2>
+            <p style="color: #999; margin: 1rem 0;">To use guest features, please verify your Discord account first.</p>
+            <a href="/auth/discord" class="btn-primary" style="text-decoration: none; display: inline-block; margin-top: 1rem;">
+                Verify with Discord
+            </a>
+        </div>
+
+        <!-- Social Media Verification Required -->
+        <div id="socialVerificationRequired" class="guest-status-card" style="display: none;">
+            <h2>📱 Social Media Verification Required</h2>
+            <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe and follow our social media channels.</p>
+            <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
+                    <span id="youtubeStatus">📺 Subscribe on YouTube</span>
+                </a>
+                <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
+                    <span id="instagramStatus">📷 Follow on Instagram</span>
+                </a>
+            </div>
+            <button id="notifyAdminBtn" class="btn-primary" style="display: none; background: #10B981; color: #fff; margin-top: 1rem;" onclick="notifyAdminSubscribed()">
+                ✅ I've Subscribed & Followed - Get Access
+            </button>
+            <div class="limitations-card" style="margin-top: 1.5rem;">
+                <h4>⚠️ Important</h4>
+                <ul>
+                    <li>Click BOTH buttons above to visit YouTube and Instagram</li>
+                    <li>Subscribe and follow on each platform</li>
+                    <li>After clicking both, the verification button will appear</li>
+                    <li>Admin monitors all verifications - fake subscriptions will result in account suspension</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Guest Status Card -->
+        <div id="guestStatusCard" style="display: none;" class="guest-status-card">
+            <h2>Your Guest Access</h2>
+            <div id="statusContent" class="status-indicators">
+                <div class="status-indicator">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Pass Used Warning -->
+        <div id="passUsedWarning" class="pass-warning" style="display: none;">
+            Your free pass has been used. Your keys will expire in 24 hours.
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs" id="tabsContainer" style="display: flex;">
+            <button class="tab-btn active" data-tab="uid" onclick="switchTab('uid', this)">
+                 Create UID
+            </button>
+            <button class="tab-btn" data-tab="aimkill" onclick="switchTab('aimkill', this)">
+                 Create Account
+            </button>
+            <button class="tab-btn" data-tab="keys" onclick="switchTab('keys', this)">
+                 Your Account
+            </button>
+        </div>
+
+        <!-- UID Tab -->
+        <div id="uid-tab" class="tab-content">
+            <div id="uidDisabledMsg" class="disabled-message" style="display: none;">
+                Free UID creation is currently disabled by administrator. Contact support for more information.
+            </div>
+            <div class="create-form" id="uidForm" style="display: none;">
+                <h3>Create Your Free UID</h3>
+                <form id="createUidForm">
+                    <div class="form-group">
+                        <label>UID Number</label>
+                        <input type="text" id="uid" placeholder="Enter UID (numbers only)" required pattern="[0-9]+"
+                            maxlength="15">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration Package</label>
+                        <select id="packageSelect" required>
+                            <option value="">Select Duration</option>
+                            <option value="1day">1 Day - FREE</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" id="createUidBtn">Create Free UID</button>
+                </form>
+
+                <div class="limitations-card">
+                    <h4>Guest UID Limitations</h4>
+                    <ul>
+                        <li>Only 1 free UID allowed per account</li>
+                        <li>Cannot delete created UIDs</li>
+                        <li>Limited to 1-day duration</li>
+                        <li>Contact admin to upgrade for more</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aimkill Tab -->
+        <div id="aimkill-tab" class="tab-content">
+            <div id="aimkillDisabledMsg" class="disabled-message" style="display: none;">
+                Free Aimkill key creation is currently disabled by administrator. Contact support for more information.
+            </div>
+            <div class="create-form" id="aimkillForm" style="display: none;">
+                <h3>Create Your Free Aimkill Account</h3>
+                <form id="createAimkillForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="aimkillUsername" placeholder="Must start with DC (e.g., DCuser123)" required pattern="DC.*" minlength="3">
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="aimkillPassword" placeholder="Minimum 6 characters" required minlength="6">
+                    </div>
+                    <div class="form-group">
+                        <label>Duration Package</label>
+                        <select id="aimkillPackageSelect" required>
+                            <option value="">Select Duration</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary" id="createAimkillBtn">Create Free Account</button>
+                </form>
+
+                <div class="limitations-card">
+                    <h4>Guest Aimkill Limitations</h4>
+                    <ul>
+                        <li>Only 1 free account allowed per guest</li>
+                        <li>Username must start with "DC"</li>
+                        <li>Account valid for 1 day only</li>
+                        <li>Contact admin to upgrade for more accounts</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Keys Tab -->
+        <div id="keys-tab" class="tab-content">
+            <div class="create-form">
+                <h3>Your Created Accounts</h3>
+                <div id="keysContainer">
+                    <div id="noKeysMsg" style="color: #999; text-align: center; padding: 2rem;">
+                        <p>No accounts created yet. Create one in the Aimkill tab!</p>
+                    </div>
+                    <div id="keysOutput" class="keys-output" style="display: none;">
+                        <h4>Created Aimkill Accounts</h4>
+                        <div id="keysList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script>
+        function switchTab(tabName, btn) {
+            document.getElementById('uid-tab').classList.remove('active');
+            document.getElementById('aimkill-tab').classList.remove('active');
+            document.getElementById('keys-tab').classList.remove('active');
+            const socialTab = document.getElementById('social-tab');
+            if (socialTab) socialTab.classList.remove('active');
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            btn.classList.add('active');
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Copied to clipboard');
+            });
+        }
+
+        function copyAccountCredentials(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Credentials copied to clipboard');
+            });
+        }
+
+        function displayKeys(keys) {
+            const list = document.getElementById('keysList');
+            const noKeysMsg = document.getElementById('noKeysMsg');
+            const keysOutput = document.getElementById('keysOutput');
+
+            list.innerHTML = '';
+
+            if (keys && keys.length > 0) {
+                noKeysMsg.style.display = 'none';
+                keysOutput.style.display = 'block';
+
+                keys.forEach((key, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'key-item';
+                    item.innerHTML = `
+                        <span class="key-text">#${index + 1}: ${key}</span>
+                        <button type="button" class="copy-btn" onclick="copyToClipboard('${key}')">Copy</button>
+                    `;
+                    list.appendChild(item);
+                });
+            } else {
+                noKeysMsg.style.display = 'block';
+                keysOutput.style.display = 'none';
+            }
+        }
+
+        async function loadGuestDashboard() {
+            try {
+                const user = await fetchUser();
+
+                if (!user || !user.isGuest) {
+                    window.location.href = '/dashboard';
+                    return;
+                }
+
+                if (!user.discordVerified) {
+                    document.getElementById('discordRequired').style.display = 'block';
+                    document.getElementById('guestStatusCard').style.display = 'none';
+                    document.getElementById('tabsContainer').style.display = 'none';
+                    document.getElementById('passUsedWarning').style.display = 'none';
+                    document.getElementById('socialVerificationRequired').style.display = 'none';
+                    return;
+                }
+
+                const response = await fetch('/api/guest-settings', { credentials: 'include' });
+                const settings = await response.json();
+
+                // Check social verification
+                const socialVerified = await checkSocialVerification();
+
+                // Show social verification card if required and not verified
+                if (settings.requireSocialVerification && !socialVerified) {
+                    document.getElementById('socialVerificationRequired').style.display = 'block';
+                    document.getElementById('guestStatusCard').style.display = 'none';
+                    document.getElementById('tabsContainer').style.display = 'none';
+                    document.getElementById('passUsedWarning').style.display = 'none';
+                    checkSocialClicks();
+                    return;
+                }
+
+                // Hide social verification card if not needed
+                document.getElementById('socialVerificationRequired').style.display = 'none';
+
+                let statusHTML = '<div class="status-indicator status-verified">Discord Verified</div>';
+
+                if (socialVerified) {
+                    statusHTML += '<div class="status-indicator status-verified">Social Media Verified</div>';
+                }
+
+                if (settings.allowGuestFreeUID) {
+                    statusHTML += '<div class="status-indicator status-available">Free UID Available</div>';
+                } else {
+                    statusHTML += '<div class="status-indicator status-disabled">Free UID Disabled</div>';
+                }
+
+                if (settings.allowGuestFreeAimkill) {
+                    statusHTML += '<div class="status-indicator status-available">Free Aimkill Available</div>';
+                } else {
+                    statusHTML += '<div class="status-indicator status-disabled">Free Aimkill Disabled</div>';
+                }
+
+                document.getElementById('statusContent').innerHTML = statusHTML;
+                document.getElementById('guestStatusCard').style.display = 'block';
+
+                if (user.guestPassUsed) {
+                    document.getElementById('passUsedWarning').style.display = 'block';
+                } else {
+                    document.getElementById('passUsedWarning').style.display = 'none';
+                }
+
+                document.getElementById('tabsContainer').style.display = 'flex';
+
+                if (settings.allowGuestFreeUID && !user.guestPassUsed) {
+                    document.getElementById('uidForm').style.display = 'block';
+                    document.getElementById('uidDisabledMsg').style.display = 'none';
+                } else {
+                    document.getElementById('uidForm').style.display = 'none';
+                    if (!settings.allowGuestFreeUID) {
+                        document.getElementById('uidDisabledMsg').style.display = 'block';
+                    }
+                }
+
+                if (settings.allowGuestFreeAimkill && !user.guestPassUsed) {
+                    document.getElementById('aimkillForm').style.display = 'block';
+                    document.getElementById('aimkillDisabledMsg').style.display = 'none';
+                    await loadAimkillPackages(settings.guestPassMaxDuration);
+                } else {
+                    document.getElementById('aimkillForm').style.display = 'none';
+                    if (!settings.allowGuestFreeAimkill) {
+                        document.getElementById('aimkillDisabledMsg').style.display = 'block';
+                    }
+                }
+
+                loadStoredKeys();
+            } catch (error) {
+                console.error('Load dashboard error:', error);
+            }
+        }
+
+        async function loadAimkillPackages(maxDuration) {
+            try {
+                const response = await fetch('/api/aimkill-packages', { credentials: 'include' });
+                const data = await response.json();
+
+                const select = document.getElementById('aimkillPackageSelect');
+                const createBtn = document.getElementById('createAimkillBtn');
+
+                if (!response.ok) {
+                    console.error('Failed to load packages:', data.error);
+                    select.innerHTML = '<option value="">No packages available</option>';
+                    createBtn.disabled = true;
+
+                    alert(data.error || 'Failed to load Aimkill packages. Please contact administrator.');
+                    return;
+                }
+
+                const aimkillPackages = data;
+                select.innerHTML = '<option value="">Select Duration</option>';
+
+                Object.keys(aimkillPackages).forEach(duration => {
+                    const pkg = aimkillPackages[duration];
+                    if (pkg && pkg.display) {
+                        const option = document.createElement('option');
+                        option.value = duration;
+                        option.textContent = `${pkg.display} - FREE`;
+                        select.appendChild(option);
+                    }
+                });
+
+                if (Object.keys(aimkillPackages).length === 0) {
+                    select.innerHTML = '<option value="">No packages available</option>';
+                    createBtn.disabled = true;
+                    alert('No Aimkill packages are currently available for guest users. Please contact administrator.');
+                } else {
+                    createBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error loading Aimkill packages:', error);
+                const select = document.getElementById('aimkillPackageSelect');
+                select.innerHTML = '<option value="">Error loading packages</option>';
+                document.getElementById('createAimkillBtn').disabled = true;
+                alert('Failed to load Aimkill packages. Please try again later or contact administrator.');
+            }
+        }
+
+        function loadStoredKeys() {
+            const stored = localStorage.getItem('guestAimkillAccount');
+            if (stored) {
+                try {
+                    const data = JSON.parse(stored);
+                    if (data.username && data.password) {
+                        window.generatedKeys = [`Username: ${data.username}\nPassword: ${data.password}`];
+                        displayKeys(window.generatedKeys);
+                    }
+                } catch (err) {
+                    console.error('Error loading stored account:', err);
+                }
+            }
+        }
+
+        async function checkSocialVerification() {
+            try {
+                const response = await fetch('/api/guest-settings', { credentials: 'include' });
+                const settings = await response.json();
+
+                // Fetch user to check verification status
+                const userResponse = await fetch('/api/user', { credentials: 'include' });
+                const user = await userResponse.json();
+
+                // Set social media URLs with proper validation
+                const youtubeLink = document.getElementById('youtubeLink');
+                const instagramLink = document.getElementById('instagramLink');
+                
+                if (youtubeLink && settings.youtubeChannelUrl) {
+                    youtubeLink.href = settings.youtubeChannelUrl;
+                    
+                    // Add click event listener
+                    youtubeLink.addEventListener('click', function() {
+                        trackClick('youtube');
+                    });
+                }
+                
+                if (instagramLink && settings.instagramProfileUrl) {
+                    instagramLink.href = settings.instagramProfileUrl;
+                    
+                    // Add click event listener
+                    instagramLink.addEventListener('click', function() {
+                        trackClick('instagram');
+                    });
+                }
+
+                // Return true if not required or already verified
+                if (!settings.requireSocialVerification) {
+                    return true;
+                }
+
+                // Return true only if user is verified
+                return user.youtubeSubscribed && user.instagramFollowed;
+            } catch (error) {
+                console.error('Error checking social verification:', error);
+                return false;
+            }
+        }
+
+        function trackClick(platform) {
+            const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
+            clicked[platform] = true;
+            localStorage.setItem('socialClicked', JSON.stringify(clicked));
+            
+            // Update button text to show it was clicked
+            if (platform === 'youtube') {
+                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
+            } else if (platform === 'instagram') {
+                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
+            }
+            
+            // Check if both are clicked
+            if (clicked.youtube && clicked.instagram) {
+                document.getElementById('notifyAdminBtn').style.display = 'block';
+            }
+        }
+
+        function checkSocialClicks() {
+            const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
+            
+            if (clicked.youtube) {
+                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
+            }
+            if (clicked.instagram) {
+                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
+            }
+            
+            if (clicked.youtube && clicked.instagram) {
+                document.getElementById('notifyAdminBtn').style.display = 'block';
+            }
+        }
+
+        async function notifyAdminSubscribed() {
+            const btn = document.getElementById('notifyAdminBtn');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = 'Verifying...';
+                
+                const response = await fetch('/api/guest/notify-subscribed', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include'
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    localStorage.removeItem('socialClicked');
+                    if (data.verified) {
+                        alert('✅ Verification successful!\n\nYou are now verified and can create free keys. The page will refresh.');
+                        window.location.reload();
+                    } else if (data.alreadyVerified) {
+                        alert('✅ You are already verified!');
+                        window.location.reload();
+                    } else {
+                        alert('✅ ' + data.message);
+                        btn.textContent = '✅ Verified';
+                        btn.style.background = '#6B7280';
+                    }
+                } else {
+                    alert('❌ ' + (data.error || 'Failed to verify'));
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                }
+            } catch (error) {
+                console.error('Error during verification:', error);
+                alert('❌ Connection error. Please try again.');
+                btn.disabled = false;
+                btn.textContent = originalText;
+            }
+        }
+
+
+        document.getElementById('createUidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Check if social verification is required and not completed
+            const socialVerified = await checkSocialVerification();
+            if (!socialVerified) {
+                alert('⚠️ Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
+                return;
+            }
+
+            const uid = document.getElementById('uid').value.trim();
+            const packageId = document.getElementById('packageSelect').value;
+            const createBtn = document.getElementById('createUidBtn');
+
+            if (!packageId) {
+                alert('Please select a duration package');
+                return;
+            }
+
+            if (!/^[0-9]+$/.test(uid)) {
+                alert('UID must contain only numbers');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/api/create-uid', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, packageId }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(`UID ${uid} created successfully`);
+                    setTimeout(() => location.reload(), 2000);
+                } else {
+                    alert(data.error || 'Failed to create UID');
+                    createBtn.disabled = false;
+                    createBtn.textContent = 'Create Free UID';
+                }
+            } catch (error) {
+                alert('Connection error');
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Free UID';
+            }
+        });
+
+        document.getElementById('createAimkillForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Check if social verification is required and not completed
+            const socialVerified = await checkSocialVerification();
+            if (!socialVerified) {
+                alert('⚠️ Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
+                return;
+            }
+
+            const username = document.getElementById('aimkillUsername').value.trim();
+            const password = document.getElementById('aimkillPassword').value;
+            const packageId = document.getElementById('aimkillPackageSelect').value;
+            const createBtn = document.getElementById('createAimkillBtn');
+
+            if (!username.startsWith('DC')) {
+                alert('Username must start with "DC"');
+                return;
+            }
+
+            if (password.length < 6) {
+                alert('Password must be at least 6 characters');
+                return;
+            }
+
+            if (!packageId) {
+                alert('Please select a duration package');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating Account...';
+
+            try {
+                const response = await fetch('/api/aimkill/create-user', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: username,
+                        password: password,
+                        packageId: packageId
+                    }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('guestAimkillAccount', JSON.stringify({
+                        username: username,
+                        password: password,
+                        createdAt: new Date()
+                    }));
+
+                    displayKeys([`Username: ${username}\nPassword: ${password}`]);
+
+                    const keysTabBtn = document.querySelector('[data-tab="keys"]');
+                    switchTab('keys', keysTabBtn);
+
+                    alert(`Account created successfully!\n\nUsername: ${username}\nPassword: ${password}\n\nPlease save these credentials!`);
+                } else {
+                    alert(data.error || 'Failed to create account');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Connection error');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Free Account';
+            }
+        });
+
+        async function loadGuestStatus() {
+            try {
+                const user = await fetchUser();
+                if (!user) return;
+
+                if (!user.discordVerified) {
+                    document.getElementById('discordRequired').style.display = 'block';
+                    document.getElementById('tabsContainer').style.display = 'none';
+                    document.getElementById('guestStatusCard').style.display = 'none';
+                    return;
+                }
+
+                document.getElementById('discordRequired').style.display = 'none';
+
+                const response = await fetch('/api/guest-settings', { credentials: 'include' });
+                const settings = await response.json();
+
+                let statusHTML = '<div class="status-indicator status-verified">Discord Verified</div>';
+
+                if (settings.allowGuestFreeUID) {
+                    statusHTML += '<div class="status-indicator status-available">Free UID Available</div>';
+                } else {
+                    statusHTML += '<div class="status-indicator status-disabled">Free UID Disabled</div>';
+                }
+
+                if (settings.allowGuestFreeAimkill) {
+                    statusHTML += '<div class="status-indicator status-available">Free Aimkill Available</div>';
+                } else {
+                    statusHTML += '<div class="status-indicator status-disabled">Free Aimkill Disabled</div>';
+                }
+
+                document.getElementById('statusContent').innerHTML = statusHTML;
+                document.getElementById('guestStatusCard').style.display = 'block';
+
+                if (user.guestPassUsed) {
+                    document.getElementById('passUsedWarning').style.display = 'block';
+                } else {
+                    document.getElementById('passUsedWarning').style.display = 'none';
+                }
+
+                document.getElementById('tabsContainer').style.display = 'flex';
+
+                if (settings.allowGuestFreeUID && !user.guestPassUsed) {
+                    document.getElementById('uidForm').style.display = 'block';
+                    document.getElementById('uidDisabledMsg').style.display = 'none';
+                } else {
+                    document.getElementById('uidForm').style.display = 'none';
+                    if (!settings.allowGuestFreeUID) {
+                        document.getElementById('uidDisabledMsg').style.display = 'block';
+                    }
+                }
+
+                if (settings.allowGuestFreeAimkill && !user.guestPassUsed) {
+                    document.getElementById('aimkillForm').style.display = 'block';
+                    document.getElementById('aimkillDisabledMsg').style.display = 'none';
+                    await loadAimkillPackages(settings.guestPassMaxDuration);
+                } else {
+                    document.getElementById('aimkillForm').style.display = 'none';
+                    if (!settings.allowGuestFreeAimkill) {
+                        document.getElementById('aimkillDisabledMsg').style.display = 'block';
+                    }
+                }
+
+                loadStoredKeys();
+
+                // Initialize social verification check
+                await checkSocialVerification();
+            } catch (error) {
+                console.error('Load dashboard error:', error);
+            }
+        }
+
+        loadGuestDashboard();
+    </script>
+</body>
+
+</html>

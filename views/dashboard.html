@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            background: #0f0f0f;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            border-bottom: 2px solid #FFFFFF;
+            padding: 3rem 2rem;
+            margin-bottom: 2.5rem;
+            border-radius: 8px;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            font-weight: 900;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
+        }
+
+        .hero-text p {
+            font-size: 16px;
+            color: #999;
+        }
+
+        .hero-text span {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .hero-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hero-stat {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 4px;
+        }
+
+        .hero-stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            color: #999;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .hero-stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #FFFFFF;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            border-color: #FFFFFF;
+            background: #222;
+            transform: translateY(-4px);
+        }
+
+        .card-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #AAAAAA;
+            letter-spacing: 1px;
+            margin-bottom: 0.75rem;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 1rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            text-align: center;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .action-btn:hover {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+        }
+
+        .management-section {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .management-section h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 1rem;
+        }
+
+        .management-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #ccc;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: #222;
+            border: 1px solid #333;
+            color: #FFFFFF;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: #2a2a2a;
+        }
+
+        .submit-btn {
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            width: 100%;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            background: #FFFFFF;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 1rem 0.5rem;
+                margin-bottom: 70px;
+            }
+
+            .hero-section {
+                padding: 1.5rem 1rem;
+            }
+
+            .hero-text h1 {
+                font-size: 1.5rem;
+            }
+
+            .hero-text p {
+                font-size: 13px;
+            }
+
+            .hero-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .hero-stat {
+                padding: 1rem;
+            }
+
+            .hero-stat-value {
+                font-size: 2rem;
+            }
+
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .management-section {
+                padding: 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-title {
+                font-size: 1.2rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-container {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .hero-text h1 {
+                font-size: 1.2rem;
+            }
+
+            .card-value {
+                font-size: 1.5rem;
+            }
+
+            .action-btn {
+                font-size: 11px;
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="hero-section">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>Welcome, <span id="username">User</span></h1>
+                    <p id="userTypeDesc">Manage your account and UIDs in one place</p>
+                </div>
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">Account Type</div>
+                        <div class="hero-stat-value" id="accountType">User</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-label">Available Credits</div>
+                        <div class="hero-stat-value" id="credits">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UID Manager Section -->
+        <div id="uidManagerSection" class="hidden">
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-label">Balance</div>
+                    <div class="card-value" id="creditCount">0</div>
+                    <div class="card-desc">Available for UID creation</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Status</div>
+                    <div class="card-value">Active</div>
+                    <div class="card-desc">All systems operational</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">2FA Security</div>
+                    <div class="card-value" id="securityStatus">Checking...</div>
+                    <div class="card-desc" id="securityDesc">Verifying status</div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <a href="/packages" class="action-btn">Create UID</a>
+                    <a href="/packages" class="action-btn">View Packages</a>
+                    <a href="/buy-credits" class="action-btn">Buy Credits</a>
+                </div>
+            </div>
+
+            <div class="management-section">
+                <h3>Delete UID</h3>
+                <p class="management-desc">Remove a UID from your account. This action cannot be undone.</p>
+                <div class="alert-box">
+                    Requirements: Two-Factor Authentication must be enabled. You can only delete your own UIDs.
+                </div>
+                <form class="delete-form" id="deleteUidForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>UID to Delete</label>
+                            <input type="text" id="deleteUid" placeholder="Enter UID" required pattern="[0-9]+">
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-btn" id="deleteBtn">Delete UID</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Aimkill Section -->
+        <div id="aimkillSection" class="hidden">
+            <div class="cards-grid">
+                <div class="card">
+                    <div class="card-label">Keys Balance</div>
+                    <div class="card-value" id="aimkillCredits">0</div>
+                    <div class="card-desc">Available for key creation</div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Status</div>
+                    <div class="card-value">Active</div>
+                    <div class="card-desc">All systems operational</div>
+                </div>
+            </div>
+
+            <div class="actions-section">
+                <h2 class="section-title">Quick Actions</h2>
+                <div class="actions-grid">
+                    <a href="/aimkill-packages" class="action-btn">Create Key</a>
+                    <a href="/aimkill-packages" class="action-btn">View Packages</a>
+                    <a href="/buy-credits" class="action-btn">Buy Credits</a>
+                </div>
+            </div>
+
+            <div class="management-section">
+                <h3>All Aimkill License Keys</h3>
+                <p class="management-desc">View and manage all your created Aimkill license keys.</p>
+                <div id="aimkillLicenseKeysTableContainer" style="margin-top: 1.5rem;">
+                    <!-- License keys will be loaded here -->
+                </div>
+            </div>
+
+            <div class="management-section">
+                <h3>All Aimkill User Accounts</h3>
+                <p class="management-desc">View and manage all your created Aimkill user accounts.</p>
+                <div id="aimkillKeysTableContainer" style="margin-top: 1.5rem;">
+                    <!-- User accounts will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/toast.js"></script>
+    <script>
+        async function check2FAStatus() {
+            try {
+                const response = await fetch('/api/2fa/status', { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    const statusEl = document.getElementById('securityStatus');
+                    const descEl = document.getElementById('securityDesc');
+
+                    if (data.enabled) {
+                        statusEl.textContent = 'Enabled';
+                        statusEl.style.color = '#FFFFFF';
+                        descEl.textContent = '2FA protection active';
+                    } else {
+                        statusEl.textContent = 'Disabled';
+                        statusEl.style.color = '#DC2626';
+                        descEl.textContent = 'Click to enable 2FA';
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to check 2FA:', error);
+            }
+        }
+
+        async function loadAimkillLicenseKeys() {
+            try {
+                const response = await fetch('/api/aimkill/license-keys', { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success && data.keys) {
+                    const container = document.getElementById('aimkillLicenseKeysTableContainer');
+
+                    if (data.keys.length === 0) {
+                        container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No license keys created yet</p>';
+                        return;
+                    }
+
+                    let html = `
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #333;">
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">LICENSE KEY</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">CREATED BY</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">STATUS</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">EXPIRES</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">TIME LEFT</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.keys.forEach(key => {
+                        const statusColor = key.status === 'active' ? '#10B981' : '#EF4444';
+
+                        html += `
+                            <tr style="border-bottom: 1px solid #333;">
+                                <td style="padding: 1rem; color: #e0e0e0; font-family: monospace;">${key.key}</td>
+                                <td style="padding: 1rem; color: #999;">${key.createdBy}</td>
+                                <td style="padding: 1rem; color: ${statusColor}; font-weight: 700; text-transform: capitalize;">${key.status}</td>
+                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', { 
+                                    year: 'numeric', 
+                                    month: '2-digit', 
+                                    day: '2-digit', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit',
+                                    hour12: false 
+                                })}</td>
+                                <td style="padding: 1rem; color: #999;">${key.timeLeft}</td>
+                                <td style="padding: 1rem;">
+                                    <button onclick="deleteLicenseKey('${key.key}')"
+                                        style="background: #EF4444; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading license keys:', error);
+                document.getElementById('aimkillLicenseKeysTableContainer').innerHTML =
+                    '<p style="color: #EF4444; text-align: center; padding: 2rem;">Failed to load license keys</p>';
+            }
+        }
+
+        async function loadAimkillKeys() {
+            try {
+                const response = await fetch('/api/aimkill/user-keys', { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success && data.keys) {
+                    const container = document.getElementById('aimkillKeysTableContainer');
+
+                    if (data.keys.length === 0) {
+                        container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No user accounts created yet</p>';
+                        return;
+                    }
+
+                    let html = `
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid #333;">
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">USERNAME</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">CREATED BY</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">STATUS</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">EXPIRES</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">TIME LEFT</th>
+                                    <th style="padding: 1rem; text-align: left; color: #fff; font-weight: 700;">ACTIONS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+
+                    data.keys.forEach(key => {
+                        const statusColor = key.status === 'active' ? '#10B981' : '#EF4444';
+
+                        html += `
+                            <tr style="border-bottom: 1px solid #333;">
+                                <td style="padding: 1rem; color: #e0e0e0; font-family: monospace;">${key.username}</td>
+                                <td style="padding: 1rem; color: #999;">${key.createdBy}</td>
+                                <td style="padding: 1rem; color: ${statusColor}; font-weight: 700; text-transform: capitalize;">${key.status}</td>
+                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', { 
+                                    year: 'numeric', 
+                                    month: '2-digit', 
+                                    day: '2-digit', 
+                                    hour: '2-digit', 
+                                    minute: '2-digit',
+                                    hour12: false 
+                                })}</td>
+                                <td style="padding: 1rem; color: #999;">${key.timeLeft}</td>
+                                <td style="padding: 1rem;">
+                                    <button onclick="deleteAimkillUserKey('${key.username}')"
+                                        style="background: #EF4444; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 700; text-transform: uppercase;">
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                }
+            } catch (error) {
+                console.error('Error loading Aimkill user accounts:', error);
+                document.getElementById('aimkillKeysTableContainer').innerHTML =
+                    '<p style="color: #EF4444; text-align: center; padding: 2rem;">Failed to load user accounts</p>';
+            }
+        }
+
+        async function deleteLicenseKey(key) {
+            if (!confirm(`Delete license key: ${key}?\n\nThis will delete the key from both the API and database.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/aimkill/delete-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message || 'License key deleted successfully');
+                    loadAimkillLicenseKeys();
+                    loadUserInfo();
+                } else {
+                    alert(data.error || 'Failed to delete key');
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+
+        async function deleteAimkillUserKey(username) {
+            if (!confirm(`Delete Aimkill account: ${username}?\n\nThis will delete the account from both the API and database.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/aimkill/delete-user-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message || 'Aimkill account deleted successfully');
+                    loadAimkillKeys();
+                    loadUserInfo(); // Refresh credits
+                } else {
+                    alert(data.error || 'Failed to delete account');
+                }
+            } catch (error) {
+                alert('Connection error: ' + error.message);
+            }
+        }
+
+        async function loadUserInfo() {
+            try {
+                const user = await fetchUser();
+                if (!user) return;
+                document.getElementById('username').textContent = user.username;
+                document.getElementById('credits').textContent = user.credits || 0;
+                document.getElementById('creditCount').textContent = user.credits || 0;
+                document.getElementById('aimkillCredits').textContent = user.credits || 0;
+
+                let accountTypeText = 'User';
+                if (user.isSuperAdmin) accountTypeText = 'Super Admin';
+                else if (user.isOwner) accountTypeText = 'Owner';
+                else if (user.isAdmin) accountTypeText = 'Admin';
+                else if (user.isGuest) accountTypeText = 'Guest';
+
+                document.getElementById('accountType').textContent = accountTypeText;
+
+                // Show/hide sections based on account type
+                const accountType = user.accountType || 'UID_MANAGER';
+
+                if (accountType === 'AIMKILL') {
+                    // Aimkill Account: Show Aimkill section ONLY
+                    document.getElementById('aimkillSection').classList.remove('hidden');
+                    document.getElementById('uidManagerSection').classList.add('hidden');
+                    document.getElementById('aimkillLink').classList.remove('nav-hidden');
+                    document.getElementById('packagesLink').classList.add('nav-hidden');
+                    document.getElementById('userTypeDesc').textContent = 'Manage your Aimkill license keys and user accounts';
+                    
+                    // Load Aimkill data
+                    loadAimkillLicenseKeys();
+                    loadAimkillKeys();
+                } else {
+                    // UID Manager Account: Show UID Manager section ONLY
+                    document.getElementById('uidManagerSection').classList.remove('hidden');
+                    document.getElementById('aimkillSection').classList.add('hidden');
+                    document.getElementById('packagesLink').classList.remove('nav-hidden');
+                    document.getElementById('aimkillLink').classList.add('nav-hidden');
+                    document.getElementById('userTypeDesc').textContent = 'Manage your account and UIDs in one place';
+                    
+                    // Check 2FA for UID accounts
+                    check2FAStatus();
+                }
+
+                if (user.isAdmin || user.isSuperAdmin || user.isOwner) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        // Load dashboard on page load
+        async function loadDashboard() {
+            await loadUserInfo();
+        }
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', loadDashboard);
+
+        // Delete UID Form
+        document.getElementById('deleteUidForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const uid = document.getElementById('deleteUid').value.trim();
+            const btn = document.getElementById('deleteBtn');
+
+            if (!/^[0-9]+$/.test(uid)) {
+                alert('UID must contain only numbers');
+                return;
+            }
+
+            if (!confirm(`Delete UID ${uid}?`)) return;
+
+            btn.disabled = true;
+            btn.textContent = 'Deleting...';
+
+            try {
+                const response = await fetch('/api/delete-uid', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid }),
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    alert('UID deleted!');
+                    document.getElementById('deleteUidForm').reset();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Failed to delete UID');
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Delete UID';
+            }
+        });
+
+        loadDashboard();
+    </script>
+</body>
+
+</html>

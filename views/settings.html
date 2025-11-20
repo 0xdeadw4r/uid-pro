@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Settings - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .settings-tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: #e0e0e0;
+        }
+
+        .tab-btn.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .activity-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            border: 1px solid #333;
+        }
+
+        .activity-time {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .activity-type {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            background: #FFFFFF;
+            color: #000;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .activity-type.login {
+            background: #FFFFFF;
+        }
+
+        .activity-type.uid-create {
+            background: #3B82F6;
+        }
+
+        .activity-type.credit {
+            background: #FFFFFF;
+        }
+
+        .api-config-section {
+            background: var(--surface-dark);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .api-config-section h4 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 0 0 1rem 0;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-size: 12px;
+            font-weight: 700;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-with-reveal {
+            position: relative;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            border: 1px solid #333;
+            border-radius: 6px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.05);
+            color: #e0e0e0;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group input::placeholder {
+            color: #666;
+        }
+
+        .input-group input[readonly] {
+            background: rgba(255, 255, 255, 0.02);
+            cursor: not-allowed;
+        }
+
+        .reveal-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .warning-box {
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 3px solid #FFFFFF;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 12px;
+            color: #e0e0e0;
+        }
+
+        .admin-section {
+            background: var(--surface-dark);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .admin-section h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #e0e0e0;
+            margin: 0 0 1rem 0;
+        }
+
+        .section-description {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 1rem;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+            font-size: 14px;
+            border: 1px solid #333;
+        }
+
+        .user-item span:first-child {
+            color: #999;
+            font-weight: 600;
+        }
+
+        .user-item span:last-child {
+            color: #FFFFFF;
+            font-weight: 700;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #999;
+        }
+
+        button[type="submit"] {
+            background: #FFFFFF;
+            color: #000;
+            padding: 0.9rem 2rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.3);
+            transition: all 0.2s;
+        }
+
+        button[type="submit"]:hover:not(:disabled) {
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 255, 255, 0.4);
+        }
+
+        button[type="submit"]:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        #passwordMessage,
+        #apiConfigMessage {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+
+        #passwordMessage.success,
+        #apiConfigMessage.success {
+            background: rgba(16, 185, 129, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        #passwordMessage.error,
+        #apiConfigMessage.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #FFFFFF;
+            border: 1px solid #FFFFFF;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 1rem;
+                margin-bottom: 70px;
+            }
+
+            .settings-tabs {
+                gap: 0.25rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab-btn {
+                padding: 0.65rem 0.9rem;
+                font-size: 11px;
+            }
+
+            .api-config-section,
+            .admin-section {
+                padding: 1.5rem;
+            }
+
+            .user-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .activity-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .activity-time {
+                font-size: 11px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 0.75rem;
+            }
+
+            .tab-btn {
+                padding: 0.6rem 0.75rem;
+                font-size: 10px;
+            }
+
+            .api-config-section,
+            .admin-section {
+                padding: 1.25rem;
+            }
+
+            .form-group input,
+            .form-group select {
+                font-size: 14px;
+            }
+
+            button[type="submit"] {
+                font-size: 12px;
+                padding: 0.8rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav>
+        <a href="/dashboard" class="nav-brand">
+            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+        </a>
+        <button class="mobile-menu-toggle">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        <div class="nav-links">
+            <a href="/dashboard">Dashboard</a>
+            <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
+            <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
+            <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
+            <a href="/buy-credits">Credits</a>
+            <a href="/invoices">Invoices</a>
+            <a href="/settings">Settings</a>
+            <a href="/security">Security</a>
+            <button id="themeToggle" onclick="toggleTheme()" aria-label="Toggle theme">🌙</button>
+            <button onclick="logout()">Logout</button>
+        </div>
+    </nav>
+
+    <script src="/js/notifications.js"></script>
+
+    <div class="container">
+        <div class="header">
+            <h2>Account Settings</h2>
+        </div>
+
+        <div class="settings-tabs">
+            <button class="tab-btn active" onclick="switchTab('activity')">Activity</button>
+            <button class="tab-btn" onclick="switchTab('login-history')">Login History</button>
+            <button class="tab-btn" id="apiConfigTab" onclick="switchTab('api-config')" style="display:none;">API
+                Configuration</button>
+            <button class="tab-btn" onclick="switchTab('account')">Account</button>
+        </div>
+
+        <!-- Activity Tab -->
+        <div id="activity-tab" class="tab-content active">
+            <div class="admin-section">
+                <h3>Recent Activity</h3>
+                <p class="section-description">Your recent actions and events</p>
+                <div id="activityList">
+                    <div class="empty-state">Loading activity...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login History Tab -->
+        <div id="login-history-tab" class="tab-content">
+            <div class="admin-section">
+                <h3>Login History</h3>
+                <p class="section-description">Track of all login sessions</p>
+                <div id="loginHistoryList">
+                    <div class="empty-state">Loading login history...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Configuration Tab (Admin Only) -->
+        <div id="api-config-tab" class="tab-content">
+            <div class="warning-box">
+                <strong>Warning:</strong> Changing these settings will affect all UID creation operations. Only modify
+                if you know what you're doing.
+            </div>
+
+            <div class="api-config-section">
+                <h4>API Endpoint Configuration</h4>
+                <form id="apiConfigForm">
+                    <div class="input-group">
+                        <label for="baseUrl">Base URL</label>
+                        <input type="url" id="baseUrl" placeholder="https://api.example.com/endpoint" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="apiKey">API Key</label>
+                        <div class="input-with-reveal">
+                            <input type="password" id="apiKey" placeholder="Enter API Key" required>
+                            <button type="button" class="reveal-btn" onclick="toggleApiKeyVisibility()">Show</button>
+                        </div>
+                    </div>
+
+                    <button type="submit" id="saveApiBtn">Save Configuration</button>
+                </form>
+                <div id="apiConfigMessage"></div>
+            </div>
+
+            <div class="api-config-section">
+                <h4>Current Configuration</h4>
+                <div class="input-group">
+                    <label>Base URL</label>
+                    <input type="text" id="currentBaseUrl" readonly>
+                </div>
+                <div class="input-group">
+                    <label>API Key</label>
+                    <div class="input-with-reveal">
+                        <input type="password" id="currentApiKey" readonly>
+                        <button type="button" class="reveal-btn" onclick="toggleCurrentApiKeyVisibility()">Show</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Account Tab -->
+        <div id="account-tab" class="tab-content">
+            <div class="admin-section">
+                <h3>Change Password</h3>
+                <form id="changePasswordForm">
+                    <div class="input-group">
+                        <label for="currentPassword">Current Password</label>
+                        <input type="password" id="currentPassword" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" minlength="6" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="confirmPassword">Confirm New Password</label>
+                        <input type="password" id="confirmPassword" minlength="6" required>
+                    </div>
+                    <button type="submit" id="changePasswordBtn">Change Password</button>
+                </form>
+                <div id="passwordMessage"></div>
+            </div>
+
+            <div class="admin-section">
+                <h3>Account Information</h3>
+                <div class="user-item">
+                    <span>Username</span>
+                    <span id="accountUsername">-</span>
+                </div>
+                <div class="user-item">
+                    <span>Account Type</span>
+                    <span id="accountType">-</span>
+                </div>
+                <div class="user-item">
+                    <span>Credits</span>
+                    <span id="accountCredits">-</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/main.js"></script>
+    <script src="/js/settings.js"></script>
+    <script>
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab-content');
+            const buttons = document.querySelectorAll('.tab-btn');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            buttons.forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName + '-tab').classList.add('active');
+            event.target.classList.add('active');
+
+            // Load API config when tab opens
+            if (tabName === 'api-config') {
+                loadCurrentApiConfig();
+            }
+        }
+
+        function toggleApiKeyVisibility() {
+            const apiKeyInput = document.getElementById('apiKey');
+            const btn = event.target;
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                apiKeyInput.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+
+        function toggleCurrentApiKeyVisibility() {
+            const apiKeyInput = document.getElementById('currentApiKey');
+            const btn = event.target;
+            if (apiKeyInput.type === 'password') {
+                apiKeyInput.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                apiKeyInput.type = 'password';
+                btn.textContent = 'Show';
+            }
+        }
+
+        async function loadCurrentApiConfig() {
+            try {
+                const response = await fetch('/api/admin/api-config', { credentials: 'include' });
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('currentBaseUrl').value = data.baseUrl || 'Not configured';
+                    document.getElementById('currentApiKey').value = data.apiKey || 'Not configured';
+                }
+            } catch (error) {
+                console.log('API config not available');
+                document.getElementById('currentBaseUrl').value = 'Not configured';
+                document.getElementById('currentApiKey').value = 'Not configured';
+            }
+        }
+
+        async function initSettingsPage() {
+            try {
+                const user = await fetchUser();
+
+                if (user.isAdmin || user.isSuperAdmin || user.isOwner || user.isLimitedAdmin) {
+                    document.getElementById('adminLink').style.display = 'block';
+                }
+
+                // Only main super admin (username: admin) can see API Configuration
+                if (user.username === 'admin') {
+                    document.getElementById('apiConfigTab').style.display = 'block';
+                }
+
+                document.getElementById('accountUsername').textContent = user.username;
+                document.getElementById('accountCredits').textContent = user.credits;
+
+                let accountType = 'User';
+                if (user.isSuperAdmin) {
+                    accountType = 'Super Administrator';
+                } else if (user.isOwner) {
+                    accountType = 'Owner';
+                } else if (user.isLimitedAdmin) {
+                    accountType = 'Limited Admin';
+                } else if (user.isAdmin) {
+                    accountType = 'Administrator';
+                } else if (user.isGuest) {
+                    accountType = 'Guest';
+                }
+                document.getElementById('accountType').textContent = accountType;
+            } catch (error) {
+                console.error('Failed to load user info:', error);
+            }
+        }
+
+        document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const btn = document.getElementById('changePasswordBtn');
+
+            if (newPassword !== confirmPassword) {
+                const msg = document.getElementById('passwordMessage');
+                msg.textContent = 'Passwords do not match';
+                msg.className = 'error';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Changing...';
+
+            try {
+                const response = await fetch('/api/change-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword, newPassword }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+                const msg = document.getElementById('passwordMessage');
+
+                if (response.ok) {
+                    msg.textContent = 'Password changed successfully!';
+                    msg.className = 'success';
+                    document.getElementById('changePasswordForm').reset();
+                } else {
+                    msg.textContent = data.error || 'Failed to change password';
+                    msg.className = 'error';
+                }
+            } catch (error) {
+                const msg = document.getElementById('passwordMessage');
+                msg.textContent = 'Connection error';
+                msg.className = 'error';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Change Password';
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', initSettingsPage);
+    </script>
+</body>
+
+</html>
