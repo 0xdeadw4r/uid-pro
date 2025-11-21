@@ -409,7 +409,10 @@ router.get('/api/admin/clients', isAdminOrOwner, async (req, res) => {
 // Admin: Create client
 router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
     try {
-        const { username, password, productKey, assignedUsername, assignedUid, notes, customDownloadLink } = req.body;
+        const { 
+            username, password, productKey, assignedUsername, assignedUid, notes, customDownloadLink,
+            createGenzAuthAccount, genzAuthUsername, genzAuthPassword, genzAuthDuration
+        } = req.body;
 
         if (!username || !password || !productKey) {
             return res.status(400).json({ error: 'Username, password, and product are required' });
@@ -432,11 +435,39 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             return res.status(401).json({ error: 'Admin user not found' });
         }
 
+        let genzAuthCreated = false;
+        let genzAuthError = null;
+        let finalAssignedUsername = assignedUsername || null;
+
+        // Create GenzAuth account if requested
+        if (createGenzAuthAccount && genzAuthUsername && genzAuthPassword) {
+            try {
+                const genzauth = require('../services/genzauth');
+                const duration = parseInt(genzAuthDuration) || 30;
+                
+                console.log(`📝 Creating GenzAuth account: ${genzAuthUsername} (${duration}d)`);
+                
+                const result = await genzauth.createUser(genzAuthUsername, genzAuthPassword, duration);
+                
+                if (result.success) {
+                    console.log(`✅ GenzAuth account created: ${genzAuthUsername}`);
+                    genzAuthCreated = true;
+                    finalAssignedUsername = genzAuthUsername;
+                } else {
+                    console.error(`❌ GenzAuth creation failed: ${result.error || result.message}`);
+                    genzAuthError = result.error || result.message || 'Failed to create GenzAuth account';
+                }
+            } catch (error) {
+                console.error('❌ GenzAuth API error:', error);
+                genzAuthError = error.message;
+            }
+        }
+
         const newClient = await Client.create({
             username: username.toLowerCase(),
             password,
             productKey,
-            assignedUsername: assignedUsername || null,
+            assignedUsername: finalAssignedUsername,
             assignedUid: assignedUid || null,
             notes: notes || null,
             customDownloadLink: customDownloadLink || null,
@@ -447,7 +478,7 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             hwidResetCount: 0
         });
 
-        res.json({
+        const response = {
             success: true,
             message: 'Client created successfully',
             client: {
@@ -455,8 +486,16 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
                 username: newClient.username,
                 productKey: newClient.productKey,
                 productDisplayName: product.displayName
-            }
-        });
+            },
+            genzAuthCreated
+        };
+
+        if (genzAuthError) {
+            response.genzAuthError = genzAuthError;
+            response.message += ` (GenzAuth account creation failed: ${genzAuthError})`;
+        }
+
+        res.json(response);
     } catch (error) {
         console.error('Create client error:', error);
         res.status(500).json({ error: 'Failed to create client' });

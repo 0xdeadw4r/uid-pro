@@ -1160,6 +1160,36 @@
                         <textarea id="newClientNotes" rows="2" placeholder="Additional notes about this client"></textarea>
                     </div>
 
+                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px;">
+                        <label style="display: flex; align-items: center; cursor: pointer; color: #3B82F6;">
+                            <input type="checkbox" id="createGenzAuthAccount" style="margin-right: 0.5rem;" onchange="toggleGenzAuthFields()">
+                            <span style="font-weight: 700;">Create GenzAuth Account (Simultaneous Login)</span>
+                        </label>
+                        <p style="color: #999; font-size: 0.75rem; margin: 0.5rem 0 0 1.5rem;">
+                            Creates a username/password account in GenzAuth system for game access with same duration as client account.
+                        </p>
+
+                        <div id="genzAuthFieldsContainer" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59, 130, 246, 0.2);">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                                <div class="form-group">
+                                    <label>GenzAuth Username</label>
+                                    <input type="text" id="genzAuthUsername" placeholder="game_username">
+                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Username for game login</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>GenzAuth Password</label>
+                                    <input type="password" id="genzAuthPassword" placeholder="Secure password">
+                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Password for game login</p>
+                                </div>
+                                <div class="form-group">
+                                    <label>Duration (Days)</label>
+                                    <input type="number" id="genzAuthDuration" placeholder="30" value="30" min="1">
+                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Account duration in days</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <button class="success-btn" onclick="createClient()" style="margin-top: 1rem; width: 100%;">Create Client</button>
                 </div>
 
@@ -2568,7 +2598,7 @@
                             <button onclick="toggleClientStatus('${client._id}', ${!client.isActive})" class="${client.isActive ? 'warning-btn' : 'success-btn'}" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                 ${client.isActive ? 'Disable' : 'Enable'}
                             </button>
-                            <button onclick="editClientDownloadLink('${client._id}', '${client.productType}')" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <button onclick="editClientDownloadLink('${client._id}', '${client.productKey}')" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                 Edit Link
                             </button>
                             <button onclick="deleteClient('${client._id}', '${client.username}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
@@ -2578,21 +2608,22 @@
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.85rem;">
-                        ${client.productType === 'AIMKILL' ? `
+                        ${client.assignedUsername ? `
                         <div>
                             <span style="color: #999;">Assigned Account:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.assignedUsername || 'N/A'}</span>
+                            <span style="color: #fff; font-weight: 500;">${client.assignedUsername}</span>
                         </div>
                         <div>
                             <span style="color: #999;">HWID Resets:</span>
                             <span style="color: #fff; font-weight: 500;">${client.hwidResetCount || 0}</span>
                         </div>
-                        ` : `
+                        ` : ''}
+                        ${client.assignedUid ? `
                         <div>
                             <span style="color: #999;">Assigned UID:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.assignedUid || 'N/A'}</span>
+                            <span style="color: #fff; font-weight: 500;">${client.assignedUid}</span>
                         </div>
-                        `}
+                        ` : ''}
                         <div>
                             <span style="color: #999;">Last Login:</span>
                             <span style="color: #fff; font-weight: 500;">${client.lastLogin ? new Date(client.lastLogin).toLocaleString() : 'Never'}</span>
@@ -2609,12 +2640,18 @@
 
                     <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 0.85rem;">
                         <span style="color: #999;">Download Link:</span>
-                        <span style="color: #5865f2; word-break: break-all;">${client.downloadLinks[client.productType === 'AIMKILL' ? 'aimkill' : 'uidBypass'] || 'Not set'}</span>
+                        <span style="color: #5865f2; word-break: break-all;">${client.customDownloadLink || (client.product ? client.product.downloadLink : '') || 'Not set'}</span>
                     </div>
                 </div>
             `).join('');
 
             container.innerHTML = html;
+        }
+
+        function toggleGenzAuthFields() {
+            const checkbox = document.getElementById('createGenzAuthAccount');
+            const container = document.getElementById('genzAuthFieldsContainer');
+            container.style.display = checkbox.checked ? 'block' : 'none';
         }
 
         async function createClient() {
@@ -2625,32 +2662,55 @@
             const assignedUid = document.getElementById('newClientAssignedUid')?.value.trim() || '';
             const notes = document.getElementById('newClientNotes')?.value.trim() || '';
 
+            const createGenzAuth = document.getElementById('createGenzAuthAccount')?.checked || false;
+            const genzAuthUsername = document.getElementById('genzAuthUsername')?.value.trim() || '';
+            const genzAuthPassword = document.getElementById('genzAuthPassword')?.value || '';
+            const genzAuthDuration = document.getElementById('genzAuthDuration')?.value || '30';
+
             if (!username || !password || !productKey) {
                 showMessage('Please fill in username, password, and select a product', 'error', 'createClientMessage');
                 return;
             }
 
+            if (createGenzAuth && (!genzAuthUsername || !genzAuthPassword)) {
+                showMessage('Please fill in GenzAuth username and password', 'error', 'createClientMessage');
+                return;
+            }
+
             try {
+                const requestBody = {
+                    username,
+                    password,
+                    productKey,
+                    assignedUsername,
+                    assignedUid,
+                    notes
+                };
+
+                if (createGenzAuth) {
+                    requestBody.createGenzAuthAccount = true;
+                    requestBody.genzAuthUsername = genzAuthUsername;
+                    requestBody.genzAuthPassword = genzAuthPassword;
+                    requestBody.genzAuthDuration = parseInt(genzAuthDuration);
+                }
+
                 const response = await fetch('/client/api/admin/clients', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     credentials: 'include',
-                    body: JSON.stringify({
-                        username,
-                        password,
-                        productKey,
-                        assignedUsername,
-                        assignedUid,
-                        notes
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    showMessage('Client created successfully!', 'success', 'createClientMessage');
+                    let message = 'Client created successfully!';
+                    if (data.genzAuthCreated) {
+                        message += ` GenzAuth account created: ${genzAuthUsername}`;
+                    }
+                    showMessage(message, 'success', 'createClientMessage');
 
                     document.getElementById('newClientUsername').value = '';
                     document.getElementById('newClientPassword').value = '';
@@ -2658,6 +2718,11 @@
                     if (document.getElementById('newClientAssignedUsername')) document.getElementById('newClientAssignedUsername').value = '';
                     if (document.getElementById('newClientAssignedUid')) document.getElementById('newClientAssignedUid').value = '';
                     if (document.getElementById('newClientNotes')) document.getElementById('newClientNotes').value = '';
+                    if (document.getElementById('createGenzAuthAccount')) document.getElementById('createGenzAuthAccount').checked = false;
+                    if (document.getElementById('genzAuthUsername')) document.getElementById('genzAuthUsername').value = '';
+                    if (document.getElementById('genzAuthPassword')) document.getElementById('genzAuthPassword').value = '';
+                    if (document.getElementById('genzAuthDuration')) document.getElementById('genzAuthDuration').value = '30';
+                    toggleGenzAuthFields();
 
                     loadClients();
                 } else {

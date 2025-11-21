@@ -17,7 +17,8 @@ const clientSchema = new mongoose.Schema({
     // Product Reference
     productKey: {
         type: String,
-        required: true
+        required: false,
+        default: 'UID_BYPASS'
     },
 
     // Legacy Product Type (for backward compatibility)
