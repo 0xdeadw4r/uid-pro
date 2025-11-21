@@ -281,19 +281,16 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
+                    credentials: 'include',
                     body: JSON.stringify({ username, password }),
                 });
 
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    showSuccess('Login successful! Redirecting...');
-                    console.log('✅ Login successful, session data:', data.debug);
-                    
-                    // Wait for session to fully save, then redirect
-                    setTimeout(() => {
-                        window.location.replace(data.redirectUrl || '/client/dashboard');
-                    }, 1000);
+                    loginBtn.textContent = 'REDIRECTING...';
+                    // Immediate redirect - session is already saved
+                    window.location.href = '/client/dashboard';
                 } else {
                     showError(data.error || 'Login failed. Please try again.');
                     loginBtn.disabled = false;

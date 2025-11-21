@@ -124,34 +124,29 @@ router.post('/api/login', async (req, res) => {
         client.lastLogin = new Date();
         await client.save();
         
-        // Set session data directly (no regeneration needed)
+        // Set session data - using same pattern as admin login
         req.session.clientId = client._id;
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Save the session and send response
+        // Save session with callback - same pattern as admin login
         req.session.save((err) => {
             if (err) {
                 console.error('❌ Session save error:', err);
-                return res.status(500).json({ error: 'Session error. Please try again.' });
+                return res.status(500).json({ error: 'Session error' });
             }
             
-            console.log('✅ Session saved successfully');
+            console.log('✅ Client session saved successfully');
             console.log('   Session ID:', req.sessionID);
             console.log('   Client ID:', req.session.clientId);
             console.log('   Client Username:', req.session.clientUsername);
             console.log('   isClient flag:', req.session.isClient);
             
-            // Send success response
             res.json({ 
                 success: true, 
                 message: 'Login successful',
-                redirectUrl: '/client/dashboard',
-                debug: {
-                    sessionId: req.sessionID,
-                    clientId: req.session.clientId.toString(),
-                    clientUsername: req.session.clientUsername
-                }
+                username: client.username,
+                redirectUrl: '/client/dashboard'
             });
         });
         
