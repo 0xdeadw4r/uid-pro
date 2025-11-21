@@ -865,7 +865,7 @@
             <div class="section">
                 <h2>API-Generated Keys</h2>
                 <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
-                    View and manage all API-generated user:pass pairs. These are stored separately from actual user accounts.
+                    View and manage all API-generated user:pass pairs. These are stored separately from user accounts.
                 </p>
                 <div class="button-group">
                     <button class="secondary-btn" onclick="loadApiKeys()">Refresh List</button>
@@ -942,12 +942,12 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                     <div class="form-group">
                         <label>Product Key (e.g., NEW_PRODUCT)</label>
-                        <input type="text" id="newProductKey" placeholder="NEW_PRODUCT" 
+                        <input type="text" id="newProductKey" placeholder="NEW_PRODUCT"
                             style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                     </div>
                     <div class="form-group">
                         <label>Display Name</label>
-                        <input type="text" id="newProductDisplayName" placeholder="New Product" 
+                        <input type="text" id="newProductDisplayName" placeholder="New Product"
                             style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                     </div>
                 </div>
@@ -958,12 +958,12 @@
                 </div>
                 <div class="form-group">
                     <label>GenzAuth Seller Key (Optional)</label>
-                    <input type="password" id="newProductGenzauth" placeholder="Enter GenzAuth seller key for this product" 
+                    <input type="password" id="newProductGenzauth" placeholder="Enter GenzAuth seller key for this product"
                         style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                 </div>
                 <div class="form-group">
                     <label>Download Link (Optional)</label>
-                    <input type="url" id="newProductDownloadLink" placeholder="https://example.com/download" 
+                    <input type="url" id="newProductDownloadLink" placeholder="https://example.com/download"
                         style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                 </div>
                 <div class="settings-list" style="margin: 1rem 0;">
@@ -1300,7 +1300,7 @@
                             <div class="setting-info" style="width: 100%;">
                                 <label class="setting-title">YouTube Channel URL</label>
                                 <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your YouTube channel URL for subscribers</p>
-                                <input type="url" id="youtubeChannelUrl" placeholder="https://youtube.com/@yourchannel" 
+                                <input type="url" id="youtubeChannelUrl" placeholder="https://youtube.com/@yourchannel"
                                     onchange="saveGuestSettings()"
                                     style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
                             </div>
@@ -1310,7 +1310,7 @@
                             <div class="setting-info" style="width: 100%;">
                                 <label class="setting-title">Instagram Profile URL</label>
                                 <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your Instagram profile URL for followers</p>
-                                <input type="url" id="instagramProfileUrl" placeholder="https://instagram.com/yourprofile" 
+                                <input type="url" id="instagramProfileUrl" placeholder="https://instagram.com/yourprofile"
                                     onchange="saveGuestSettings()"
                                     style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
                             </div>
@@ -2038,7 +2038,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    document.getElementById('verifiedUsersTableContainer').innerHTML = 
+                    document.getElementById('verifiedUsersTableContainer').innerHTML =
                         '<p style="color: #999;">Error loading verified users</p>';
                     return;
                 }
@@ -2047,9 +2047,9 @@
 
                 // Update stats
                 document.getElementById('totalVerifiedUsers').textContent = users.length;
-                document.getElementById('totalVerifiedGuests').textContent = 
+                document.getElementById('totalVerifiedGuests').textContent =
                     users.filter(u => u.isGuest).length;
-                document.getElementById('totalVerifiedRegular').textContent = 
+                document.getElementById('totalVerifiedRegular').textContent =
                     users.filter(u => !u.isGuest).length;
 
                 let html = `
@@ -2072,16 +2072,16 @@
                     html += '<tr><td colspan="6" style="text-align: center; color: #999;">No verified users found</td></tr>';
                 } else {
                     users.forEach(user => {
-                        const userType = user.isGuest ? 
-                            '<span class="badge-warning">Guest</span>' : 
+                        const userType = user.isGuest ?
+                            '<span class="badge-warning">Guest</span>' :
                             '<span class="badge-success">Regular</span>';
-                        const verifiedDate = user.discordVerifiedAt ? 
-                            new Date(user.discordVerifiedAt).toLocaleString() : 
+                        const verifiedDate = user.discordVerifiedAt ?
+                            new Date(user.discordVerifiedAt).toLocaleString() :
                             'Unknown';
 
                         // Social verification status
-                        const socialVerified = (user.youtubeSubscribed && user.instagramFollowed) ? 
-                            '<span class="status-verified">✓ Yes</span>' : 
+                        const socialVerified = (user.youtubeSubscribed && user.instagramFollowed) ?
+                            '<span class="status-verified">✓ Yes</span>' :
                             '<span class="status-unverified">✗ No</span>';
 
                         html += `
@@ -2109,7 +2109,7 @@
                 document.getElementById('verifiedUsersTableContainer').innerHTML = html;
             } catch (error) {
                 console.error('Error loading verified users:', error);
-                document.getElementById('verifiedUsersTableContainer').innerHTML = 
+                document.getElementById('verifiedUsersTableContainer').innerHTML =
                     '<p style="color: #999;">Error loading verified users</p>';
             }
         }
@@ -2413,7 +2413,7 @@
                 const packageCount = Object.keys(product.packages || {}).length;
                 const hasGenzauth = product.genzauthSellerKey && product.genzauthSellerKey.length > 0;
                 const hasDownloadLink = product.downloadLink && product.downloadLink.length > 0;
-                
+
                 html += `
                     <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -2530,26 +2530,26 @@
                     credentials: 'include'
                 });
                 const productsData = await productsResponse.json();
-                
+
                 if (productsData.success && productsData.products) {
                     const productSelect = document.getElementById('newClientProduct');
                     productSelect.innerHTML = '<option value="">Select a product...</option>';
                     productsData.products.forEach(product => {
                         productSelect.innerHTML += `<option value="${product.productKey}" data-key="${product.productKey}">${product.displayName}</option>`;
                     });
-                    
+
                     // Add change handler to show/hide fields
                     productSelect.addEventListener('change', function() {
                         const selectedOption = this.options[this.selectedIndex];
                         const productKey = selectedOption.getAttribute('data-key');
-                        
+
                         const aimkillField = document.getElementById('aimkillUsernameField');
                         const uidField = document.getElementById('uidBypassUidField');
-                        
+
                         // Hide both fields first
                         aimkillField.style.display = 'none';
                         uidField.style.display = 'none';
-                        
+
                         // Show relevant field based on product
                         if (productKey === 'AIMKILL') {
                             aimkillField.style.display = 'block';
@@ -2558,7 +2558,7 @@
                         }
                     });
                 }
-                
+
                 // Load clients
                 const response = await fetch('/client/admin/clients', {
                     credentials: 'include'
@@ -2694,7 +2694,7 @@
                     requestBody.genzAuthDuration = parseInt(genzAuthDuration);
                 }
 
-                const response = await fetch('/client/api/admin/clients', {
+                const response = await fetch('/client/admin/clients', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
