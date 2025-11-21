@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const bcrypt = require('bcrypt');
 const Client = require('../models/Client');
 const User = require('../models/User');
 const genzauth = require('../services/genzauth');
@@ -82,9 +83,21 @@ router.post('/api/login', async (req, res) => {
         console.log('Login attempt for client:', username);
         console.log('Stored password:', `"${client.password}"`);
         console.log('Entered password:', `"${password}"`);
-        console.log('Passwords match:', client.password === password);
         
-        if (client.password !== password) {
+        // Check if password is hashed (bcrypt) or plain text
+        let passwordMatches = false;
+        
+        if (client.password.startsWith('$2b$') || client.password.startsWith('$2a$')) {
+            // Password is hashed - use bcrypt to compare
+            passwordMatches = await bcrypt.compare(password, client.password);
+            console.log('Using bcrypt comparison:', passwordMatches);
+        } else {
+            // Password is plain text - direct comparison
+            passwordMatches = client.password === password;
+            console.log('Using direct comparison:', passwordMatches);
+        }
+        
+        if (!passwordMatches) {
             console.log('❌ Password mismatch for client:', username);
             return res.status(401).json({ error: 'Invalid username or password' });
         }
