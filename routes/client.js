@@ -7,9 +7,15 @@ const genzauth = require('../services/genzauth');
 
 // Middleware to check if user is a client
 const isClient = (req, res, next) => {
-    if (req.session && req.session.clientId) {
+    console.log('🔍 Client auth check - Session ID:', req.sessionID);
+    console.log('🔍 Client auth check - Session data:', req.session);
+    
+    if (req.session && req.session.clientId && req.session.isClient) {
+        console.log('✅ Client authenticated:', req.session.clientUsername);
         return next();
     }
+    
+    console.log('❌ Client not authenticated, redirecting to login');
     res.redirect('/client/login');
 };
 
@@ -115,21 +121,33 @@ router.post('/api/login', async (req, res) => {
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Save session and wait for it to be committed
-        req.session.save((err) => {
+        // Force session regeneration to ensure fresh session ID
+        req.session.regenerate((err) => {
             if (err) {
-                console.error('Session save error:', err);
-                return res.status(500).json({ error: 'Session save failed' });
+                console.error('Session regenerate error:', err);
+                return res.status(500).json({ error: 'Session error' });
             }
             
-            console.log('Session saved successfully for client:', username);
-            console.log('Session ID:', req.sessionID);
-            console.log('Session data:', req.session);
+            // Re-set session data after regeneration
+            req.session.clientId = client._id;
+            req.session.clientUsername = client.username;
+            req.session.isClient = true;
             
-            res.json({ 
-                success: true, 
-                message: 'Login successful',
-                redirectUrl: '/client/dashboard'
+            // Save session and wait for it to be committed
+            req.session.save((saveErr) => {
+                if (saveErr) {
+                    console.error('Session save error:', saveErr);
+                    return res.status(500).json({ error: 'Session save failed' });
+                }
+                
+                console.log('✅ Session saved for client:', username);
+                console.log('Session ID:', req.sessionID);
+                
+                res.json({ 
+                    success: true, 
+                    message: 'Login successful',
+                    redirectUrl: '/client/dashboard'
+                });
             });
         });
         

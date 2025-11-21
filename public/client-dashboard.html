@@ -644,7 +644,10 @@
             }
         }
 
-        loadClientData();
+        // Wait a bit for session to be fully established
+        setTimeout(() => {
+            loadClientData();
+        }, 500);
     </script>
 </body>
 </html>
