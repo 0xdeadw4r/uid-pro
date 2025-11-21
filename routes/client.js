@@ -29,12 +29,7 @@ const isClient = (req, res, next) => {
     }
     
     // For page requests, redirect to login (but not if already on login page)
-    if (req.path !== '/login') {
-        return res.redirect('/client/login');
-    }
-    
-    // If on login page, just continue
-    next();
+    return res.redirect('/client/login');
 };
 
 // Middleware to check if user is admin/owner
@@ -129,20 +124,7 @@ router.post('/api/login', async (req, res) => {
         client.lastLogin = new Date();
         await client.save();
         
-        // Regenerate session to ensure clean state (prevents stale session data)
-        await new Promise((resolve, reject) => {
-            req.session.regenerate((err) => {
-                if (err) {
-                    console.error('❌ Session regenerate error:', err);
-                    reject(err);
-                } else {
-                    console.log('✅ Session regenerated');
-                    resolve();
-                }
-            });
-        });
-        
-        // Set session data after regeneration
+        // Set session data directly (no regeneration needed)
         req.session.clientId = client._id;
         req.session.clientUsername = client.username;
         req.session.isClient = true;

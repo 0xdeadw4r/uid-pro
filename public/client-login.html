@@ -290,10 +290,10 @@
                     showSuccess('Login successful! Redirecting...');
                     console.log('✅ Login successful, session data:', data.debug);
                     
-                    // Wait a bit longer for session to fully save, then redirect
+                    // Wait for session to fully save, then redirect
                     setTimeout(() => {
                         window.location.replace(data.redirectUrl || '/client/dashboard');
-                    }, 500);
+                    }, 1000);
                 } else {
                     showError(data.error || 'Login failed. Please try again.');
                     loginBtn.disabled = false;
