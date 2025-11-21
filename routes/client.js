@@ -10,14 +10,22 @@ const isClient = (req, res, next) => {
     console.log('isClient middleware - Session:', {
         hasSession: !!req.session,
         clientId: req.session?.clientId,
-        clientUsername: req.session?.clientUsername
+        clientUsername: req.session?.clientUsername,
+        path: req.path
     });
     
     if (req.session && req.session.clientId) {
         return next();
     }
     
-    console.log('❌ Client not authenticated, redirecting to login');
+    console.log('❌ Client not authenticated');
+    
+    // If it's an API request, return JSON error instead of redirect
+    if (req.path.startsWith('/api/')) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    // For page requests, redirect to login
     res.redirect('/client/login');
 };
 
