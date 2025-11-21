@@ -305,7 +305,7 @@
         <div id="downloadTab" class="tab-content active">
             <h2>Download Files</h2>
             <div id="downloadAlert" class="alert"></div>
-            
+
             <div class="info-card">
                 <div class="info-row">
                     <span class="info-label">Product Type:</span>
@@ -389,10 +389,27 @@
             const alert = document.getElementById(elementId);
             alert.className = `alert alert-${type} show`;
             alert.textContent = message;
-            
+
             setTimeout(() => {
                 alert.classList.remove('show');
             }, 5000);
+        }
+
+        // Helper function to show error messages
+        function showError(message) {
+            showAlert('downloadAlert', message, 'error');
+            // Also try to show error in reset alert if visible
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'error');
+            }
+        }
+
+        // Helper function to show success messages
+        function showSuccess(message) {
+            showAlert('downloadAlert', message, 'success');
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'success');
+            }
         }
 
         async function loadClientData() {
@@ -404,11 +421,11 @@
                     clientData = data.client;
                     updateUI();
                 } else {
-                    showAlert('downloadAlert', 'Failed to load client data', 'error');
+                    showError(data.error || 'Failed to load client data');
                 }
             } catch (error) {
                 console.error('Load client data error:', error);
-                showAlert('downloadAlert', 'Error loading client data', 'error');
+                showError('Error loading client data');
             }
         }
 
@@ -418,7 +435,7 @@
             document.getElementById('headerUsername').textContent = clientData.username;
             document.getElementById('headerProductType').textContent = clientData.productType;
             document.getElementById('productType').textContent = clientData.productType;
-            
+
             const lastLogin = clientData.lastLogin ? new Date(clientData.lastLogin).toLocaleString() : 'Never';
             document.getElementById('lastLogin').textContent = lastLogin;
 
@@ -426,13 +443,21 @@
             if (clientData.productType === 'AIMKILL') {
                 document.getElementById('resetTabButton').style.display = 'block';
                 document.getElementById('assignedUsername').textContent = clientData.assignedUsername || 'Not assigned';
-                
+
                 const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
                 document.getElementById('lastHwidReset').textContent = lastReset;
                 document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
+            } else if (clientData.productType === 'UID_BYPASS') {
+                // Hide reset tab and show UID bypass creation card
+                document.getElementById('resetTabButton').style.display = 'none';
+                document.getElementById('uidBypassCard').style.display = 'block';
+                 // If currently on reset tab, switch to download tab
+                if (document.getElementById('resetTab').classList.contains('active')) {
+                    showTab('download');
+                }
             } else {
                 document.getElementById('resetTabButton').style.display = 'none';
-                // If currently on reset tab, switch to download tab
+                 // If currently on reset tab, switch to download tab
                 if (document.getElementById('resetTab').classList.contains('active')) {
                     showTab('download');
                 }
@@ -454,12 +479,12 @@
             if (!clientData) return;
 
             if (clientData.productType !== 'AIMKILL') {
-                showAlert('resetAlert', 'HWID reset is only available for Aimkill clients', 'error');
+                showError('HWID reset is only available for Aimkill clients');
                 return;
             }
 
             if (!clientData.assignedUsername) {
-                showAlert('resetAlert', 'No assigned username configured. Please contact your administrator.', 'error');
+                showError('No assigned username configured. Please contact your administrator.');
                 return;
             }
 
@@ -482,17 +507,17 @@
                 const data = await response.json();
 
                 if (response.ok && data.success) {
-                    showAlert('resetAlert', data.message, 'success');
-                    
+                    showSuccess(data.message);
+
                     clientData.hwidResetCount = data.resetCount;
                     clientData.lastHwidReset = data.lastReset;
                     updateUI();
                 } else {
-                    showAlert('resetAlert', data.error || 'HWID reset failed', 'error');
+                    showError(data.error || 'HWID reset failed');
                 }
             } catch (error) {
                 console.error('Reset HWID error:', error);
-                showAlert('resetAlert', 'Error resetting HWID. Please try again.', 'error');
+                showError('Error resetting HWID. Please try again.');
             } finally {
                 resetButton.disabled = false;
                 resetButton.textContent = '🔄 Reset HWID';
@@ -518,6 +543,53 @@
             }
         }
 
+        // UID Bypass Account Creation Handler
+        document.getElementById('createUidBypassForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const uid = document.getElementById('uidBypassUid').value.trim();
+            const duration = document.getElementById('uidBypassDuration').value;
+            const createBtn = document.getElementById('createUidBypassBtn');
+
+            if (!/^\d+$/.test(uid)) {
+                showError('UID must contain only numbers');
+                return;
+            }
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+
+            try {
+                const response = await fetch('/client/api/create-uid-bypass', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ uid, duration })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    document.getElementById('uidBypassResult').style.display = 'block';
+                    document.getElementById('uidBypassDetails').innerHTML = `
+                        <strong>UID:</strong> ${data.uid}<br>
+                        <strong>Duration:</strong> ${data.duration} days<br>
+                        <strong>Expires:</strong> ${new Date(data.expiresAt).toLocaleString()}
+                    `;
+                    document.getElementById('createUidBypassForm').reset();
+                    showSuccess('UID Bypass account created successfully!');
+                } else {
+                    showError(data.error || 'Failed to create UID Bypass account');
+                }
+            } catch (error) {
+                console.error('Error creating UID Bypass account:', error);
+                showError('Failed to create UID Bypass account');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = '✨ Create Account';
+            }
+        });
+
+        // Load client info on page load
         loadClientData();
     </script>
 </body>

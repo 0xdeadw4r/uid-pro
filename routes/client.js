@@ -130,6 +130,86 @@ router.get('/api/info', isClient, async (req, res) => {
     }
 });
 
+// Create UID Bypass Account
+router.post('/api/create-uid-bypass', isClient, async (req, res) => {
+    try {
+        const { uid, duration } = req.body;
+        const client = await Client.findById(req.session.clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        if (!client.isActive) {
+            return res.status(403).json({ error: 'Account is disabled' });
+        }
+        
+        // Only UID_BYPASS clients can use this endpoint
+        if (client.productType !== 'UID_BYPASS') {
+            return res.status(403).json({ error: 'This feature is only available for UID Bypass clients' });
+        }
+        
+        // Validate inputs
+        if (!uid || !duration) {
+            return res.status(400).json({ error: 'UID and duration are required' });
+        }
+        
+        if (!/^\d+$/.test(uid)) {
+            return res.status(400).json({ error: 'UID must contain only numbers' });
+        }
+        
+        const durationDays = parseInt(duration);
+        if (![1, 3, 7, 15, 30].includes(durationDays)) {
+            return res.status(400).json({ error: 'Invalid duration' });
+        }
+        
+        // Import required models
+        const UID = require('../models/UID');
+        const axios = require('axios');
+        
+        // Check if UID already exists
+        const existingUID = await UID.findOne({ uid });
+        if (existingUID) {
+            return res.status(400).json({ error: 'UID already exists' });
+        }
+        
+        // Calculate hours and expiry
+        const hours = durationDays * 24;
+        const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
+        
+        // Call the UID Bypass API
+        const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=create&uid=${uid}&duration=${hours}`;
+        
+        try {
+            await axios.post(apiUrl, {}, { timeout: 10000 });
+        } catch (apiError) {
+            console.error('UID Bypass API error:', apiError.message);
+            return res.status(500).json({ error: 'Failed to create UID in bypass system' });
+        }
+        
+        // Create UID record
+        await UID.create({
+            uid,
+            duration: hours,
+            createdBy: client.username,
+            expiresAt,
+            status: 'active'
+        });
+        
+        res.json({
+            success: true,
+            message: 'UID Bypass account created successfully',
+            uid,
+            duration: durationDays,
+            expiresAt
+        });
+        
+    } catch (error) {
+        console.error('Create UID Bypass error:', error);
+        res.status(500).json({ error: 'Failed to create UID Bypass account' });
+    }
+});
+
 // Reset HWID
 router.post('/api/reset-hwid', isClient, async (req, res) => {
     try {
