@@ -128,33 +128,21 @@ router.post('/api/login', async (req, res) => {
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Force session regeneration to ensure fresh session ID
-        req.session.regenerate((err) => {
-            if (err) {
-                console.error('Session regenerate error:', err);
-                return res.status(500).json({ error: 'Session error' });
+        // Save session and wait for it to be committed
+        req.session.save((saveErr) => {
+            if (saveErr) {
+                console.error('Session save error:', saveErr);
+                return res.status(500).json({ error: 'Session save failed' });
             }
             
-            // Re-set session data after regeneration
-            req.session.clientId = client._id;
-            req.session.clientUsername = client.username;
-            req.session.isClient = true;
+            console.log('✅ Session saved for client:', username);
+            console.log('Session ID:', req.sessionID);
+            console.log('Session data:', req.session);
             
-            // Save session and wait for it to be committed
-            req.session.save((saveErr) => {
-                if (saveErr) {
-                    console.error('Session save error:', saveErr);
-                    return res.status(500).json({ error: 'Session save failed' });
-                }
-                
-                console.log('✅ Session saved for client:', username);
-                console.log('Session ID:', req.sessionID);
-                
-                res.json({ 
-                    success: true, 
-                    message: 'Login successful',
-                    redirectUrl: '/client/dashboard'
-                });
+            res.json({ 
+                success: true, 
+                message: 'Login successful',
+                redirectUrl: '/client/dashboard'
             });
         });
         
