@@ -164,7 +164,8 @@ router.post('/api/logout', (req, res) => {
 
 // Client Dashboard
 router.get('/dashboard', isClient, (req, res) => {
-    res.sendFile('client-dashboard.html', { root: './views' });
+    const path = require('path');
+    res.sendFile(path.join(__dirname, '../views/client-dashboard.html'));
 });
 
 // Get Client Info
@@ -375,7 +376,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
 });
 
 // Admin: Get all clients
-router.get('/api/admin/clients', isAdminOrOwner, async (req, res) => {
+router.get('/admin/clients', isAdminOrOwner, async (req, res) => {
     try {
         const Product = require('../models/Product');
 
@@ -407,7 +408,7 @@ router.get('/api/admin/clients', isAdminOrOwner, async (req, res) => {
 });
 
 // Admin: Create client
-router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
+router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
     try {
         const { 
             username, password, productKey, assignedUsername, assignedUid, notes, customDownloadLink,
@@ -503,7 +504,7 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
 });
 
 // Admin: Update client
-router.put('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
+router.put('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     try {
         const { id } = req.params;
         const updates = req.body;
@@ -557,7 +558,7 @@ router.put('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
 });
 
 // Admin: Delete client
-router.delete('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
+router.delete('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     try {
         const { id } = req.params;
 
