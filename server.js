@@ -31,6 +31,16 @@ app.get('/health', (req, res) => {
   });
 });
 
+const User = require('./models/User');
+const UID = require('./models/UID');
+const Activity = require('./models/Activity');
+const LoginHistory = require('./models/LoginHistory');
+const Invoice = require('./models/Invoice');
+const AimkillKey = require('./models/AimkillKey');
+const ApiKey = require('./models/ApiKey');
+const ApiConfig = require('./models/ApiConfig');
+const PackageConfig = require('./models/PackageConfig');
+
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI, {
@@ -47,8 +57,6 @@ const connectDB = async () => {
   }
 };
 
-connectDB();
-
 mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connected');
 });
@@ -62,16 +70,6 @@ mongoose.connection.on('disconnected', () => {
   setTimeout(connectDB, 5000);
 });
 
-const User = require('./models/User');
-const UID = require('./models/UID');
-const Activity = require('./models/Activity');
-const LoginHistory = require('./models/LoginHistory');
-const Invoice = require('./models/Invoice');
-const AimkillKey = require('./models/AimkillKey');
-const ApiKey = require('./models/ApiKey');
-const ApiConfig = require('./models/ApiConfig');
-const PackageConfig = require('./models/PackageConfig');
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -82,34 +80,39 @@ if (!process.env.SESSION_SECRET) {
   process.exit(1);
 }
 
-app.use(session({
-  secret: process.env.SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  store: MongoStore.create({
-    mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600,
-    mongoOptions: {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000
-    }
-  }),
-  cookie: {
-    secure: false,
-    maxAge: 24 * 60 * 60 * 1000,
-    httpOnly: true,
-    sameSite: 'lax'
-  },
-  proxy: true
-}));
+// Initialize session after MongoDB connection
+async function initializeApp() {
+  await connectDB();
+  
+  app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      client: mongoose.connection.getClient(),
+      touchAfter: 24 * 3600
+    }),
+    cookie: {
+      secure: false,
+      maxAge: 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      sameSite: 'lax'
+    },
+    proxy: true
+  }));
 
-app.use(passport.initialize());
-app.use(passport.session());
+  app.use(passport.initialize());
+  app.use(passport.session());
 
-const clientRoutes = require('./routes/client');
-app.use('/client', clientRoutes);
+  const clientRoutes = require('./routes/client');
+  app.use('/client', clientRoutes);
 
-app.use(['/dashboard', '/packages', '/admin', '/settings', '/security', '/invoices'], checkNetworkFingerprint);
+  app.use(['/dashboard', '/packages', '/admin', '/settings', '/security', '/invoices'], checkNetworkFingerprint);
+  
+  console.log('✅ Application middleware initialized');
+}
+
+initializeApp();
 
 async function initializeAdmin() {
   try {
@@ -326,7 +329,7 @@ let PACKAGES = {
 };
 
 function requireAuth(req, res, next) {
-  if (req.session.user) {
+  if (req.session && req.session.user) {
     next();
   } else {
     res.redirect('/login');
@@ -334,7 +337,7 @@ function requireAuth(req, res, next) {
 }
 
 function requireAdmin(req, res, next) {
-  if (req.session.user && (req.session.user.isAdmin || req.session.user.isSuperAdmin || req.session.user.isOwner)) {
+  if (req.session && req.session.user && (req.session.user.isAdmin || req.session.user.isSuperAdmin || req.session.user.isOwner)) {
     next();
   } else {
     res.status(403).json({ error: 'Admin access required' });
@@ -342,7 +345,7 @@ function requireAdmin(req, res, next) {
 }
 
 function requireSuperAdminOnly(req, res, next) {
-  if (req.session.user && req.session.user.isSuperAdmin) {
+  if (req.session && req.session.user && req.session.user.isSuperAdmin) {
     next();
   } else {
     res.status(403).json({ error: 'Super Admin access required' });
@@ -350,7 +353,7 @@ function requireSuperAdminOnly(req, res, next) {
 }
 
 function requireMainSuperAdmin(req, res, next) {
-  if (req.session.user && req.session.user.username === 'admin') {
+  if (req.session && req.session.user && req.session.user.username === 'admin') {
     next();
   } else {
     res.status(403).json({ error: 'Only the main super admin can perform this action' });
@@ -358,7 +361,7 @@ function requireMainSuperAdmin(req, res, next) {
 }
 
 async function checkUserPaused(req, res, next) {
-  if (req.session.user && !req.session.user.isAdmin && !req.session.user.isOwner) {
+  if (req.session && req.session.user && !req.session.user.isAdmin && !req.session.user.isOwner) {
     try {
       const user = await User.findOne({ username: req.session.user.username });
       if (user && user.isPaused) {
@@ -375,7 +378,7 @@ async function checkUserPaused(req, res, next) {
 }
 
 async function require2FAForUID(req, res, next) {
-  if (req.session.user && !req.session.user.isAdmin && !req.session.user.isOwner) {
+  if (req.session && req.session.user && !req.session.user.isAdmin && !req.session.user.isOwner) {
     try {
       const user = await User.findOne({ username: req.session.user.username });
 
@@ -397,7 +400,7 @@ async function require2FAForUID(req, res, next) {
 }
 
 async function checkGuestFreeUID(req, res, next) {
-  if (req.session.user && req.session.user.isGuest) {
+  if (req.session && req.session.user && req.session.user.isGuest) {
     try {
       const admin = await User.findOne({ username: 'admin' });
       if (admin && !admin.allowGuestFreeUID) {
@@ -423,7 +426,7 @@ async function checkGuestFreeUID(req, res, next) {
 }
 
 async function checkGuestFreeAimkill(req, res, next) {
-  if (req.session.user && req.session.user.isGuest) {
+  if (req.session && req.session.user && req.session.user.isGuest) {
     try {
       const admin = await User.findOne({ username: 'admin' });
       if (admin && !admin.allowGuestFreeAimkill) {
@@ -488,7 +491,7 @@ app.get('/auth/discord/callback',
 );
 
 app.get('/', (req, res) => {
-  if (req.session.user) {
+  if (req.session && req.session.user) {
     res.redirect('/dashboard');
   } else {
     res.redirect('/login');
