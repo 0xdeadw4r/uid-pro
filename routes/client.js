@@ -558,7 +558,7 @@ router.put('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
 });
 
 // Admin: Update client download link
-router.put('/api/admin/clients/:id/download-link', isAdminOrOwner, async (req, res) => {
+router.put('/admin/clients/:id/download-link', isAdminOrOwner, async (req, res) => {
     try {
         const { id } = req.params;
         const { downloadLink } = req.body;

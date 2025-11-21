@@ -2611,7 +2611,7 @@
                             <button onclick="toggleClientStatus('${client._id}', ${!client.isActive})" class="${client.isActive ? 'warning-btn' : 'success-btn'}" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                 ${client.isActive ? 'Disable' : 'Enable'}
                             </button>
-                            <button onclick="editClientDownloadLink('${client._id}', '${client.productKey}')" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
+                            <button onclick="editClientDownloadLink('${client._id}', '${client.customDownloadLink || (client.product ? client.product.downloadLink : '')}')" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
                                 Edit Link
                             </button>
                             <button onclick="deleteClient('${client._id}', '${client.username}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
@@ -2772,13 +2772,13 @@
             }
         }
 
-        async function editClientDownloadLink(clientId, productType) {
-            const newLink = prompt(`Enter new download link for ${productType}:`, '');
+        async function editClientDownloadLink(clientId, currentLink) {
+            const newLink = prompt(`Enter new download link:`, currentLink || '');
 
             if (newLink === null) return;
 
             try {
-                const response = await fetch(`/client/api/admin/clients/${clientId}/download-link`, {
+                const response = await fetch(`/client/admin/clients/${clientId}/download-link`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
