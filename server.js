@@ -42,6 +42,7 @@ const connectDB = async () => {
     await migrateUsers();
     await initializeApiConfig();
     await initializePackages();
+    await initializeProducts();
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
   }
@@ -71,6 +72,7 @@ const AimkillKey = require('./models/AimkillKey');
 const ApiKey = require('./models/ApiKey');
 const ApiConfig = require('./models/ApiConfig');
 const PackageConfig = require('./models/PackageConfig');
+const Product = require('./models/Product');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -198,6 +200,52 @@ async function initializePackages() {
     return config;
   } catch (error) {
     console.error('⚠️ Error initializing package config:', error.message);
+  }
+}
+
+async function initializeProducts() {
+  try {
+    const productCount = await Product.countDocuments({});
+    
+    if (productCount === 0) {
+      // Create default products
+      await Product.create([
+        {
+          productKey: 'UID_BYPASS',
+          displayName: 'UID Bypass',
+          description: 'Create and manage UID bypass accounts',
+          isActive: true,
+          createdBy: 'system',
+          packages: new Map(Object.entries({
+            '1day': { display: '1 Day', hours: 24, days: 1, credits: 1, price: 0.50 },
+            '3days': { display: '3 Days', hours: 72, days: 3, credits: 3, price: 1.30, popular: true },
+            '7days': { display: '7 Days', hours: 168, days: 7, credits: 5, price: 2.33 },
+            '14days': { display: '14 Days', hours: 336, days: 14, credits: 10, price: 3.50 },
+            '30days': { display: '30 Days', hours: 720, days: 30, credits: 15, price: 5.20 }
+          }))
+        },
+        {
+          productKey: 'AIMKILL',
+          displayName: 'Aimkill',
+          description: 'Create Aimkill user accounts',
+          isActive: true,
+          createdBy: 'system',
+          packages: new Map(Object.entries({
+            '1day': { display: '1 Day', days: 1, credits: 3, price: 2.99 },
+            '3day': { display: '3 Days', days: 3, credits: 8, price: 7.99 },
+            '7day': { display: '7 Days', days: 7, credits: 15, price: 14.99 },
+            '15day': { display: '15 Days', days: 15, credits: 30, price: 29.99 },
+            '30day': { display: '30 Days', days: 30, credits: 50, price: 49.99 },
+            'lifetime': { display: 'Lifetime (1 Year)', days: 365, credits: 100, price: 99.99 }
+          }))
+        }
+      ]);
+      console.log('✅ Default products initialized');
+    } else {
+      console.log('✅ Products loaded from MongoDB');
+    }
+  } catch (error) {
+    console.error('⚠️ Error initializing products:', error.message);
   }
 }
 
@@ -3376,6 +3424,119 @@ app.post('/api/admin/unverify-all-users', requireAuth, requireAdmin, async (req,
   } catch (error) {
     console.error('Unverify all users error:', error);
     res.status(500).json({ error: 'Failed to unverify users' });
+  }
+});
+
+// Product Management APIs
+app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
+    
+    const productsData = products.map(product => ({
+      productKey: product.productKey,
+      displayName: product.displayName,
+      description: product.description,
+      isActive: product.isActive,
+      packages: Object.fromEntries(product.packages),
+      settings: Object.fromEntries(product.settings || new Map()),
+      createdAt: product.createdAt
+    }));
+    
+    res.json({ success: true, products: productsData });
+  } catch (error) {
+    console.error('Get products error:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey, displayName, description, packages } = req.body;
+    
+    if (!productKey || !displayName) {
+      return res.status(400).json({ error: 'Product key and display name are required' });
+    }
+    
+    const existingProduct = await Product.findOne({ productKey });
+    if (existingProduct) {
+      return res.status(400).json({ error: 'Product with this key already exists' });
+    }
+    
+    const packagesMap = new Map(Object.entries(packages || {}));
+    
+    const product = await Product.create({
+      productKey: productKey.toUpperCase().replace(/\s+/g, '_'),
+      displayName,
+      description: description || '',
+      packages: packagesMap,
+      createdBy: req.session.user.username,
+      isActive: true
+    });
+    
+    await logActivity(req.session.user.username, 'product-create', `Created new product: ${displayName}`);
+    
+    res.json({
+      success: true,
+      message: 'Product created successfully',
+      product: {
+        productKey: product.productKey,
+        displayName: product.displayName,
+        description: product.description
+      }
+    });
+  } catch (error) {
+    console.error('Create product error:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey } = req.params;
+    const { displayName, description, packages, isActive } = req.body;
+    
+    const product = await Product.findOne({ productKey });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    if (displayName) product.displayName = displayName;
+    if (description !== undefined) product.description = description;
+    if (isActive !== undefined) product.isActive = isActive;
+    if (packages) product.packages = new Map(Object.entries(packages));
+    
+    await product.save();
+    
+    await logActivity(req.session.user.username, 'product-update', `Updated product: ${productKey}`);
+    
+    res.json({
+      success: true,
+      message: 'Product updated successfully'
+    });
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+app.delete('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey } = req.params;
+    
+    const product = await Product.findOneAndDelete({ productKey });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+    
+    await logActivity(req.session.user.username, 'product-delete', `Deleted product: ${productKey}`);
+    
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
   }
 });
 
