@@ -64,13 +64,14 @@ const isAdminOrOwner = (req, res, next) => {
     }
 };
 
-// Client Login Page
+// Client Login Page - Redirect to main login
 router.get('/login', (req, res) => {
     // If already logged in, redirect to dashboard
     if (req.session && req.session.clientId && req.session.isClient) {
         return res.redirect('/client/dashboard');
     }
-    res.sendFile('client-login.html', { root: './public' });
+    // Redirect to main login page (client tab will be available there)
+    res.redirect('/login');
 });
 
 // Client Login API

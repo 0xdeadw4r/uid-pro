@@ -106,6 +106,7 @@
             text-decoration: none;
             text-align: center;
             display: block;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         .login-tab:hover {
@@ -349,18 +350,20 @@
         <div class="login-right">
             <div class="login-form-container">
                 <div class="login-tabs">
-                    <a href="/login" class="login-tab active">Admin / User</a>
-                    <a href="/client/login" class="login-tab">Client Portal</a>
+                    <button class="login-tab active" onclick="switchLoginType('admin')">Admin / User</button>
+                    <button class="login-tab" onclick="switchLoginType('client')">Client Portal</button>
                 </div>
                 
                 <div class="login-form-header">
                     <h1>Sign In</h1>
-                    <p>Enter your credentials to continue</p>
+                    <p id="loginSubtext">Enter your credentials to continue</p>
                 </div>
 
                 <div id="error" class="error"></div>
 
                 <form id="loginForm">
+                    <input type="hidden" id="loginType" value="admin">
+                    
                     <div class="form-group">
                         <input type="text" id="username" placeholder="Username" required autofocus
                             autocomplete="username">
@@ -395,7 +398,7 @@
         </div>
     </div>
 
-    <!-- ORIGINAL SCRIPT - NO CHANGES -->
+    <!-- MERGED LOGIN SCRIPT - ADMIN & CLIENT -->
     <script>
         const form = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
@@ -404,6 +407,32 @@
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const twoFactorInput = document.getElementById('twoFactorCode');
+        const loginTypeInput = document.getElementById('loginType');
+        const loginSubtext = document.getElementById('loginSubtext');
+
+        function switchLoginType(type) {
+            loginTypeInput.value = type;
+            
+            // Update active tab
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update subtext
+            if (type === 'client') {
+                loginSubtext.textContent = 'Client Portal Access';
+                twoFAField.style.display = 'none';
+            } else {
+                loginSubtext.textContent = 'Enter your credentials to continue';
+            }
+            
+            // Clear form
+            usernameInput.value = '';
+            passwordInput.value = '';
+            if (twoFactorInput) twoFactorInput.value = '';
+            errorDiv.classList.remove('show');
+        }
 
         function showError(msg) {
             errorDiv.textContent = msg;
@@ -421,6 +450,7 @@
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
             const token = twoFactorInput?.value || null;
+            const loginType = loginTypeInput.value;
 
             if (!username || !password) {
                 showError('Please enter your credentials');
@@ -431,7 +461,10 @@
             loginBtn.textContent = 'SIGNING IN...';
 
             try {
-                const response = await fetch('/api/login', {
+                // Different endpoints for admin vs client
+                const endpoint = loginType === 'client' ? '/client/api/login' : '/api/login';
+                
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, token }),
@@ -440,7 +473,8 @@
 
                 const data = await response.json();
 
-                if (data.requires2FA) {
+                // Handle 2FA for admin login only
+                if (loginType === 'admin' && data.requires2FA) {
                     twoFAField.style.display = 'block';
                     twoFactorInput.focus();
                     loginBtn.textContent = 'VERIFY CODE';
@@ -450,7 +484,9 @@
 
                 if (response.ok && data.success) {
                     loginBtn.textContent = 'REDIRECTING...';
-                    setTimeout(() => window.location.href = '/dashboard', 600);
+                    // Redirect based on login type
+                    const redirectUrl = loginType === 'client' ? '/client/dashboard' : '/dashboard';
+                    setTimeout(() => window.location.href = redirectUrl, 600);
                 } else {
                     showError(data.error || 'Login failed');
                     loginBtn.textContent = 'SIGN IN';
