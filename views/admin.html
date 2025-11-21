@@ -2560,7 +2560,7 @@
                 }
                 
                 // Load clients
-                const response = await fetch('/client/api/admin/clients', {
+                const response = await fetch('/client/admin/clients', {
                     credentials: 'include'
                 });
 
@@ -2736,7 +2736,7 @@
 
         async function toggleClientStatus(clientId, newStatus) {
             try {
-                const response = await fetch(`/client/api/admin/clients/${clientId}`, {
+                const response = await fetch(`/client/admin/clients/${clientId}`, {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
@@ -2794,7 +2794,7 @@
             }
 
             try {
-                const response = await fetch(`/client/api/admin/clients/${clientId}`, {
+                const response = await fetch(`/client/admin/clients/${clientId}`, {
                     method: 'DELETE',
                     credentials: 'include'
                 });
@@ -2818,7 +2818,7 @@
             const uidBypassLink = document.getElementById('uidBypassDownloadLink').value.trim();
 
             try {
-                const response = await fetch('/client/api/admin/download-links', {
+                const response = await fetch('/client/admin/download-links', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
