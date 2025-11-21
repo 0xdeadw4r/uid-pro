@@ -14,8 +14,16 @@ const isClient = (req, res, next) => {
 
 // Middleware to check if user is admin/owner
 const isAdminOrOwner = (req, res, next) => {
-    if (req.session && req.session.userId) {
-        User.findById(req.session.userId).then(user => {
+    // Check both session formats (client and regular admin)
+    const userId = req.session.userId || (req.session.user && req.session.user.username);
+    
+    if (!userId) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    // If we have a username from session.user, find by username
+    if (req.session.user && req.session.user.username) {
+        User.findOne({ username: req.session.user.username }).then(user => {
             if (user && (user.isAdmin || user.isOwner || user.isSuperAdmin)) {
                 return next();
             }
@@ -24,7 +32,15 @@ const isAdminOrOwner = (req, res, next) => {
             res.status(500).json({ error: 'Server error' });
         });
     } else {
-        res.status(401).json({ error: 'Not authenticated' });
+        // Otherwise find by ID
+        User.findById(req.session.userId).then(user => {
+            if (user && (user.isAdmin || user.isOwner || user.isSuperAdmin)) {
+                return next();
+            }
+            res.status(403).json({ error: 'Access denied' });
+        }).catch(err => {
+            res.status(500).json({ error: 'Server error' });
+        });
     }
 };
 
