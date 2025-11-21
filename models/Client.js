@@ -14,14 +14,14 @@ const clientSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    
+
     // Product Type
     productType: {
         type: String,
         enum: ['AIMKILL', 'UID_BYPASS'],
         required: true
     },
-    
+
     // Assigned Aimkill Account (for HWID reset - only for AIMKILL product type)
     assignedUsername: {
         type: String,
@@ -30,7 +30,7 @@ const clientSchema = new mongoose.Schema({
         },
         trim: true
     },
-    
+
     // Assigned UID (for UID_BYPASS product type)
     assignedUid: {
         type: String,
@@ -39,7 +39,7 @@ const clientSchema = new mongoose.Schema({
         },
         trim: true
     },
-    
+
     // Download Links (managed by admins)
     downloadLinks: {
         aimkill: {
@@ -51,35 +51,35 @@ const clientSchema = new mongoose.Schema({
             default: ''
         }
     },
-    
+
     // Status
     isActive: {
         type: Boolean,
         default: true
     },
-    
+
     // Metadata
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },
-    
+
     lastLogin: {
         type: Date,
         default: null
     },
-    
+
     lastHwidReset: {
         type: Date,
         default: null
     },
-    
+
     hwidResetCount: {
         type: Number,
         default: 0
     },
-    
+
     notes: {
         type: String,
         default: ''
@@ -91,7 +91,7 @@ const clientSchema = new mongoose.Schema({
 // Hash client password before saving
 clientSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
-    
+
     try {
         const salt = await bcrypt.genSalt(10);
         this.password = await bcrypt.hash(this.password, salt);
