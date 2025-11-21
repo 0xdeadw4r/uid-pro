@@ -463,22 +463,7 @@
         async function loadClientData() {
             try {
                 const response = await fetch('/client/api/info');
-                
-                // Check if we got redirected to login (HTML response)
-                const contentType = response.headers.get('content-type');
-                if (!contentType || !contentType.includes('application/json')) {
-                    console.error('Not authenticated - redirecting to login');
-                    window.location.href = '/client/login';
-                    return;
-                }
-                
                 const data = await response.json();
-
-                if (response.status === 401) {
-                    // Not authenticated
-                    window.location.href = '/client/login';
-                    return;
-                }
 
                 if (response.ok && data.success) {
                     clientData = data.client;
@@ -488,8 +473,7 @@
                 }
             } catch (error) {
                 console.error('Load client data error:', error);
-                // If JSON parsing fails, likely not authenticated
-                window.location.href = '/client/login';
+                showError('Error loading client data');
             }
         }
 

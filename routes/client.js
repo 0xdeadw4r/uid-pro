@@ -7,27 +7,9 @@ const genzauth = require('../services/genzauth');
 
 // Middleware to check if user is a client
 const isClient = (req, res, next) => {
-    console.log('isClient middleware - Session:', {
-        hasSession: !!req.session,
-        clientId: req.session?.clientId,
-        clientUsername: req.session?.clientUsername,
-        path: req.path
-    });
-    
     if (req.session && req.session.clientId) {
         return next();
     }
-    
-    console.log('❌ Client not authenticated - Path:', req.path);
-    
-    // If it's an API request, return JSON error instead of redirect
-    if (req.path.includes('/api/')) {
-        console.log('⚠️ Returning JSON error for API request');
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
-    
-    // For page requests, redirect to login
-    console.log('⚠️ Redirecting to login for page request');
     res.redirect('/client/login');
 };
 
