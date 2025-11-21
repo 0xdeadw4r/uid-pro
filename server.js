@@ -106,6 +106,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+const clientRoutes = require('./routes/client');
+app.use('/client', clientRoutes);
+
 app.use(['/dashboard', '/packages', '/admin', '/settings', '/security', '/invoices'], checkNetworkFingerprint);
 
 async function initializeAdmin() {

@@ -1,0 +1,440 @@
+const express = require('express');
+const router = express.Router();
+const Client = require('../models/Client');
+const User = require('../models/User');
+const genzauth = require('../services/genzauth');
+
+// Middleware to check if user is a client
+const isClient = (req, res, next) => {
+    if (req.session && req.session.clientId) {
+        return next();
+    }
+    res.redirect('/client/login');
+};
+
+// Middleware to check if user is admin/owner
+const isAdminOrOwner = (req, res, next) => {
+    if (req.session && req.session.userId) {
+        User.findById(req.session.userId).then(user => {
+            if (user && (user.isAdmin || user.isOwner || user.isSuperAdmin)) {
+                return next();
+            }
+            res.status(403).json({ error: 'Access denied' });
+        }).catch(err => {
+            res.status(500).json({ error: 'Server error' });
+        });
+    } else {
+        res.status(401).json({ error: 'Not authenticated' });
+    }
+};
+
+// Client Login Page
+router.get('/login', (req, res) => {
+    if (req.session.clientId) {
+        return res.redirect('/client/dashboard');
+    }
+    res.sendFile('client-login.html', { root: './public' });
+});
+
+// Client Login API
+router.post('/api/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+        
+        const client = await Client.findOne({ username: username.toLowerCase() });
+        
+        if (!client) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        if (!client.isActive) {
+            return res.status(403).json({ error: 'Account is disabled' });
+        }
+        
+        const isMatch = await client.comparePassword(password);
+        
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        // Update last login
+        client.lastLogin = new Date();
+        await client.save();
+        
+        // Set session
+        req.session.clientId = client._id;
+        req.session.clientUsername = client.username;
+        req.session.isClient = true;
+        
+        res.json({ 
+            success: true, 
+            message: 'Login successful',
+            redirectUrl: '/client/dashboard'
+        });
+        
+    } catch (error) {
+        console.error('Client login error:', error);
+        res.status(500).json({ error: 'Login failed' });
+    }
+});
+
+// Client Logout
+router.post('/api/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).json({ error: 'Logout failed' });
+        }
+        res.json({ success: true, message: 'Logged out successfully' });
+    });
+});
+
+// Client Dashboard
+router.get('/dashboard', isClient, (req, res) => {
+    res.sendFile('client-dashboard.html', { root: './public' });
+});
+
+// Get Client Info
+router.get('/api/info', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId)
+            .select('-password')
+            .populate('createdBy', 'username');
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        const downloadLink = client.getDownloadLink();
+        
+        res.json({
+            success: true,
+            client: {
+                username: client.username,
+                productType: client.productType,
+                assignedUsername: client.assignedUsername || null,
+                downloadLink: downloadLink || '',
+                hasDownloadLink: !!downloadLink,
+                lastLogin: client.lastLogin,
+                lastHwidReset: client.lastHwidReset,
+                hwidResetCount: client.hwidResetCount,
+                createdAt: client.createdAt
+            }
+        });
+    } catch (error) {
+        console.error('Get client info error:', error);
+        res.status(500).json({ error: 'Failed to get client info' });
+    }
+});
+
+// Reset HWID
+router.post('/api/reset-hwid', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        if (!client.isActive) {
+            return res.status(403).json({ error: 'Account is disabled' });
+        }
+        
+        // Only Aimkill clients can reset HWID
+        if (client.productType !== 'AIMKILL') {
+            return res.status(403).json({ error: 'HWID reset is only available for Aimkill clients' });
+        }
+        
+        // Validate that assignedUsername exists and is not empty
+        if (!client.assignedUsername || !client.assignedUsername.trim()) {
+            console.error('HWID reset attempted with missing assignedUsername for client:', client.username);
+            return res.status(400).json({ error: 'No assigned username configured. Please contact your administrator.' });
+        }
+        
+        // Use GenzAuth to reset HWID for the assigned username
+        const result = await genzauth.resetHwid(client.assignedUsername);
+        
+        if (result.success) {
+            // Update client record
+            client.lastHwidReset = new Date();
+            client.hwidResetCount += 1;
+            await client.save();
+            
+            res.json({
+                success: true,
+                message: `HWID reset successful for ${client.assignedUsername}`,
+                resetCount: client.hwidResetCount,
+                lastReset: client.lastHwidReset
+            });
+        } else {
+            const errorMessage = result.error || result.message || 'HWID reset failed';
+            console.error('HWID reset failed:', errorMessage);
+            res.status(400).json({
+                error: errorMessage
+            });
+        }
+        
+    } catch (error) {
+        console.error('HWID reset error:', error);
+        res.status(500).json({ error: 'HWID reset failed' });
+    }
+});
+
+// ===== ADMIN ROUTES =====
+
+// Get all clients (Admin only)
+router.get('/api/admin/clients', isAdminOrOwner, async (req, res) => {
+    try {
+        const clients = await Client.find()
+            .select('-password')
+            .populate('createdBy', 'username')
+            .sort({ createdAt: -1 });
+        
+        res.json({ success: true, clients });
+    } catch (error) {
+        console.error('Get clients error:', error);
+        res.status(500).json({ error: 'Failed to get clients' });
+    }
+});
+
+// Create client (Admin only)
+router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
+    try {
+        const { 
+            username, 
+            password, 
+            productType, 
+            assignedUsername,
+            notes 
+        } = req.body;
+        
+        // Validate required fields
+        if (!username || !password || !productType) {
+            return res.status(400).json({ error: 'Username, password, and product type are required' });
+        }
+        
+        // Validate product type
+        if (!['AIMKILL', 'UID_BYPASS'].includes(productType)) {
+            return res.status(400).json({ error: 'Invalid product type' });
+        }
+        
+        // For AIMKILL clients, assignedUsername is required and must not be empty
+        if (productType === 'AIMKILL') {
+            const trimmedAssignedUsername = assignedUsername ? assignedUsername.trim() : '';
+            if (!trimmedAssignedUsername) {
+                return res.status(400).json({ error: 'Assigned username is required and cannot be empty for Aimkill clients' });
+            }
+        }
+        
+        // Check if client username already exists
+        const existingClient = await Client.findOne({ username: username.toLowerCase() });
+        if (existingClient) {
+            return res.status(400).json({ error: 'Client username already exists' });
+        }
+        
+        // Get current admin user
+        const adminUser = await User.findById(req.session.userId);
+        
+        const newClient = new Client({
+            username: username.toLowerCase(),
+            password,
+            productType,
+            assignedUsername: productType === 'AIMKILL' ? assignedUsername.trim().toLowerCase() : undefined,
+            notes: notes || '',
+            createdBy: adminUser._id
+        });
+        
+        await newClient.save();
+        
+        const clientData = await Client.findById(newClient._id)
+            .select('-password')
+            .populate('createdBy', 'username');
+        
+        res.json({ 
+            success: true, 
+            message: 'Client created successfully',
+            client: clientData
+        });
+        
+    } catch (error) {
+        console.error('Create client error:', error);
+        res.status(500).json({ error: 'Failed to create client' });
+    }
+});
+
+// Update client (Admin only)
+router.put('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        
+        // Don't allow updating certain fields
+        delete updates._id;
+        delete updates.createdBy;
+        delete updates.createdAt;
+        
+        // Get current client to check product type
+        const currentClient = await Client.findById(id);
+        if (!currentClient) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        // Normalize assignedUsername if provided
+        if (updates.assignedUsername !== undefined) {
+            updates.assignedUsername = updates.assignedUsername ? updates.assignedUsername.trim().toLowerCase() : null;
+        }
+        
+        // Validate productType change
+        if (updates.productType) {
+            if (!['AIMKILL', 'UID_BYPASS'].includes(updates.productType)) {
+                return res.status(400).json({ error: 'Invalid product type' });
+            }
+            
+            // If changing to or staying as AIMKILL, assignedUsername is required
+            if (updates.productType === 'AIMKILL') {
+                const assignedUsername = updates.assignedUsername !== undefined ? updates.assignedUsername : currentClient.assignedUsername;
+                if (!assignedUsername || assignedUsername.trim() === '') {
+                    return res.status(400).json({ error: 'Assigned username is required for Aimkill clients' });
+                }
+            }
+            
+            // If changing to UID_BYPASS, clear assignedUsername
+            if (updates.productType === 'UID_BYPASS') {
+                updates.assignedUsername = null;
+            }
+        } else {
+            // If productType is not changing but we're updating an Aimkill client
+            if (currentClient.productType === 'AIMKILL' && updates.assignedUsername !== undefined) {
+                if (!updates.assignedUsername || updates.assignedUsername.trim() === '') {
+                    return res.status(400).json({ error: 'Assigned username cannot be empty for Aimkill clients' });
+                }
+            }
+        }
+        
+        const client = await Client.findByIdAndUpdate(
+            id,
+            updates,
+            { new: true, runValidators: true }
+        ).select('-password').populate('createdBy', 'username');
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Client updated successfully',
+            client 
+        });
+        
+    } catch (error) {
+        console.error('Update client error:', error);
+        res.status(500).json({ error: 'Failed to update client' });
+    }
+});
+
+// Delete client (Admin only)
+router.delete('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const client = await Client.findByIdAndDelete(id);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        res.json({ 
+            success: true, 
+            message: 'Client deleted successfully' 
+        });
+        
+    } catch (error) {
+        console.error('Delete client error:', error);
+        res.status(500).json({ error: 'Failed to delete client' });
+    }
+});
+
+// Update download links (Admin only)
+router.put('/api/admin/download-links', isAdminOrOwner, async (req, res) => {
+    try {
+        let { aimkillLink, uidBypassLink } = req.body;
+        
+        // Validate URLs if provided
+        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+        
+        if (aimkillLink && aimkillLink.trim() && !urlPattern.test(aimkillLink)) {
+            return res.status(400).json({ error: 'Invalid Aimkill download link URL' });
+        }
+        
+        if (uidBypassLink && uidBypassLink.trim() && !urlPattern.test(uidBypassLink)) {
+            return res.status(400).json({ error: 'Invalid UID Bypass download link URL' });
+        }
+        
+        // Update all clients' download links
+        const updateData = {};
+        if (aimkillLink !== undefined) {
+            updateData['downloadLinks.aimkill'] = aimkillLink.trim();
+        }
+        if (uidBypassLink !== undefined) {
+            updateData['downloadLinks.uidBypass'] = uidBypassLink.trim();
+        }
+        
+        await Client.updateMany({}, { $set: updateData });
+        
+        res.json({ 
+            success: true, 
+            message: 'Download links updated successfully' 
+        });
+        
+    } catch (error) {
+        console.error('Update download links error:', error);
+        res.status(500).json({ error: 'Failed to update download links' });
+    }
+});
+
+// Update specific client's download link (Admin only)
+router.put('/api/admin/clients/:id/download-link', isAdminOrOwner, async (req, res) => {
+    try {
+        const { id } = req.params;
+        let { downloadLink } = req.body;
+        
+        // Validate URL if provided
+        const urlPattern = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$/i;
+        if (downloadLink && downloadLink.trim() && !urlPattern.test(downloadLink)) {
+            return res.status(400).json({ error: 'Invalid download link URL' });
+        }
+        
+        const client = await Client.findById(id);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+        
+        downloadLink = downloadLink ? downloadLink.trim() : '';
+        
+        // Update the appropriate download link based on product type
+        if (client.productType === 'AIMKILL') {
+            client.downloadLinks.aimkill = downloadLink;
+        } else if (client.productType === 'UID_BYPASS') {
+            client.downloadLinks.uidBypass = downloadLink;
+        }
+        
+        await client.save();
+        
+        res.json({ 
+            success: true, 
+            message: 'Download link updated successfully',
+            client: await Client.findById(id).select('-password')
+        });
+        
+    } catch (error) {
+        console.error('Update client download link error:', error);
+        res.status(500).json({ error: 'Failed to update download link' });
+    }
+});
+
+module.exports = router;
