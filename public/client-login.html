@@ -288,10 +288,12 @@
 
                 if (response.ok && data.success) {
                     showSuccess('Login successful! Redirecting...');
-                    // Longer delay to ensure session cookie is properly set
+                    console.log('✅ Login successful, session data:', data.debug);
+                    
+                    // Wait a bit longer for session to fully save, then redirect
                     setTimeout(() => {
-                        window.location.href = data.redirectUrl || '/client/dashboard';
-                    }, 1000);
+                        window.location.replace(data.redirectUrl || '/client/dashboard');
+                    }, 500);
                 } else {
                     showError(data.error || 'Login failed. Please try again.');
                     loginBtn.disabled = false;

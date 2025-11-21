@@ -9,13 +9,14 @@ const genzauth = require('../services/genzauth');
 const isClient = (req, res, next) => {
     console.log('🔍 Client auth check - Path:', req.path);
     console.log('🔍 Client auth check - Session ID:', req.sessionID);
-    console.log('🔍 Client auth check - Session:', {
-        clientId: req.session.clientId,
-        clientUsername: req.session.clientUsername,
-        isClient: req.session.isClient
-    });
+    console.log('🔍 Client auth check - Session:', JSON.stringify({
+        clientId: req.session?.clientId,
+        clientUsername: req.session?.clientUsername,
+        isClient: req.session?.isClient
+    }, null, 2));
     
-    if (req.session && req.session.clientId && req.session.isClient) {
+    // Check if client session exists
+    if (req.session?.clientId && req.session?.isClient === true) {
         console.log('✅ Client authenticated:', req.session.clientUsername);
         return next();
     }
@@ -27,8 +28,13 @@ const isClient = (req, res, next) => {
         return res.status(401).json({ error: 'Not authenticated', redirect: '/client/login' });
     }
     
-    // For page requests, redirect to login
-    res.redirect('/client/login');
+    // For page requests, redirect to login (but not if already on login page)
+    if (req.path !== '/login') {
+        return res.redirect('/client/login');
+    }
+    
+    // If on login page, just continue
+    next();
 };
 
 // Middleware to check if user is admin/owner
@@ -142,26 +148,29 @@ router.post('/api/login', async (req, res) => {
         req.session.isClient = true;
         
         // Save the session and send response
-        await new Promise((resolve, reject) => {
-            req.session.save((err) => {
-                if (err) {
-                    console.error('❌ Session save error:', err);
-                    reject(err);
-                } else {
-                    console.log('✅ Session saved successfully');
-                    console.log('   Session ID:', req.sessionID);
-                    console.log('   Client ID:', req.session.clientId);
-                    console.log('   Client Username:', req.session.clientUsername);
-                    resolve();
+        req.session.save((err) => {
+            if (err) {
+                console.error('❌ Session save error:', err);
+                return res.status(500).json({ error: 'Session error. Please try again.' });
+            }
+            
+            console.log('✅ Session saved successfully');
+            console.log('   Session ID:', req.sessionID);
+            console.log('   Client ID:', req.session.clientId);
+            console.log('   Client Username:', req.session.clientUsername);
+            console.log('   isClient flag:', req.session.isClient);
+            
+            // Send success response
+            res.json({ 
+                success: true, 
+                message: 'Login successful',
+                redirectUrl: '/client/dashboard',
+                debug: {
+                    sessionId: req.sessionID,
+                    clientId: req.session.clientId.toString(),
+                    clientUsername: req.session.clientUsername
                 }
             });
-        });
-        
-        // Send success response
-        res.json({ 
-            success: true, 
-            message: 'Login successful',
-            redirectUrl: '/client/dashboard'
         });
         
     } catch (error) {
