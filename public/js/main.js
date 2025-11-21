@@ -1,6 +1,11 @@
 // Fetch user info
 async function fetchUser() {
     try {
+        // Check if this is a client dashboard page
+        if (window.location.pathname === '/client/dashboard') {
+            return; // Client dashboard has its own data loading
+        }
+
         const response = await fetch('/api/user', {
             credentials: 'include'
         });

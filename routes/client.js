@@ -64,15 +64,7 @@ const isAdminOrOwner = (req, res, next) => {
     }
 };
 
-// Client Login Page - Redirect to main login
-router.get('/login', (req, res) => {
-    // If already logged in, redirect to dashboard
-    if (req.session && req.session.clientId && req.session.isClient) {
-        return res.redirect('/client/dashboard');
-    }
-    // Redirect to main login page (client tab will be available there)
-    res.redirect('/login');
-});
+// Client Login Page - removed, now uses main /login page
 
 // Client Login API
 router.post('/api/login', async (req, res) => {
@@ -172,7 +164,7 @@ router.post('/api/logout', (req, res) => {
 
 // Client Dashboard
 router.get('/dashboard', isClient, (req, res) => {
-    res.sendFile('client-dashboard.html', { root: './public' });
+    res.sendFile('client-dashboard.html', { root: './views' });
 });
 
 // Get Client Info

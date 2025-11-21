@@ -1,0 +1,651 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - Dominus Corps</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 50%, #0a0a0a 100%);
+            background-attachment: fixed;
+        }
+
+        .header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .username {
+            font-weight: 700;
+            color: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .product-type {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-logout {
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            color: #999;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #EF4444;
+            color: white;
+            border-color: #EF4444;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            color: #999;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab:hover {
+            background: #222;
+            color: #FFFFFF;
+        }
+
+        .tab.active {
+            background: #FFFFFF;
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #FFFFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2a2a2a;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #999;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            color: #FFFFFF;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .download-section, .reset-section {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .download-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .btn-download, .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-download:disabled, .btn-reset:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background: #10B981;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10B981;
+            color: #10B981;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+
+        .no-link-message {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+                padding: 1.25rem 1rem;
+            }
+
+            .header-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .container {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 11px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Client Dashboard</h1>
+        <div class="header-info">
+            <div class="user-info">
+                <div class="username" id="headerUsername">Loading...</div>
+                <div class="product-type" id="headerProductType">Loading...</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs" id="tabsContainer">
+            <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
+            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
+        </div>
+
+        <div id="downloadTab" class="tab-content active">
+            <h2>Download Files</h2>
+            <div id="downloadAlert" class="alert"></div>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Product Type:</span>
+                    <span class="info-value" id="productType">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Login:</span>
+                    <span class="info-value" id="lastLogin">-</span>
+                </div>
+            </div>
+
+            <div id="uidInfoCard" class="info-card" style="display: none;">
+                <div class="info-row">
+                    <span class="info-label">Your UID:</span>
+                    <span class="info-value" id="assignedUid">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expires At:</span>
+                    <span class="info-value" id="uidExpiresAt">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Remaining:</span>
+                    <span class="info-value" id="uidTimeRemaining">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="uidStatus">-</span>
+                </div>
+            </div>
+
+            <div id="downloadSection" class="download-section">
+                <div class="download-icon">📥</div>
+                <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
+                    Click the button below to download your files
+                </p>
+                <a id="downloadButton" class="btn-download" href="#" target="_blank">
+                    <span>⬇️</span>
+                    <span>Download Now</span>
+                </a>
+            </div>
+
+            <div id="noLinkSection" class="no-link-message" style="display: none;">
+                <p>⚠️ No download link available. Please contact your administrator.</p>
+            </div>
+        </div>
+
+        <div id="resetTab" class="tab-content">
+            <h2>Reset HWID</h2>
+            <div id="resetAlert" class="alert"></div>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Assigned Account:</span>
+                    <span class="info-value" id="assignedUsername">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last HWID Reset:</span>
+                    <span class="info-value" id="lastHwidReset">-</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="resetCount">0</div>
+                    <div class="stat-label">Total Resets</div>
+                </div>
+            </div>
+
+            <div class="reset-section">
+                <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
+                    Reset the Hardware ID for your assigned account
+                </p>
+                <button class="btn-reset" onclick="resetHwid()" id="resetButton">
+                    🔄 Reset HWID
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let clientData = null;
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'download') {
+                tabs[0].classList.add('active');
+                document.getElementById('downloadTab').classList.add('active');
+            } else if (tabName === 'reset') {
+                tabs[1].classList.add('active');
+                document.getElementById('resetTab').classList.add('active');
+            }
+        }
+
+        function showAlert(elementId, message, type) {
+            const alert = document.getElementById(elementId);
+            alert.className = `alert alert-${type} show`;
+            alert.textContent = message;
+
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 5000);
+        }
+
+        function showError(message) {
+            showAlert('downloadAlert', message, 'error');
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'error');
+            }
+        }
+
+        function showSuccess(message) {
+            showAlert('downloadAlert', message, 'success');
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'success');
+            }
+        }
+
+        async function loadClientData() {
+            try {
+                const response = await fetch('/client/api/info', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('Not authenticated - received HTML instead of JSON');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401 || data.error === 'Not authenticated') {
+                    console.error('Session expired - redirecting to login');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    clientData = data.client;
+                    updateUI();
+                } else {
+                    showError(data.error || 'Failed to load client data');
+                }
+            } catch (error) {
+                console.error('Load client data error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        function updateUI() {
+            if (!clientData) return;
+
+            document.getElementById('headerUsername').textContent = clientData.username;
+            document.getElementById('headerProductType').textContent = clientData.productType;
+            document.getElementById('productType').textContent = clientData.productType;
+
+            const lastLogin = clientData.lastLogin ? new Date(clientData.lastLogin).toLocaleString() : 'Never';
+            document.getElementById('lastLogin').textContent = lastLogin;
+
+            if (clientData.productType === 'AIMKILL') {
+                document.getElementById('resetTabButton').style.display = 'block';
+                document.getElementById('uidInfoCard').style.display = 'none';
+                document.getElementById('assignedUsername').textContent = clientData.assignedUsername || 'Not assigned';
+
+                const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
+                document.getElementById('lastHwidReset').textContent = lastReset;
+                document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
+            } else if (clientData.productType === 'UID_BYPASS') {
+                document.getElementById('resetTabButton').style.display = 'none';
+                document.getElementById('uidInfoCard').style.display = 'block';
+
+                if (clientData.assignedUid) {
+                    document.getElementById('assignedUid').textContent = clientData.assignedUid;
+
+                    if (clientData.uidExpiresAt) {
+                        const expiresAt = new Date(clientData.uidExpiresAt);
+                        document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
+
+                        const now = new Date();
+                        const timeLeft = expiresAt - now;
+
+                        if (timeLeft > 0) {
+                            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            document.getElementById('uidTimeRemaining').textContent = `${days} days, ${hours} hours`;
+                            document.getElementById('uidStatus').textContent = '✅ Active';
+                            document.getElementById('uidStatus').style.color = '#10B981';
+                        } else {
+                            document.getElementById('uidTimeRemaining').textContent = 'Expired';
+                            document.getElementById('uidStatus').textContent = '❌ Expired';
+                            document.getElementById('uidStatus').style.color = '#EF4444';
+                        }
+                    } else {
+                        document.getElementById('uidExpiresAt').textContent = 'Not set';
+                        document.getElementById('uidTimeRemaining').textContent = '-';
+                        document.getElementById('uidStatus').textContent = 'Unknown';
+                    }
+                } else {
+                    document.getElementById('assignedUid').textContent = 'Not assigned';
+                    document.getElementById('uidExpiresAt').textContent = '-';
+                    document.getElementById('uidTimeRemaining').textContent = '-';
+                    document.getElementById('uidStatus').textContent = 'Not configured';
+                }
+
+                if (document.getElementById('resetTab').classList.contains('active')) {
+                    showTab('download');
+                }
+            } else {
+                document.getElementById('resetTabButton').style.display = 'none';
+                document.getElementById('uidInfoCard').style.display = 'none';
+                if (document.getElementById('resetTab').classList.contains('active')) {
+                    showTab('download');
+                }
+            }
+
+            if (clientData.hasDownloadLink && clientData.downloadLink.trim() !== '') {
+                document.getElementById('downloadButton').href = clientData.downloadLink;
+                document.getElementById('downloadSection').style.display = 'block';
+                document.getElementById('noLinkSection').style.display = 'none';
+            } else {
+                document.getElementById('downloadSection').style.display = 'none';
+                document.getElementById('noLinkSection').style.display = 'block';
+                showAlert('downloadAlert', 'No download link has been configured. Please contact your administrator.', 'info');
+            }
+        }
+
+        async function resetHwid() {
+            if (!clientData) return;
+
+            if (clientData.productType !== 'AIMKILL') {
+                showError('HWID reset is only available for Aimkill clients');
+                return;
+            }
+
+            if (!clientData.assignedUsername) {
+                showError('No assigned username configured. Please contact your administrator.');
+                return;
+            }
+
+            if (!confirm(`Reset HWID for ${clientData.assignedUsername}?`)) {
+                return;
+            }
+
+            const resetButton = document.getElementById('resetButton');
+            resetButton.disabled = true;
+            resetButton.textContent = '🔄 RESETTING...';
+
+            try {
+                const response = await fetch('/client/api/reset-hwid', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showSuccess(data.message);
+
+                    clientData.hwidResetCount = data.resetCount;
+                    clientData.lastHwidReset = data.lastReset;
+                    updateUI();
+                } else {
+                    showError(data.error || 'HWID reset failed');
+                }
+            } catch (error) {
+                console.error('Reset HWID error:', error);
+                showError('Error resetting HWID. Please try again.');
+            } finally {
+                resetButton.disabled = false;
+                resetButton.textContent = '🔄 RESET HWID';
+            }
+        }
+
+        async function logout() {
+            try {
+                const response = await fetch('/client/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Logout failed. Please try again.');
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+                alert('Error logging out');
+            }
+        }
+
+        setTimeout(() => {
+            loadClientData();
+        }, 500);
+    </script>
+</body>
+</html>
