@@ -361,8 +361,17 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             return res.status(400).json({ error: 'Client username already exists' });
         }
         
-        // Get current admin user
-        const adminUser = await User.findById(req.session.userId);
+        // Get current admin user - handle both session formats
+        let adminUser;
+        if (req.session.userId) {
+            adminUser = await User.findById(req.session.userId);
+        } else if (req.session.user && req.session.user.username) {
+            adminUser = await User.findOne({ username: req.session.user.username });
+        }
+        
+        if (!adminUser) {
+            return res.status(401).json({ error: 'Admin user not found in session' });
+        }
         
         const newClient = new Client({
             username: username.toLowerCase(),
