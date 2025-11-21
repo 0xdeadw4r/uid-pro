@@ -58,21 +58,22 @@ const isAdminOrOwner = async (req, res, next) => {
         }
 
         if (!user) {
-            console.log('❌ Admin check failed - No user found');
-            return res.status(401).json({ error: 'Not authenticated' });
+            console.log('❌ Admin check failed - No user found in session');
+            return res.status(401).json({ error: 'Not authenticated', needsAuth: true });
         }
 
-        console.log('✅ User found:', user.username, 'Admin:', user.isAdmin, 'Owner:', user.isOwner);
+        console.log('✅ User found:', user.username, 'Admin:', user.isAdmin, 'Owner:', user.isOwner, 'SuperAdmin:', user.isSuperAdmin);
 
         if (user.isAdmin || user.isOwner || user.isSuperAdmin) {
+            console.log('✅ Admin/Owner access granted');
             return next();
         }
 
         console.log('❌ Admin check failed - Insufficient permissions');
-        return res.status(403).json({ error: 'Access denied' });
+        return res.status(403).json({ error: 'Access denied - Admin or Owner privileges required' });
     } catch (error) {
         console.error('❌ Admin check error:', error);
-        return res.status(500).json({ error: 'Server error' });
+        return res.status(500).json({ error: 'Server error: ' + error.message });
     }
 };
 

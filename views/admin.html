@@ -2522,8 +2522,47 @@
             }
         }
 
-        function editProduct(productKey) {
-            alert(`Edit functionality for ${productKey} - you can expand this to show a modal with package configuration`);
+        async function editProduct(productKey) {
+            const displayName = prompt('Enter new display name (leave empty to keep current):');
+            const description = prompt('Enter new description (leave empty to keep current):');
+            const downloadLink = prompt('Enter new download link (leave empty to keep current):');
+            const genzauthKey = prompt('Enter new GenzAuth seller key (leave empty to keep current):');
+            const allowHwidResetInput = prompt('Allow HWID reset? (yes/no, leave empty to keep current):');
+            
+            const updates = {};
+            if (displayName && displayName.trim()) updates.displayName = displayName.trim();
+            if (description !== null && description.trim()) updates.description = description.trim();
+            if (downloadLink !== null) updates.downloadLink = downloadLink.trim();
+            if (genzauthKey !== null) updates.genzauthSellerKey = genzauthKey.trim();
+            if (allowHwidResetInput && (allowHwidResetInput.toLowerCase() === 'yes' || allowHwidResetInput.toLowerCase() === 'no')) {
+                updates.allowHwidReset = allowHwidResetInput.toLowerCase() === 'yes';
+            }
+            
+            if (Object.keys(updates).length === 0) {
+                showMessage('No changes made', 'error', 'productsMessage');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/admin/products/${productKey}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify(updates)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    showMessage('Product updated successfully!', 'success', 'productsMessage');
+                    loadProducts();
+                } else {
+                    showMessage(data.error || 'Failed to update product', 'error', 'productsMessage');
+                }
+            } catch (error) {
+                console.error('Edit product error:', error);
+                showMessage('Error updating product', 'error', 'productsMessage');
+            }
         }
 
         // Client Management Functions
@@ -2573,20 +2612,33 @@
                 }
 
                 // Load clients
+                console.log('📥 Loading clients from /client/admin/clients...');
                 const response = await fetch('/client/admin/clients', {
                     credentials: 'include'
                 });
 
-                const data = await response.json();
+                console.log('📡 Response status:', response.status);
 
-                if (response.ok && data.success) {
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    console.error('❌ Failed to load clients:', errorData);
+                    showMessage(`Failed to load clients: ${errorData.error || 'Server error'}`, 'error', 'clientsListMessage');
+                    document.getElementById('clientsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Failed to load clients. Please check console for details.</p>';
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('✅ Clients data received:', data);
+
+                if (data.success) {
                     renderClientsList(data.clients);
                 } else {
                     showMessage(data.error || 'Failed to load clients', 'error', 'clientsListMessage');
                 }
             } catch (error) {
-                console.error('Load clients error:', error);
-                showMessage('Error loading clients', 'error', 'clientsListMessage');
+                console.error('❌ Load clients error:', error);
+                showMessage('Error loading clients: ' + error.message, 'error', 'clientsListMessage');
+                document.getElementById('clientsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Error loading clients. Please refresh the page.</p>';
             }
         }
 
