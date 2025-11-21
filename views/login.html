@@ -85,6 +85,38 @@
             max-width: 450px;
         }
 
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .login-tab:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .login-tab.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
+        }
+
         .login-form-header {
             margin-bottom: 40px;
         }
@@ -316,6 +348,11 @@
         <!-- Right Side -->
         <div class="login-right">
             <div class="login-form-container">
+                <div class="login-tabs">
+                    <a href="/login" class="login-tab active">Admin / User</a>
+                    <a href="/client/login" class="login-tab">Client Portal</a>
+                </div>
+                
                 <div class="login-form-header">
                     <h1>Sign In</h1>
                     <p>Enter your credentials to continue</p>

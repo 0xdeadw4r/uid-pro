@@ -32,6 +32,38 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+        }
+
+        .login-tab:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .login-tab.active {
+            color: #FFFFFF;
+            border-bottom-color: #5865f2;
+        }
+
         .logo {
             text-align: center;
             margin-bottom: 30px;
@@ -169,6 +201,11 @@
 </head>
 <body>
     <div class="login-container">
+        <div class="login-tabs">
+            <a href="/login" class="login-tab">Admin / User</a>
+            <a href="/client/login" class="login-tab active">Client Portal</a>
+        </div>
+        
         <div class="logo">
             <h1>Client Portal</h1>
             <p>Dominus Corps</p>
