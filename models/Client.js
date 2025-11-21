@@ -14,41 +14,37 @@ const clientSchema = new mongoose.Schema({
         required: true
     },
 
-    // Product Type
-    productType: {
+    // Product Reference
+    productKey: {
         type: String,
-        enum: ['AIMKILL', 'UID_BYPASS'],
         required: true
     },
 
-    // Assigned Aimkill Account (for HWID reset - only for AIMKILL product type)
+    // Legacy Product Type (for backward compatibility)
+    productType: {
+        type: String,
+        enum: ['AIMKILL', 'UID_BYPASS'],
+        required: false
+    },
+
+    // Assigned Aimkill Account (for HWID reset)
     assignedUsername: {
         type: String,
-        required: function() {
-            return this.productType === 'AIMKILL';
-        },
+        required: false,
         trim: true
     },
 
-    // Assigned UID (for UID_BYPASS product type)
+    // Assigned UID
     assignedUid: {
         type: String,
-        required: function() {
-            return this.productType === 'UID_BYPASS';
-        },
+        required: false,
         trim: true
     },
 
-    // Download Links (managed by admins)
-    downloadLinks: {
-        aimkill: {
-            type: String,
-            default: ''
-        },
-        uidBypass: {
-            type: String,
-            default: ''
-        }
+    // Custom download link (overrides product default)
+    customDownloadLink: {
+        type: String,
+        default: ''
     },
 
     // Status
@@ -87,14 +83,15 @@ const clientSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Method to get download link based on product type
-clientSchema.methods.getDownloadLink = function() {
-    if (this.productType === 'AIMKILL') {
-        return this.downloadLinks.aimkill;
-    } else if (this.productType === 'UID_BYPASS') {
-        return this.downloadLinks.uidBypass;
+// Method to get download link (custom overrides product default)
+clientSchema.methods.getDownloadLink = async function() {
+    if (this.customDownloadLink) {
+        return this.customDownloadLink;
     }
-    return '';
+    
+    const Product = require('./Product');
+    const product = await Product.findOne({ productKey: this.productKey });
+    return product ? product.downloadLink : '';
 };
 
 module.exports = mongoose.model('Client', clientSchema);

@@ -31,6 +31,21 @@ const productSchema = new mongoose.Schema({
         },
         default: {}
     },
+    // GenzAuth API Configuration
+    genzauthSellerKey: {
+        type: String,
+        default: ''
+    },
+    // HWID Reset Permission
+    allowHwidReset: {
+        type: Boolean,
+        default: false
+    },
+    // Download Link
+    downloadLink: {
+        type: String,
+        default: ''
+    },
     settings: {
         type: Map,
         of: mongoose.Schema.Types.Mixed,

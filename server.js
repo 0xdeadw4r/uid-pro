@@ -3430,7 +3430,7 @@ app.post('/api/admin/unverify-all-users', requireAuth, requireAdmin, async (req,
 // Product Management APIs
 app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
+    const products = await Product.find({}).sort({ createdAt: -1 });
     
     const productsData = products.map(product => ({
       productKey: product.productKey,
@@ -3438,6 +3438,9 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       description: product.description,
       isActive: product.isActive,
       packages: Object.fromEntries(product.packages),
+      genzauthSellerKey: product.genzauthSellerKey || '',
+      allowHwidReset: product.allowHwidReset || false,
+      downloadLink: product.downloadLink || '',
       settings: Object.fromEntries(product.settings || new Map()),
       createdAt: product.createdAt
     }));
@@ -3451,7 +3454,7 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 
 app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { productKey, displayName, description, packages } = req.body;
+    const { productKey, displayName, description, packages, genzauthSellerKey, allowHwidReset, downloadLink } = req.body;
     
     if (!productKey || !displayName) {
       return res.status(400).json({ error: 'Product key and display name are required' });
@@ -3469,6 +3472,9 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       displayName,
       description: description || '',
       packages: packagesMap,
+      genzauthSellerKey: genzauthSellerKey || '',
+      allowHwidReset: allowHwidReset || false,
+      downloadLink: downloadLink || '',
       createdBy: req.session.user.username,
       isActive: true
     });
@@ -3481,7 +3487,10 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       product: {
         productKey: product.productKey,
         displayName: product.displayName,
-        description: product.description
+        description: product.description,
+        genzauthSellerKey: product.genzauthSellerKey ? '***configured***' : '',
+        allowHwidReset: product.allowHwidReset,
+        downloadLink: product.downloadLink
       }
     });
   } catch (error) {
@@ -3493,7 +3502,7 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    const { displayName, description, packages, isActive } = req.body;
+    const { displayName, description, packages, isActive, genzauthSellerKey, allowHwidReset, downloadLink } = req.body;
     
     const product = await Product.findOne({ productKey });
     if (!product) {
@@ -3504,6 +3513,9 @@ app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req
     if (description !== undefined) product.description = description;
     if (isActive !== undefined) product.isActive = isActive;
     if (packages) product.packages = new Map(Object.entries(packages));
+    if (genzauthSellerKey !== undefined) product.genzauthSellerKey = genzauthSellerKey;
+    if (allowHwidReset !== undefined) product.allowHwidReset = allowHwidReset;
+    if (downloadLink !== undefined) product.downloadLink = downloadLink;
     
     await product.save();
     
