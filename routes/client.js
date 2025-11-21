@@ -57,6 +57,8 @@ router.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         
+        console.log('Client login attempt:', username);
+        
         if (!username || !password) {
             return res.status(400).json({ error: 'Username and password are required' });
         }
@@ -64,22 +66,29 @@ router.post('/api/login', async (req, res) => {
         const client = await Client.findOne({ username: username.toLowerCase() });
         
         if (!client) {
+            console.log('Client not found:', username);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
         if (!client.isActive) {
+            console.log('Client account disabled:', username);
             return res.status(403).json({ error: 'Account is disabled' });
         }
         
+        console.log('Comparing passwords for client:', username);
         const isMatch = await client.comparePassword(password);
+        console.log('Password match result:', isMatch);
         
         if (!isMatch) {
+            console.log('Password mismatch for client:', username);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
         
         // Update last login
         client.lastLogin = new Date();
         await client.save();
+        
+        console.log('Client login successful:', username);
         
         // Set session
         req.session.clientId = client._id;
