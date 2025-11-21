@@ -557,6 +557,63 @@ router.put('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     }
 });
 
+// Admin: Update client download link
+router.put('/api/admin/clients/:id/download-link', isAdminOrOwner, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { downloadLink } = req.body;
+
+        const client = await Client.findById(id);
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+
+        client.customDownloadLink = downloadLink || null;
+        await client.save();
+
+        res.json({
+            success: true,
+            message: 'Download link updated successfully'
+        });
+    } catch (error) {
+        console.error('Update download link error:', error);
+        res.status(500).json({ error: 'Failed to update download link' });
+    }
+});
+
+// Admin: Update global download links by product type
+router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
+    try {
+        const { aimkillLink, uidBypassLink } = req.body;
+
+        const Product = require('../models/Product');
+
+        // Update Aimkill product download link
+        if (aimkillLink !== undefined) {
+            await Product.updateOne(
+                { productKey: 'AIMKILL' },
+                { $set: { downloadLink: aimkillLink } }
+            );
+        }
+
+        // Update UID Bypass product download link
+        if (uidBypassLink !== undefined) {
+            await Product.updateOne(
+                { productKey: 'UID_BYPASS' },
+                { $set: { downloadLink: uidBypassLink } }
+            );
+        }
+
+        res.json({
+            success: true,
+            message: 'Global download links updated successfully'
+        });
+    } catch (error) {
+        console.error('Update global download links error:', error);
+        res.status(500).json({ error: 'Failed to update download links' });
+    }
+});
+
 // Admin: Delete client
 router.delete('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     try {
