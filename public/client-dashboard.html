@@ -317,6 +317,26 @@
                 </div>
             </div>
 
+            <!-- UID Info Card (for UID Bypass clients) -->
+            <div id="uidInfoCard" class="info-card" style="display: none;">
+                <div class="info-row">
+                    <span class="info-label">Your UID:</span>
+                    <span class="info-value" id="assignedUid">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expires At:</span>
+                    <span class="info-value" id="uidExpiresAt">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Remaining:</span>
+                    <span class="info-value" id="uidTimeRemaining">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="uidStatus">-</span>
+                </div>
+            </div>
+
             <div id="downloadSection" class="download-section">
                 <div class="download-icon">📥</div>
                 <p style="margin-bottom: 30px; color: rgba(255, 255, 255, 0.7);">
@@ -442,22 +462,60 @@
             // Show/hide HWID reset tab based on product type
             if (clientData.productType === 'AIMKILL') {
                 document.getElementById('resetTabButton').style.display = 'block';
+                document.getElementById('uidInfoCard').style.display = 'none';
                 document.getElementById('assignedUsername').textContent = clientData.assignedUsername || 'Not assigned';
 
                 const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
                 document.getElementById('lastHwidReset').textContent = lastReset;
                 document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
             } else if (clientData.productType === 'UID_BYPASS') {
-                // Hide reset tab and show UID bypass creation card
+                // Hide reset tab and show UID info
                 document.getElementById('resetTabButton').style.display = 'none';
-                document.getElementById('uidBypassCard').style.display = 'block';
-                 // If currently on reset tab, switch to download tab
+                document.getElementById('uidInfoCard').style.display = 'block';
+                
+                // Display UID information
+                if (clientData.assignedUid) {
+                    document.getElementById('assignedUid').textContent = clientData.assignedUid;
+                    
+                    if (clientData.uidExpiresAt) {
+                        const expiresAt = new Date(clientData.uidExpiresAt);
+                        document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
+                        
+                        // Calculate time remaining
+                        const now = new Date();
+                        const timeLeft = expiresAt - now;
+                        
+                        if (timeLeft > 0) {
+                            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            document.getElementById('uidTimeRemaining').textContent = `${days} days, ${hours} hours`;
+                            document.getElementById('uidStatus').textContent = '✅ Active';
+                            document.getElementById('uidStatus').style.color = '#43b581';
+                        } else {
+                            document.getElementById('uidTimeRemaining').textContent = 'Expired';
+                            document.getElementById('uidStatus').textContent = '❌ Expired';
+                            document.getElementById('uidStatus').style.color = '#ed4245';
+                        }
+                    } else {
+                        document.getElementById('uidExpiresAt').textContent = 'Not set';
+                        document.getElementById('uidTimeRemaining').textContent = '-';
+                        document.getElementById('uidStatus').textContent = 'Unknown';
+                    }
+                } else {
+                    document.getElementById('assignedUid').textContent = 'Not assigned';
+                    document.getElementById('uidExpiresAt').textContent = '-';
+                    document.getElementById('uidTimeRemaining').textContent = '-';
+                    document.getElementById('uidStatus').textContent = 'Not configured';
+                }
+                
+                // If currently on reset tab, switch to download tab
                 if (document.getElementById('resetTab').classList.contains('active')) {
                     showTab('download');
                 }
             } else {
                 document.getElementById('resetTabButton').style.display = 'none';
-                 // If currently on reset tab, switch to download tab
+                document.getElementById('uidInfoCard').style.display = 'none';
+                // If currently on reset tab, switch to download tab
                 if (document.getElementById('resetTab').classList.contains('active')) {
                     showTab('download');
                 }

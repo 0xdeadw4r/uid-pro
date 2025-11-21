@@ -31,6 +31,15 @@ const clientSchema = new mongoose.Schema({
         trim: true
     },
     
+    // Assigned UID (for UID_BYPASS product type)
+    assignedUid: {
+        type: String,
+        required: function() {
+            return this.productType === 'UID_BYPASS';
+        },
+        trim: true
+    },
+    
     // Download Links (managed by admins)
     downloadLinks: {
         aimkill: {

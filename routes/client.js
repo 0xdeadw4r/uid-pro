@@ -110,12 +110,30 @@ router.get('/api/info', isClient, async (req, res) => {
         
         const downloadLink = client.getDownloadLink();
         
+        // Get UID info if this is a UID Bypass client
+        let uidData = null;
+        if (client.productType === 'UID_BYPASS' && client.assignedUid) {
+            const UID = require('../models/UID');
+            const uidRecord = await UID.findOne({ uid: client.assignedUid });
+            if (uidRecord) {
+                uidData = {
+                    uid: uidRecord.uid,
+                    expiresAt: uidRecord.expiresAt,
+                    status: uidRecord.status,
+                    duration: uidRecord.duration
+                };
+            }
+        }
+        
         res.json({
             success: true,
             client: {
                 username: client.username,
                 productType: client.productType,
                 assignedUsername: client.assignedUsername || null,
+                assignedUid: client.assignedUid || null,
+                uidExpiresAt: uidData ? uidData.expiresAt : null,
+                uidStatus: uidData ? uidData.status : null,
                 downloadLink: downloadLink || '',
                 hasDownloadLink: !!downloadLink,
                 lastLogin: client.lastLogin,
@@ -288,6 +306,7 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             password, 
             productType, 
             assignedUsername,
+            assignedUid,
             notes 
         } = req.body;
         
@@ -309,6 +328,17 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             }
         }
         
+        // For UID_BYPASS clients, assignedUid is required and must not be empty
+        if (productType === 'UID_BYPASS') {
+            const trimmedAssignedUid = assignedUid ? assignedUid.trim() : '';
+            if (!trimmedAssignedUid) {
+                return res.status(400).json({ error: 'UID is required and cannot be empty for UID Bypass clients' });
+            }
+            if (!/^\d+$/.test(trimmedAssignedUid)) {
+                return res.status(400).json({ error: 'UID must contain only numbers' });
+            }
+        }
+        
         // Check if client username already exists
         const existingClient = await Client.findOne({ username: username.toLowerCase() });
         if (existingClient) {
@@ -323,6 +353,7 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             password,
             productType,
             assignedUsername: productType === 'AIMKILL' ? assignedUsername.trim().toLowerCase() : undefined,
+            assignedUid: productType === 'UID_BYPASS' ? assignedUid.trim() : undefined,
             notes: notes || '',
             createdBy: adminUser._id
         });
@@ -367,6 +398,14 @@ router.put('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
             updates.assignedUsername = updates.assignedUsername ? updates.assignedUsername.trim().toLowerCase() : null;
         }
         
+        // Normalize assignedUid if provided
+        if (updates.assignedUid !== undefined) {
+            updates.assignedUid = updates.assignedUid ? updates.assignedUid.trim() : null;
+            if (updates.assignedUid && !/^\d+$/.test(updates.assignedUid)) {
+                return res.status(400).json({ error: 'UID must contain only numbers' });
+            }
+        }
+        
         // Validate productType change
         if (updates.productType) {
             if (!['AIMKILL', 'UID_BYPASS'].includes(updates.productType)) {
@@ -379,17 +418,29 @@ router.put('/api/admin/clients/:id', isAdminOrOwner, async (req, res) => {
                 if (!assignedUsername || assignedUsername.trim() === '') {
                     return res.status(400).json({ error: 'Assigned username is required for Aimkill clients' });
                 }
+                updates.assignedUid = null; // Clear UID for Aimkill
             }
             
-            // If changing to UID_BYPASS, clear assignedUsername
+            // If changing to UID_BYPASS, assignedUid is required
             if (updates.productType === 'UID_BYPASS') {
-                updates.assignedUsername = null;
+                const assignedUid = updates.assignedUid !== undefined ? updates.assignedUid : currentClient.assignedUid;
+                if (!assignedUid || assignedUid.trim() === '') {
+                    return res.status(400).json({ error: 'UID is required for UID Bypass clients' });
+                }
+                updates.assignedUsername = null; // Clear username for UID Bypass
             }
         } else {
             // If productType is not changing but we're updating an Aimkill client
             if (currentClient.productType === 'AIMKILL' && updates.assignedUsername !== undefined) {
                 if (!updates.assignedUsername || updates.assignedUsername.trim() === '') {
                     return res.status(400).json({ error: 'Assigned username cannot be empty for Aimkill clients' });
+                }
+            }
+            
+            // If productType is not changing but we're updating a UID Bypass client
+            if (currentClient.productType === 'UID_BYPASS' && updates.assignedUid !== undefined) {
+                if (!updates.assignedUid || updates.assignedUid.trim() === '') {
+                    return res.status(400).json({ error: 'UID cannot be empty for UID Bypass clients' });
                 }
             }
         }
