@@ -548,10 +548,14 @@
             Object.entries(packagesData).forEach(([key, pkg]) => {
                 const card = document.createElement('div');
                 card.className = 'package-card';
+                
+                const durationText = pkg.days === 365 ? '1 Year' : `${pkg.days} Day${pkg.days !== 1 ? 's' : ''}`;
+
                 card.innerHTML = `
                     <div class="package-name">${pkg.display}</div>
-                    <div class="package-credits">${pkg.credits} Credits</div>
+                    <div class="duration">${durationText}</div>
                     <div class="package-price">$${pkg.price.toFixed(2)}</div>
+                    <div class="package-credits">${pkg.credits} Credits</div>
                 `;
 
                 // Pass the key to selectPackage
