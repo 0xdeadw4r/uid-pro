@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -462,8 +461,30 @@
 
         async function loadClientData() {
             try {
-                const response = await fetch('/client/api/info');
+                const response = await fetch('/client/api/info', {
+                    credentials: 'include'
+                });
+
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Got HTML instead of JSON - not authenticated
+                    console.error('Session lost - got HTML instead of JSON');
+                    console.error('Redirecting to login...');
+                    setTimeout(() => {
+                        window.location.href = '/client/login';
+                    }, 100);
+                    return;
+                }
+
                 const data = await response.json();
+
+                // Check for authentication error
+                if (response.status === 401 || data.error === 'Not authenticated') {
+                    console.error('Authentication failed - redirecting to login');
+                    window.location.href = '/client/login';
+                    return;
+                }
 
                 if (response.ok && data.success) {
                     clientData = data.client;
@@ -498,17 +519,17 @@
             } else if (clientData.productType === 'UID_BYPASS') {
                 document.getElementById('resetTabButton').style.display = 'none';
                 document.getElementById('uidInfoCard').style.display = 'block';
-                
+
                 if (clientData.assignedUid) {
                     document.getElementById('assignedUid').textContent = clientData.assignedUid;
-                    
+
                     if (clientData.uidExpiresAt) {
                         const expiresAt = new Date(clientData.uidExpiresAt);
                         document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
-                        
+
                         const now = new Date();
                         const timeLeft = expiresAt - now;
-                        
+
                         if (timeLeft > 0) {
                             const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
                             const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -531,7 +552,7 @@
                     document.getElementById('uidTimeRemaining').textContent = '-';
                     document.getElementById('uidStatus').textContent = 'Not configured';
                 }
-                
+
                 if (document.getElementById('resetTab').classList.contains('active')) {
                     showTab('download');
                 }

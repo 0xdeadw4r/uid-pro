@@ -115,7 +115,7 @@ router.post('/api/login', async (req, res) => {
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Save session synchronously before responding
+        // Save session and wait for it to be committed
         req.session.save((err) => {
             if (err) {
                 console.error('Session save error:', err);
@@ -123,6 +123,8 @@ router.post('/api/login', async (req, res) => {
             }
             
             console.log('Session saved successfully for client:', username);
+            console.log('Session ID:', req.sessionID);
+            console.log('Session data:', req.session);
             
             res.json({ 
                 success: true, 
