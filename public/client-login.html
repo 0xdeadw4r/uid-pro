@@ -288,8 +288,10 @@
 
                 if (response.ok && data.success) {
                     showSuccess('Login successful! Redirecting...');
-                    // Immediate redirect without delay to prevent session issues
-                    window.location.href = data.redirectUrl || '/client/dashboard';
+                    // Small delay to ensure session is saved on server
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl || '/client/dashboard';
+                    }, 500);
                 } else {
                     showError(data.error || 'Login failed. Please try again.');
                     loginBtn.disabled = false;

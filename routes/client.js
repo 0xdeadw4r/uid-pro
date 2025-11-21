@@ -115,20 +115,20 @@ router.post('/api/login', async (req, res) => {
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Save session and ensure it's properly stored
-        await new Promise((resolve, reject) => {
-            req.session.save((err) => {
-                if (err) reject(err);
-                else resolve();
+        // Save session synchronously before responding
+        req.session.save((err) => {
+            if (err) {
+                console.error('Session save error:', err);
+                return res.status(500).json({ error: 'Session save failed' });
+            }
+            
+            console.log('Session saved successfully for client:', username);
+            
+            res.json({ 
+                success: true, 
+                message: 'Login successful',
+                redirectUrl: '/client/dashboard'
             });
-        });
-        
-        console.log('Session saved successfully for client:', username);
-        
-        res.json({ 
-            success: true, 
-            message: 'Login successful',
-            redirectUrl: '/client/dashboard'
         });
         
     } catch (error) {
