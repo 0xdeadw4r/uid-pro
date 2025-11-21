@@ -15,7 +15,14 @@ const isClient = (req, res, next) => {
         return next();
     }
     
-    console.log('❌ Client not authenticated, redirecting to login');
+    console.log('❌ Client not authenticated');
+    
+    // For API requests, return JSON error
+    if (req.path.includes('/api/')) {
+        return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    // For page requests, redirect to login
     res.redirect('/client/login');
 };
 
