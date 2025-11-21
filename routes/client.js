@@ -426,6 +426,12 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             return res.status(404).json({ error: 'Product not found' });
         }
 
+        // Get the admin user who is creating this client
+        const adminUser = await User.findOne({ username: req.session.user.username });
+        if (!adminUser) {
+            return res.status(401).json({ error: 'Admin user not found' });
+        }
+
         const newClient = await Client.create({
             username: username.toLowerCase(),
             password,
@@ -434,7 +440,7 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             assignedUid: assignedUid || null,
             notes: notes || null,
             customDownloadLink: customDownloadLink || null,
-            createdBy: req.session.userId, // Assuming userId is set in session by auth middleware
+            createdBy: adminUser._id,
             isActive: true,
             lastLogin: null,
             lastHwidReset: null,
