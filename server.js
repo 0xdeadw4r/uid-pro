@@ -238,10 +238,35 @@ async function initializeProducts() {
             '30day': { display: '30 Days', days: 30, credits: 50, price: 49.99 },
             'lifetime': { display: 'Lifetime (1 Year)', days: 365, credits: 100, price: 99.99 }
           }))
+        },
+        {
+          productKey: 'SILENT_AIM',
+          displayName: 'Silent Aim',
+          description: 'Silent Aim product for clients',
+          isActive: true,
+          createdBy: 'system',
+          allowHwidReset: false,
+          downloadLink: '',
+          packages: new Map()
         }
       ]);
       console.log('✅ Default products initialized');
     } else {
+      // Ensure SILENT_AIM product exists
+      const silentAimExists = await Product.findOne({ productKey: 'SILENT_AIM' });
+      if (!silentAimExists) {
+        await Product.create({
+          productKey: 'SILENT_AIM',
+          displayName: 'Silent Aim',
+          description: 'Silent Aim product for clients',
+          isActive: true,
+          createdBy: 'system',
+          allowHwidReset: false,
+          downloadLink: '',
+          packages: new Map()
+        });
+        console.log('✅ SILENT_AIM product created');
+      }
       console.log('✅ Products loaded from MongoDB');
     }
   } catch (error) {

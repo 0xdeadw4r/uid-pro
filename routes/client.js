@@ -627,11 +627,23 @@ router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
 
         // Update Silent Aim product download link
         if (silentAimLink !== undefined) {
-            await Product.updateOne(
-                { productKey: 'SILENT_AIM' },
-                { $set: { downloadLink: silentAimLink } },
-                { upsert: true }
-            );
+            const silentAimProduct = await Product.findOne({ productKey: 'SILENT_AIM' });
+            if (silentAimProduct) {
+                silentAimProduct.downloadLink = silentAimLink;
+                await silentAimProduct.save();
+            } else {
+                // Create if doesn't exist
+                await Product.create({
+                    productKey: 'SILENT_AIM',
+                    displayName: 'Silent Aim',
+                    description: 'Silent Aim product for clients',
+                    isActive: true,
+                    createdBy: 'system',
+                    allowHwidReset: false,
+                    downloadLink: silentAimLink,
+                    packages: new Map()
+                });
+            }
         }
 
         res.json({
