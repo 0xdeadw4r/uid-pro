@@ -33,34 +33,46 @@ const isClient = (req, res, next) => {
 };
 
 // Middleware to check if user is admin/owner
-const isAdminOrOwner = (req, res, next) => {
-    // Check both session formats (client and regular admin)
-    const userId = req.session.userId || (req.session.user && req.session.user.username);
+const isAdminOrOwner = async (req, res, next) => {
+    try {
+        console.log('🔍 Admin check - Session:', JSON.stringify({
+            userId: req.session.userId,
+            sessionUser: req.session.user,
+            sessionID: req.sessionID
+        }, null, 2));
 
-    if (!userId) {
-        return res.status(401).json({ error: 'Not authenticated' });
-    }
+        // Try multiple session formats
+        let user = null;
 
-    // If we have a username from session.user, find by username
-    if (req.session.user && req.session.user.username) {
-        User.findOne({ username: req.session.user.username }).then(user => {
-            if (user && (user.isAdmin || user.isOwner || user.isSuperAdmin)) {
-                return next();
-            }
-            res.status(403).json({ error: 'Access denied' });
-        }).catch(err => {
-            res.status(500).json({ error: 'Server error' });
-        });
-    } else {
-        // Otherwise find by ID
-        User.findById(req.session.userId).then(user => {
-            if (user && (user.isAdmin || user.isOwner || user.isSuperAdmin)) {
-                return next();
-            }
-            res.status(403).json({ error: 'Access denied' });
-        }).catch(err => {
-            res.status(500).json({ error: 'Server error' });
-        });
+        // Check if userId exists in session
+        if (req.session.userId) {
+            user = await User.findById(req.session.userId);
+        }
+        // Check if user.username exists
+        else if (req.session.user && req.session.user.username) {
+            user = await User.findOne({ username: req.session.user.username });
+        }
+        // Check if user object has _id
+        else if (req.session.user && req.session.user._id) {
+            user = await User.findById(req.session.user._id);
+        }
+
+        if (!user) {
+            console.log('❌ Admin check failed - No user found');
+            return res.status(401).json({ error: 'Not authenticated' });
+        }
+
+        console.log('✅ User found:', user.username, 'Admin:', user.isAdmin, 'Owner:', user.isOwner);
+
+        if (user.isAdmin || user.isOwner || user.isSuperAdmin) {
+            return next();
+        }
+
+        console.log('❌ Admin check failed - Insufficient permissions');
+        return res.status(403).json({ error: 'Access denied' });
+    } catch (error) {
+        console.error('❌ Admin check error:', error);
+        return res.status(500).json({ error: 'Server error' });
     }
 };
 
@@ -431,7 +443,16 @@ router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
         }
 
         // Get the admin user who is creating this client
-        const adminUser = await User.findOne({ username: req.session.user.username });
+        let adminUser = null;
+        
+        if (req.session.userId) {
+            adminUser = await User.findById(req.session.userId);
+        } else if (req.session.user && req.session.user.username) {
+            adminUser = await User.findOne({ username: req.session.user.username });
+        } else if (req.session.user && req.session.user._id) {
+            adminUser = await User.findById(req.session.user._id);
+        }
+        
         if (!adminUser) {
             return res.status(401).json({ error: 'Admin user not found' });
         }
