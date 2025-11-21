@@ -500,67 +500,62 @@
         function updateUI() {
             if (!clientData) return;
 
+            const productName = clientData.productInfo ? clientData.productInfo.displayName : clientData.productKey;
+            
             document.getElementById('headerUsername').textContent = clientData.username;
-            document.getElementById('headerProductType').textContent = clientData.productType;
-            document.getElementById('productType').textContent = clientData.productType;
+            document.getElementById('headerProductType').textContent = productName;
+            document.getElementById('productType').textContent = productName;
 
             const lastLogin = clientData.lastLogin ? new Date(clientData.lastLogin).toLocaleString() : 'Never';
             document.getElementById('lastLogin').textContent = lastLogin;
 
-            if (clientData.productType === 'AIMKILL') {
+            const hasHwidReset = clientData.productInfo && clientData.productInfo.allowHwidReset;
+            const hasUid = clientData.assignedUid !== null && clientData.assignedUid !== undefined;
+
+            if (hasHwidReset) {
                 document.getElementById('resetTabButton').style.display = 'block';
-                document.getElementById('uidInfoCard').style.display = 'none';
                 document.getElementById('assignedUsername').textContent = clientData.assignedUsername || 'Not assigned';
 
                 const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
                 document.getElementById('lastHwidReset').textContent = lastReset;
                 document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
-            } else if (clientData.productType === 'UID_BYPASS') {
-                document.getElementById('resetTabButton').style.display = 'none';
-                document.getElementById('uidInfoCard').style.display = 'block';
-
-                if (clientData.assignedUid) {
-                    document.getElementById('assignedUid').textContent = clientData.assignedUid;
-
-                    if (clientData.uidExpiresAt) {
-                        const expiresAt = new Date(clientData.uidExpiresAt);
-                        document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
-
-                        const now = new Date();
-                        const timeLeft = expiresAt - now;
-
-                        if (timeLeft > 0) {
-                            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                            document.getElementById('uidTimeRemaining').textContent = `${days} days, ${hours} hours`;
-                            document.getElementById('uidStatus').textContent = '✅ Active';
-                            document.getElementById('uidStatus').style.color = '#10B981';
-                        } else {
-                            document.getElementById('uidTimeRemaining').textContent = 'Expired';
-                            document.getElementById('uidStatus').textContent = '❌ Expired';
-                            document.getElementById('uidStatus').style.color = '#EF4444';
-                        }
-                    } else {
-                        document.getElementById('uidExpiresAt').textContent = 'Not set';
-                        document.getElementById('uidTimeRemaining').textContent = '-';
-                        document.getElementById('uidStatus').textContent = 'Unknown';
-                    }
-                } else {
-                    document.getElementById('assignedUid').textContent = 'Not assigned';
-                    document.getElementById('uidExpiresAt').textContent = '-';
-                    document.getElementById('uidTimeRemaining').textContent = '-';
-                    document.getElementById('uidStatus').textContent = 'Not configured';
-                }
-
-                if (document.getElementById('resetTab').classList.contains('active')) {
-                    showTab('download');
-                }
             } else {
                 document.getElementById('resetTabButton').style.display = 'none';
-                document.getElementById('uidInfoCard').style.display = 'none';
-                if (document.getElementById('resetTab').classList.contains('active')) {
-                    showTab('download');
+            }
+
+            if (hasUid) {
+                document.getElementById('uidInfoCard').style.display = 'block';
+                document.getElementById('assignedUid').textContent = clientData.assignedUid;
+
+                if (clientData.uidExpiresAt) {
+                    const expiresAt = new Date(clientData.uidExpiresAt);
+                    document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
+
+                    const now = new Date();
+                    const timeLeft = expiresAt - now;
+
+                    if (timeLeft > 0) {
+                        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        document.getElementById('uidTimeRemaining').textContent = `${days} days, ${hours} hours`;
+                        document.getElementById('uidStatus').textContent = '✅ Active';
+                        document.getElementById('uidStatus').style.color = '#10B981';
+                    } else {
+                        document.getElementById('uidTimeRemaining').textContent = 'Expired';
+                        document.getElementById('uidStatus').textContent = '❌ Expired';
+                        document.getElementById('uidStatus').style.color = '#EF4444';
+                    }
+                } else {
+                    document.getElementById('uidExpiresAt').textContent = 'Not set';
+                    document.getElementById('uidTimeRemaining').textContent = '-';
+                    document.getElementById('uidStatus').textContent = 'Unknown';
                 }
+            } else {
+                document.getElementById('uidInfoCard').style.display = 'none';
+            }
+
+            if (!hasHwidReset && document.getElementById('resetTab').classList.contains('active')) {
+                showTab('download');
             }
 
             if (clientData.hasDownloadLink && clientData.downloadLink.trim() !== '') {
@@ -577,8 +572,8 @@
         async function resetHwid() {
             if (!clientData) return;
 
-            if (clientData.productType !== 'AIMKILL') {
-                showError('HWID reset is only available for Aimkill clients');
+            if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
+                showError('HWID reset is not available for your product');
                 return;
             }
 
