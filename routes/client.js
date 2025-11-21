@@ -55,7 +55,11 @@ router.get('/login', (req, res) => {
 // Client Login API
 router.post('/api/login', async (req, res) => {
     try {
-        const { username, password } = req.body;
+        let { username, password } = req.body;
+        
+        // Trim whitespace from inputs
+        username = username ? username.trim() : '';
+        password = password ? password.trim() : '';
         
         console.log('Client login attempt:', username);
         
@@ -76,13 +80,13 @@ router.post('/api/login', async (req, res) => {
         }
         
         console.log('Login attempt for client:', username);
-        console.log('Stored password:', client.password);
-        console.log('Entered password:', password);
+        console.log('Stored password:', `"${client.password}"`);
+        console.log('Entered password:', `"${password}"`);
         console.log('Passwords match:', client.password === password);
         
         if (client.password !== password) {
             console.log('❌ Password mismatch for client:', username);
-            return res.status(401).json({ error: 'Incorrect password. Please check your password and try again.' });
+            return res.status(401).json({ error: 'Invalid username or password' });
         }
         
         console.log('✅ Password matched for client:', username);
@@ -386,11 +390,11 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
         }
         
         console.log('Creating new client:', username.toLowerCase());
-        console.log('Password being saved:', password);
+        console.log('Password being saved:', `"${password.trim()}"`);
         
         const newClient = new Client({
             username: username.toLowerCase(),
-            password,
+            password: password.trim(),
             productType,
             assignedUsername: productType === 'AIMKILL' ? assignedUsername.trim().toLowerCase() : undefined,
             assignedUid: productType === 'UID_BYPASS' ? assignedUid.trim() : undefined,
