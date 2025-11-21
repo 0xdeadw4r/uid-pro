@@ -76,13 +76,13 @@ router.post('/api/login', async (req, res) => {
         }
         
         console.log('Comparing passwords for client:', username);
-        const isMatch = await client.comparePassword(password);
-        console.log('Password match result:', isMatch);
         
-        if (!isMatch) {
+        if (client.password !== password) {
             console.log('Password mismatch for client:', username);
             return res.status(401).json({ error: 'Invalid credentials' });
         }
+        
+        console.log('Password matched for client:', username);
         
         // Update last login
         client.lastLogin = new Date();
