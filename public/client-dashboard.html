@@ -462,26 +462,25 @@
         async function loadClientData() {
             try {
                 const response = await fetch('/client/api/info', {
-                    credentials: 'include'
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
                 });
 
                 // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
-                    // Got HTML instead of JSON - not authenticated
-                    console.error('Session lost - got HTML instead of JSON');
-                    console.error('Redirecting to login...');
-                    setTimeout(() => {
-                        window.location.href = '/client/login';
-                    }, 100);
+                    console.error('Not authenticated - received HTML instead of JSON');
+                    window.location.href = '/client/login';
                     return;
                 }
 
                 const data = await response.json();
 
-                // Check for authentication error
                 if (response.status === 401 || data.error === 'Not authenticated') {
-                    console.error('Authentication failed - redirecting to login');
+                    console.error('Session expired - redirecting to login');
                     window.location.href = '/client/login';
                     return;
                 }
@@ -494,7 +493,7 @@
                 }
             } catch (error) {
                 console.error('Load client data error:', error);
-                showError('Error loading client data');
+                window.location.href = '/client/login';
             }
         }
 
@@ -599,6 +598,7 @@
             try {
                 const response = await fetch('/client/api/reset-hwid', {
                     method: 'POST',
+                    credentials: 'include',
                     headers: {
                         'Content-Type': 'application/json',
                     },
@@ -628,6 +628,7 @@
             try {
                 const response = await fetch('/client/api/logout', {
                     method: 'POST',
+                    credentials: 'include'
                 });
 
                 const data = await response.json();
