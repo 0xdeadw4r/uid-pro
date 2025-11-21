@@ -75,14 +75,17 @@ router.post('/api/login', async (req, res) => {
             return res.status(403).json({ error: 'Account is disabled' });
         }
         
-        console.log('Comparing passwords for client:', username);
+        console.log('Login attempt for client:', username);
+        console.log('Stored password:', client.password);
+        console.log('Entered password:', password);
+        console.log('Passwords match:', client.password === password);
         
         if (client.password !== password) {
-            console.log('Password mismatch for client:', username);
-            return res.status(401).json({ error: 'Invalid credentials' });
+            console.log('❌ Password mismatch for client:', username);
+            return res.status(401).json({ error: 'Incorrect password. Please check your password and try again.' });
         }
         
-        console.log('Password matched for client:', username);
+        console.log('✅ Password matched for client:', username);
         
         // Update last login
         client.lastLogin = new Date();
@@ -382,6 +385,9 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
             return res.status(401).json({ error: 'Admin user not found in session' });
         }
         
+        console.log('Creating new client:', username.toLowerCase());
+        console.log('Password being saved:', password);
+        
         const newClient = new Client({
             username: username.toLowerCase(),
             password,
@@ -393,6 +399,8 @@ router.post('/api/admin/clients', isAdminOrOwner, async (req, res) => {
         });
         
         await newClient.save();
+        
+        console.log('✅ Client created successfully:', username.toLowerCase());
         
         const clientData = await Client.findById(newClient._id)
             .select('-password')
