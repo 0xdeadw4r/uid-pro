@@ -7,9 +7,17 @@ const genzauth = require('../services/genzauth');
 
 // Middleware to check if user is a client
 const isClient = (req, res, next) => {
+    console.log('isClient middleware - Session:', {
+        hasSession: !!req.session,
+        clientId: req.session?.clientId,
+        clientUsername: req.session?.clientUsername
+    });
+    
     if (req.session && req.session.clientId) {
         return next();
     }
+    
+    console.log('❌ Client not authenticated, redirecting to login');
     res.redirect('/client/login');
 };
 
@@ -115,18 +123,20 @@ router.post('/api/login', async (req, res) => {
         req.session.clientUsername = client.username;
         req.session.isClient = true;
         
-        // Save session before sending response
-        req.session.save((err) => {
-            if (err) {
-                console.error('Session save error:', err);
-                return res.status(500).json({ error: 'Login failed - session error' });
-            }
-            
-            res.json({ 
-                success: true, 
-                message: 'Login successful',
-                redirectUrl: '/client/dashboard'
+        // Save session and ensure it's properly stored
+        await new Promise((resolve, reject) => {
+            req.session.save((err) => {
+                if (err) reject(err);
+                else resolve();
             });
+        });
+        
+        console.log('Session saved successfully for client:', username);
+        
+        res.json({ 
+            success: true, 
+            message: 'Login successful',
+            redirectUrl: '/client/dashboard'
         });
         
     } catch (error) {
