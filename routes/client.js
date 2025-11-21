@@ -584,7 +584,7 @@ router.put('/api/admin/clients/:id/download-link', isAdminOrOwner, async (req, r
 // Admin: Update global download links by product type
 router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
     try {
-        const { aimkillLink, uidBypassLink } = req.body;
+        const { aimkillLink, uidBypassLink, silentAimLink } = req.body;
 
         const Product = require('../models/Product');
 
@@ -601,6 +601,15 @@ router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
             await Product.updateOne(
                 { productKey: 'UID_BYPASS' },
                 { $set: { downloadLink: uidBypassLink } }
+            );
+        }
+
+        // Update Silent Aim product download link
+        if (silentAimLink !== undefined) {
+            await Product.updateOne(
+                { productKey: 'SILENT_AIM' },
+                { $set: { downloadLink: silentAimLink } },
+                { upsert: true }
             );
         }
 

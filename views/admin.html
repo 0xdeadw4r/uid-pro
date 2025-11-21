@@ -1209,6 +1209,10 @@
                         <label>UID Bypass Download Link</label>
                         <input type="url" id="uidBypassDownloadLink" placeholder="https://example.com/uid-bypass-download">
                     </div>
+                    <div class="form-group">
+                        <label>Silent Aim Download Link</label>
+                        <input type="url" id="silentAimDownloadLink" placeholder="https://example.com/silent-aim-download">
+                    </div>
                     <button class="submit-btn" onclick="updateGlobalDownloadLinks()" style="margin-top: 1rem;">Update Global Links</button>
                 </div>
 
@@ -2536,6 +2540,15 @@
                     productSelect.innerHTML = '<option value="">Select a product...</option>';
                     productsData.products.forEach(product => {
                         productSelect.innerHTML += `<option value="${product.productKey}" data-key="${product.productKey}">${product.displayName}</option>`;
+
+                        // Load global download links from products
+                        if (product.productKey === 'AIMKILL' && product.downloadLink) {
+                            document.getElementById('aimkillDownloadLink').value = product.downloadLink;
+                        } else if (product.productKey === 'UID_BYPASS' && product.downloadLink) {
+                            document.getElementById('uidBypassDownloadLink').value = product.downloadLink;
+                        } else if (product.productKey === 'SILENT_AIM' && product.downloadLink) {
+                            document.getElementById('silentAimDownloadLink').value = product.downloadLink;
+                        }
                     });
 
                     // Add change handler to show/hide fields
@@ -2664,8 +2677,8 @@
 
             const createGenzAuth = document.getElementById('createGenzAuthAccount')?.checked || false;
             const genzAuthUsername = document.getElementById('genzAuthUsername')?.value.trim() || '';
-            const genzAuthPassword = document.getElementById('genzAuthPassword')?.value || '';
-            const genzAuthDuration = document.getElementById('genzAuthDuration')?.value || '30';
+            const genzAuthPassword = document.getElementById('genzAuthPassword').value || '';
+            const genzAuthDuration = document.getElementById('genzAuthDuration').value || '30';
 
             if (!username || !password || !productKey) {
                 showMessage('Please fill in username, password, and select a product', 'error', 'createClientMessage');
@@ -2816,6 +2829,7 @@
         async function updateGlobalDownloadLinks() {
             const aimkillLink = document.getElementById('aimkillDownloadLink').value.trim();
             const uidBypassLink = document.getElementById('uidBypassDownloadLink').value.trim();
+            const silentAimLink = document.getElementById('silentAimDownloadLink').value.trim(); // Get the value for Silent Aim
 
             try {
                 const response = await fetch('/client/admin/download-links', {
@@ -2826,7 +2840,8 @@
                     credentials: 'include',
                     body: JSON.stringify({
                         aimkillLink,
-                        uidBypassLink
+                        uidBypassLink,
+                        silentAimLink // Include Silent Aim link in the request
                     })
                 });
 
