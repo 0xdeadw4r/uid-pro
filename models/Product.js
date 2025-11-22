@@ -41,6 +41,16 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    // Maximum free HWID resets (before requiring payment)
+    maxFreeHwidResets: {
+        type: Number,
+        default: 5
+    },
+    // Price for HWID reset after free limit
+    hwidResetPrice: {
+        type: Number,
+        default: 0
+    },
     // Download Link
     downloadLink: {
         type: String,

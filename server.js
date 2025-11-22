@@ -3465,6 +3465,8 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       packages: Object.fromEntries(product.packages),
       genzauthSellerKey: product.genzauthSellerKey || '',
       allowHwidReset: product.allowHwidReset || false,
+      maxFreeHwidResets: product.maxFreeHwidResets || 5,
+      hwidResetPrice: product.hwidResetPrice || 0,
       downloadLink: product.downloadLink || '',
       settings: Object.fromEntries(product.settings || new Map()),
       createdAt: product.createdAt
@@ -3479,7 +3481,7 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 
 app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { productKey, displayName, description, packages, genzauthSellerKey, allowHwidReset, downloadLink } = req.body;
+    const { productKey, displayName, description, packages, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
     
     if (!productKey || !displayName) {
       return res.status(400).json({ error: 'Product key and display name are required' });
@@ -3499,6 +3501,8 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       packages: packagesMap,
       genzauthSellerKey: genzauthSellerKey || '',
       allowHwidReset: allowHwidReset || false,
+      maxFreeHwidResets: maxFreeHwidResets || 5,
+      hwidResetPrice: hwidResetPrice || 0,
       downloadLink: downloadLink || '',
       createdBy: req.session.user.username,
       isActive: true
@@ -3527,7 +3531,7 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    const { displayName, description, packages, isActive, genzauthSellerKey, allowHwidReset, downloadLink } = req.body;
+    const { displayName, description, packages, isActive, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
     
     const product = await Product.findOne({ productKey });
     if (!product) {
@@ -3540,6 +3544,8 @@ app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req
     if (packages) product.packages = new Map(Object.entries(packages));
     if (genzauthSellerKey !== undefined) product.genzauthSellerKey = genzauthSellerKey;
     if (allowHwidReset !== undefined) product.allowHwidReset = allowHwidReset;
+    if (maxFreeHwidResets !== undefined) product.maxFreeHwidResets = maxFreeHwidResets;
+    if (hwidResetPrice !== undefined) product.hwidResetPrice = hwidResetPrice;
     if (downloadLink !== undefined) product.downloadLink = downloadLink;
     
     await product.save();

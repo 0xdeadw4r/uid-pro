@@ -978,6 +978,20 @@
                         </div>
                     </div>
                 </div>
+                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
+                    <div class="form-group">
+                        <label>Max Free HWID Resets</label>
+                        <input type="number" id="newProductMaxFreeResets" placeholder="5" value="5" min="0"
+                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Number of free HWID resets allowed per client</p>
+                    </div>
+                    <div class="form-group">
+                        <label>HWID Reset Price (USD)</label>
+                        <input type="number" id="newProductResetPrice" placeholder="0.00" value="0" min="0" step="0.01"
+                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Price for additional resets after free limit</p>
+                    </div>
+                </div>
                 <button class="success-btn" onclick="createProduct()" style="width: 100%;">Create Product</button>
             </div>
 
@@ -2455,6 +2469,8 @@
             const genzauthSellerKey = document.getElementById('newProductGenzauth').value.trim();
             const downloadLink = document.getElementById('newProductDownloadLink').value.trim();
             const allowHwidReset = document.getElementById('newProductAllowHwid').checked;
+            const maxFreeHwidResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
+            const hwidResetPrice = parseFloat(document.getElementById('newProductResetPrice').value) || 0;
 
             if (!productKey || !displayName) {
                 showMessage('Product key and display name are required', 'error', 'productsMessage');
@@ -2473,6 +2489,8 @@
                         genzauthSellerKey,
                         downloadLink,
                         allowHwidReset,
+                        maxFreeHwidResets,
+                        hwidResetPrice,
                         packages: {}
                     })
                 });
@@ -2528,6 +2546,8 @@
             const downloadLink = prompt('Enter new download link (leave empty to keep current):');
             const genzauthKey = prompt('Enter new GenzAuth seller key (leave empty to keep current):');
             const allowHwidResetInput = prompt('Allow HWID reset? (yes/no, leave empty to keep current):');
+            const maxFreeResetsInput = prompt('Max free HWID resets (leave empty to keep current):');
+            const resetPriceInput = prompt('HWID reset price in USD (leave empty to keep current):');
             
             const updates = {};
             if (displayName && displayName.trim()) updates.displayName = displayName.trim();
@@ -2536,6 +2556,12 @@
             if (genzauthKey !== null) updates.genzauthSellerKey = genzauthKey.trim();
             if (allowHwidResetInput && (allowHwidResetInput.toLowerCase() === 'yes' || allowHwidResetInput.toLowerCase() === 'no')) {
                 updates.allowHwidReset = allowHwidResetInput.toLowerCase() === 'yes';
+            }
+            if (maxFreeResetsInput && maxFreeResetsInput.trim() && !isNaN(maxFreeResetsInput)) {
+                updates.maxFreeHwidResets = parseInt(maxFreeResetsInput);
+            }
+            if (resetPriceInput && resetPriceInput.trim() && !isNaN(resetPriceInput)) {
+                updates.hwidResetPrice = parseFloat(resetPriceInput);
             }
             
             if (Object.keys(updates).length === 0) {

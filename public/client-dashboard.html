@@ -400,8 +400,18 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-value" id="resetCount">0</div>
-                    <div class="stat-label">Total Resets</div>
+                    <div class="stat-label">Resets Used</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="resetsRemaining">-</div>
+                    <div class="stat-label">Resets Remaining</div>
+                </div>
+            </div>
+
+            <div id="resetLimitWarning" class="info-card" style="display: none; background: #2a1a1a; border: 1px solid #ff4444; margin-bottom: 2rem;">
+                <p style="color: #ff4444; margin: 0; font-size: 14px; text-align: center;">
+                    ⚠️ <span id="limitWarningText"></span>
+                </p>
             </div>
 
             <div class="reset-section">
@@ -518,7 +528,42 @@
 
                 const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
                 document.getElementById('lastHwidReset').textContent = lastReset;
-                document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
+                
+                const resetCount = clientData.hwidResetCount || 0;
+                const maxFreeResets = clientData.productInfo.maxFreeHwidResets || 5;
+                const resetsRemaining = Math.max(0, maxFreeResets - resetCount);
+                const resetPrice = clientData.productInfo.hwidResetPrice || 0;
+                
+                document.getElementById('resetCount').textContent = resetCount;
+                document.getElementById('resetsRemaining').textContent = resetsRemaining;
+                
+                const resetButton = document.getElementById('resetButton');
+                const warningDiv = document.getElementById('resetLimitWarning');
+                const warningText = document.getElementById('limitWarningText');
+                
+                if (resetsRemaining === 0) {
+                    resetButton.disabled = true;
+                    resetButton.style.opacity = '0.5';
+                    resetButton.style.cursor = 'not-allowed';
+                    warningDiv.style.display = 'block';
+                    warningDiv.style.borderColor = '#ff4444';
+                    warningText.style.color = '#ff4444';
+                    const priceMsg = resetPrice > 0 ? ` for $${resetPrice}` : '';
+                    warningText.textContent = `You have used all ${maxFreeResets} free HWID resets. Please contact the administrator${priceMsg} to reset your HWID.`;
+                } else if (resetsRemaining <= 2) {
+                    resetButton.disabled = false;
+                    resetButton.style.opacity = '1';
+                    resetButton.style.cursor = 'pointer';
+                    warningDiv.style.display = 'block';
+                    warningDiv.style.borderColor = '#ffa500';
+                    warningText.style.color = '#ffa500';
+                    warningText.textContent = `Warning: You have only ${resetsRemaining} reset(s) remaining. Use them wisely!`;
+                } else {
+                    resetButton.disabled = false;
+                    resetButton.style.opacity = '1';
+                    resetButton.style.cursor = 'pointer';
+                    warningDiv.style.display = 'none';
+                }
             } else {
                 document.getElementById('resetTabButton').style.display = 'none';
             }

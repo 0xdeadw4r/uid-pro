@@ -236,6 +236,8 @@ router.get('/api/info', isClient, async (req, res) => {
                 productInfo: product ? {
                     displayName: product.displayName,
                     allowHwidReset: product.allowHwidReset,
+                    maxFreeHwidResets: product.maxFreeHwidResets || 5,
+                    hwidResetPrice: product.hwidResetPrice || 0,
                     genzAuthSellerApi: product.genzAuthSellerApi
                 } : null
             }
@@ -344,18 +346,19 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
             return res.status(403).json({ error: 'This feature is not available for your product' });
         }
 
-        // Check if reset is available
+        // Check if client has exceeded free reset limit
+        const currentResetCount = client.hwidResetCount || 0;
+        const maxFreeResets = product.maxFreeHwidResets || 5;
+        const resetPrice = product.hwidResetPrice || 0;
         const now = new Date();
-        const resetCooldown = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
 
-        if (client.lastHwidReset) {
-            const timeSinceLastReset = now - client.lastHwidReset;
-            if (timeSinceLastReset < resetCooldown) {
-                const hoursRemaining = Math.ceil((resetCooldown - timeSinceLastReset) / (60 * 60 * 1000));
-                return res.status(429).json({ 
-                    error: `HWID reset is on cooldown. Please wait ${hoursRemaining} hour(s) before trying again.` 
-                });
-            }
+        if (currentResetCount >= maxFreeResets) {
+            const priceMsg = resetPrice > 0 ? ` for $${resetPrice}` : '';
+            return res.status(403).json({ 
+                error: `You have used all ${maxFreeResets} free HWID resets. Please contact the administrator${priceMsg} to reset your HWID.`,
+                limitReached: true,
+                resetPrice: resetPrice
+            });
         }
 
         // Perform HWID reset via GenzAuth if configured
@@ -376,11 +379,15 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
         client.hwidResetCount = (client.hwidResetCount || 0) + 1;
         await client.save();
 
+        const resetsRemaining = maxFreeResets - client.hwidResetCount;
+        
         res.json({
             success: true,
-            message: 'HWID reset successfully',
+            message: `HWID reset successfully. You have ${resetsRemaining} free reset(s) remaining.`,
             lastReset: client.lastHwidReset,
-            resetCount: client.hwidResetCount
+            resetCount: client.hwidResetCount,
+            resetsRemaining: resetsRemaining,
+            maxFreeResets: maxFreeResets
         });
     } catch (error) {
         console.error('Reset HWID error:', error);
