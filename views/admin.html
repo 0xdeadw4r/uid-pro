@@ -2549,39 +2549,122 @@
             }
         }
 
+        let editingProductKey = null;
+
         async function editProduct(productKey) {
-            const displayName = prompt('Enter new display name (leave empty to keep current):');
-            const description = prompt('Enter new description (leave empty to keep current):');
-            const downloadLink = prompt('Enter new download link (leave empty to keep current):');
-            const setupVideoLink = prompt('Enter new setup video link (YouTube URL, leave empty to keep current):');
-            const genzauthKey = prompt('Enter new GenzAuth seller key (leave empty to keep current):');
-            const allowHwidResetInput = prompt('Allow HWID reset? (yes/no, leave empty to keep current):');
-            const maxFreeResetsInput = prompt('Max free HWID resets (leave empty to keep current):');
-            const resetPriceInput = prompt('HWID reset price in USD (leave empty to keep current):');
+            try {
+                const response = await fetch('/api/admin/products', { credentials: 'include' });
+                const data = await response.json();
+                
+                if (!data.success) {
+                    showMessage('Failed to load product details', 'error', 'productsMessage');
+                    return;
+                }
+                
+                const product = data.products.find(p => p.productKey === productKey);
+                if (!product) {
+                    showMessage('Product not found', 'error', 'productsMessage');
+                    return;
+                }
+                
+                editingProductKey = productKey;
+                
+                const editForm = `
+                    <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                        <h4 style="margin: 0 0 1rem 0; color: #fff;">Edit Product: ${product.displayName}</h4>
+                        
+                        <div class="form-group">
+                            <label>Display Name</label>
+                            <input type="text" id="edit_displayName" value="${product.displayName || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea id="edit_description" rows="2" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">${product.description || ''}</textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Download Link</label>
+                            <input type="url" id="edit_downloadLink" value="${product.downloadLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Setup Video Link (YouTube URL)</label>
+                            <input type="url" id="edit_setupVideoLink" value="${product.setupVideoLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>GenzAuth Seller Key</label>
+                            <input type="password" id="edit_genzauthKey" placeholder="${product.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        
+                        <div class="settings-list" style="margin: 1rem 0;">
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="edit_allowHwidReset" class="toggle-checkbox" ${product.allowHwidReset ? 'checked' : ''}>
+                                    <label for="edit_allowHwidReset" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Allow HWID Reset</label>
+                                    <p class="setting-description">Enable HWID reset functionality for clients</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Max Free HWID Resets</label>
+                                <input type="number" id="edit_maxFreeResets" value="${product.maxFreeHwidResets || 5}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>HWID Reset Price (USD)</label>
+                                <input type="number" id="edit_resetPrice" value="${product.hwidResetPrice || 0}" min="0" step="0.01" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                            <button onclick="saveProductEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
+                            <button onclick="cancelProductEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
+                        </div>
+                    </div>
+                `;
+                
+                const container = document.getElementById('productsContainer');
+                container.insertAdjacentHTML('afterbegin', editForm);
+                
+                document.getElementById('edit_displayName').focus();
+                
+            } catch (error) {
+                console.error('Edit product error:', error);
+                showMessage('Error loading product for editing', 'error', 'productsMessage');
+            }
+        }
+        
+        async function saveProductEdit() {
+            if (!editingProductKey) return;
             
             const updates = {};
-            if (displayName && displayName.trim()) updates.displayName = displayName.trim();
-            if (description !== null && description.trim()) updates.description = description.trim();
-            if (downloadLink !== null) updates.downloadLink = downloadLink.trim();
-            if (setupVideoLink !== null) updates.setupVideoLink = setupVideoLink.trim();
-            if (genzauthKey !== null) updates.genzauthSellerKey = genzauthKey.trim();
-            if (allowHwidResetInput && (allowHwidResetInput.toLowerCase() === 'yes' || allowHwidResetInput.toLowerCase() === 'no')) {
-                updates.allowHwidReset = allowHwidResetInput.toLowerCase() === 'yes';
-            }
-            if (maxFreeResetsInput && maxFreeResetsInput.trim() && !isNaN(maxFreeResetsInput)) {
-                updates.maxFreeHwidResets = parseInt(maxFreeResetsInput);
-            }
-            if (resetPriceInput && resetPriceInput.trim() && !isNaN(resetPriceInput)) {
-                updates.hwidResetPrice = parseFloat(resetPriceInput);
-            }
             
-            if (Object.keys(updates).length === 0) {
-                showMessage('No changes made', 'error', 'productsMessage');
-                return;
-            }
+            const displayName = document.getElementById('edit_displayName').value.trim();
+            const description = document.getElementById('edit_description').value.trim();
+            const downloadLink = document.getElementById('edit_downloadLink').value.trim();
+            const setupVideoLink = document.getElementById('edit_setupVideoLink').value.trim();
+            const genzauthKey = document.getElementById('edit_genzauthKey').value.trim();
+            const allowHwidReset = document.getElementById('edit_allowHwidReset').checked;
+            const maxFreeResets = document.getElementById('edit_maxFreeResets').value;
+            const resetPrice = document.getElementById('edit_resetPrice').value;
+            
+            if (displayName) updates.displayName = displayName;
+            if (description) updates.description = description;
+            updates.downloadLink = downloadLink;
+            updates.setupVideoLink = setupVideoLink;
+            if (genzauthKey) updates.genzauthSellerKey = genzauthKey;
+            updates.allowHwidReset = allowHwidReset;
+            if (maxFreeResets) updates.maxFreeHwidResets = parseInt(maxFreeResets);
+            if (resetPrice) updates.hwidResetPrice = parseFloat(resetPrice);
             
             try {
-                const response = await fetch(`/api/admin/products/${productKey}`, {
+                const response = await fetch(`/api/admin/products/${editingProductKey}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -2592,14 +2675,20 @@
                 
                 if (response.ok && data.success) {
                     showMessage('Product updated successfully!', 'success', 'productsMessage');
+                    editingProductKey = null;
                     loadProducts();
                 } else {
                     showMessage(data.error || 'Failed to update product', 'error', 'productsMessage');
                 }
             } catch (error) {
-                console.error('Edit product error:', error);
+                console.error('Save product error:', error);
                 showMessage('Error updating product', 'error', 'productsMessage');
             }
+        }
+        
+        function cancelProductEdit() {
+            editingProductKey = null;
+            loadProducts();
         }
 
         // Client Management Functions
