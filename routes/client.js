@@ -220,18 +220,29 @@ router.get('/api/info', isClient, async (req, res) => {
 
         // Check if GenzAuth is configured (product-specific or global)
         let hasGenzAuth = false;
+        let genzAuthSource = 'none';
+        
         if (product && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
             hasGenzAuth = true;
+            genzAuthSource = 'product';
         } else {
             // Check for global seller key
             try {
                 const ApiConfig = require('../models/ApiConfig');
                 const config = await ApiConfig.findOne({ configKey: 'main_config' });
-                hasGenzAuth = !!(config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY);
+                if (config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY) {
+                    hasGenzAuth = true;
+                    genzAuthSource = 'global';
+                }
             } catch (err) {
-                hasGenzAuth = !!process.env.GENZAUTH_SELLER_KEY;
+                if (process.env.GENZAUTH_SELLER_KEY) {
+                    hasGenzAuth = true;
+                    genzAuthSource = 'global';
+                }
             }
         }
+        
+        console.log(`✅ Client ${client.username} - GenzAuth: ${hasGenzAuth} (source: ${genzAuthSource})`);
 
         res.json({
             success: true,
@@ -358,7 +369,14 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
 
         // Check if the product allows HWID reset
         if (!product || !product.allowHwidReset) {
-            return res.status(403).json({ error: 'This feature is not available for your product' });
+            return res.status(403).json({ error: 'HWID Reset is not available for your product' });
+        }
+
+        // Check if client has assigned username for HWID reset
+        if (!client.assignedUsername) {
+            return res.status(400).json({ 
+                error: 'No GenzAuth username assigned. Please contact administrator to set up your account.' 
+            });
         }
 
         // Check if client has exceeded free reset limit
@@ -376,69 +394,85 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
             });
         }
 
-        // Check if client has assigned username for HWID reset
-        if (!client.assignedUsername) {
-            return res.status(400).json({ 
-                error: 'No assigned username configured for HWID reset. Please contact administrator.' 
-            });
-        }
-
-        // Perform HWID reset via GenzAuth (use product-specific key or fall back to global)
+        // Perform HWID reset via GenzAuth
+        // Priority: Product-specific seller key > Global seller key
         try {
             const productSellerKey = product.genzauthSellerKey && product.genzauthSellerKey.trim() 
                 ? product.genzauthSellerKey.trim() 
                 : null;
             
-            console.log(`🔄 Resetting HWID for user: ${client.assignedUsername}`);
-            if (productSellerKey) {
-                console.log(`   Using product-specific GenzAuth seller key`);
-            } else {
-                console.log(`   Using global GenzAuth seller key (fallback)`);
+            // Get global seller key from ApiConfig as fallback
+            let sellerKeyToUse = productSellerKey;
+            if (!sellerKeyToUse) {
+                const ApiConfig = require('../models/ApiConfig');
+                const config = await ApiConfig.findOne({ configKey: 'main_config' });
+                sellerKeyToUse = config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY || null;
             }
+
+            console.log(`🔄 Resetting HWID for GenzAuth user: ${client.assignedUsername}`);
+            console.log(`   Product: ${product.displayName} (${product.productKey})`);
+            console.log(`   Using ${productSellerKey ? 'product-specific' : 'global'} GenzAuth seller key`);
             
-            const result = await genzauth.resetHwid(client.assignedUsername, productSellerKey);
-            
-            // Handle TEST mode / configuration missing
-            if (result.isTestMode) {
-                console.error(`❌ GenzAuth not configured - neither product nor global seller key available`);
+            // Check if we have any seller key configured
+            if (!sellerKeyToUse) {
+                console.error(`❌ GenzAuth not configured - no seller key available`);
                 return res.status(503).json({ 
-                    error: 'GenzAuth API is not configured. Please contact the administrator to set up the seller key.',
+                    error: 'GenzAuth API is not configured. Please contact the administrator to configure the seller key in Product Settings.',
+                    configurationError: true
+                });
+            }
+
+            // Call GenzAuth reset HWID API
+            const result = await genzauth.resetHwid(client.assignedUsername, sellerKeyToUse);
+            
+            // Handle TEST mode
+            if (result.isTestMode) {
+                console.error(`❌ GenzAuth in TEST mode - seller key not configured properly`);
+                return res.status(503).json({ 
+                    error: 'GenzAuth API is in TEST mode. Please contact administrator to configure the seller key.',
                     configurationError: true
                 });
             }
             
-            // Handle other failures
+            // Handle API failures
             if (!result.success) {
-                console.error(`❌ HWID reset failed: ${result.error || result.message}`);
+                const errorMsg = result.error || result.message || 'Unknown error';
+                console.error(`❌ HWID reset failed: ${errorMsg}`);
                 return res.status(500).json({ 
-                    error: result.error || result.message || 'Failed to reset HWID through GenzAuth API' 
+                    error: `Failed to reset HWID: ${errorMsg}`,
+                    apiError: true
                 });
             }
             
             console.log(`✅ HWID reset successful for: ${client.assignedUsername}`);
         } catch (error) {
-            console.error('GenzAuth HWID reset error:', error);
-            return res.status(500).json({ error: 'Failed to reset HWID through authentication service' });
+            console.error('❌ GenzAuth HWID reset error:', error);
+            return res.status(500).json({ 
+                error: 'Failed to reset HWID. Please try again or contact administrator.',
+                technicalError: error.message 
+            });
         }
 
-        // Update client
+        // Update client record
         client.lastHwidReset = now;
         client.hwidResetCount = (client.hwidResetCount || 0) + 1;
         await client.save();
 
         const resetsRemaining = maxFreeResets - client.hwidResetCount;
         
+        console.log(`✅ Client HWID reset completed. Resets used: ${client.hwidResetCount}/${maxFreeResets}`);
+        
         res.json({
             success: true,
-            message: `HWID reset successfully. You have ${resetsRemaining} free reset(s) remaining.`,
+            message: `HWID reset successfully for ${client.assignedUsername}. You have ${resetsRemaining} free reset(s) remaining.`,
             lastReset: client.lastHwidReset,
             resetCount: client.hwidResetCount,
             resetsRemaining: resetsRemaining,
             maxFreeResets: maxFreeResets
         });
     } catch (error) {
-        console.error('Reset HWID error:', error);
-        res.status(500).json({ error: 'Failed to reset HWID' });
+        console.error('❌ Reset HWID error:', error);
+        res.status(500).json({ error: 'Failed to reset HWID. Please try again later.' });
     }
 });
 
@@ -522,12 +556,27 @@ router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
                 const genzauth = require('../services/genzauth');
                 const duration = parseInt(genzAuthDuration) || 30;
                 
-                console.log(`📝 Creating GenzAuth account: ${genzAuthUsername} (${duration}d)`);
+                console.log(`📝 Creating GenzAuth account for client: ${username}`);
+                console.log(`   GenzAuth Username: ${genzAuthUsername}`);
+                console.log(`   Duration: ${duration} days`);
+                console.log(`   Product: ${product.displayName} (${productKey})`);
+                
+                // Use product-specific seller key if available
+                const productSellerKey = product.genzauthSellerKey && product.genzauthSellerKey.trim() 
+                    ? product.genzauthSellerKey.trim() 
+                    : null;
+                
+                if (productSellerKey) {
+                    console.log(`   Using product-specific GenzAuth seller key`);
+                } else {
+                    console.log(`   Using global GenzAuth seller key`);
+                }
                 
                 const result = await genzauth.createUser(genzAuthUsername, genzAuthPassword, duration);
                 
                 if (result.success) {
-                    console.log(`✅ GenzAuth account created: ${genzAuthUsername}`);
+                    console.log(`✅ GenzAuth account created successfully: ${genzAuthUsername}`);
+                    console.log(`   This account will be used for HWID reset functionality`);
                     genzAuthCreated = true;
                     finalAssignedUsername = genzAuthUsername;
                 } else {

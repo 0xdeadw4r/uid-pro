@@ -511,7 +511,7 @@
             if (!clientData) return;
 
             const productName = clientData.productInfo ? clientData.productInfo.displayName : clientData.productKey;
-            
+
             document.getElementById('headerUsername').textContent = clientData.username;
             document.getElementById('headerProductType').textContent = productName;
             document.getElementById('productType').textContent = productName;
@@ -528,19 +528,19 @@
 
                 const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
                 document.getElementById('lastHwidReset').textContent = lastReset;
-                
+
                 const resetCount = clientData.hwidResetCount || 0;
                 const maxFreeResets = clientData.productInfo.maxFreeHwidResets || 5;
                 const resetsRemaining = Math.max(0, maxFreeResets - resetCount);
                 const resetPrice = clientData.productInfo.hwidResetPrice || 0;
-                
+
                 document.getElementById('resetCount').textContent = resetCount;
                 document.getElementById('resetsRemaining').textContent = resetsRemaining;
-                
+
                 const resetButton = document.getElementById('resetButton');
                 const warningDiv = document.getElementById('resetLimitWarning');
                 const warningText = document.getElementById('limitWarningText');
-                
+
                 if (resetsRemaining === 0) {
                     resetButton.disabled = true;
                     resetButton.style.opacity = '0.5';
@@ -615,54 +615,67 @@
         }
 
         async function resetHwid() {
-            if (!clientData) return;
+        if (!clientData) return;
 
-            if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
-                showError('HWID reset is not available for your product');
-                return;
-            }
-
-            if (!clientData.assignedUsername) {
-                showError('No assigned username configured. Please contact your administrator.');
-                return;
-            }
-
-            if (!confirm(`Reset HWID for ${clientData.assignedUsername}?`)) {
-                return;
-            }
-
-            const resetButton = document.getElementById('resetButton');
-            resetButton.disabled = true;
-            resetButton.textContent = '🔄 RESETTING...';
-
-            try {
-                const response = await fetch('/client/api/reset-hwid', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showSuccess(data.message);
-
-                    clientData.hwidResetCount = data.resetCount;
-                    clientData.lastHwidReset = data.lastReset;
-                    updateUI();
-                } else {
-                    showError(data.error || 'HWID reset failed');
-                }
-            } catch (error) {
-                console.error('Reset HWID error:', error);
-                showError('Error resetting HWID. Please try again.');
-            } finally {
-                resetButton.disabled = false;
-                resetButton.textContent = '🔄 RESET HWID';
-            }
+        if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
+            showError('HWID reset is not available for your product');
+            return;
         }
+
+        if (!clientData.assignedUsername) {
+            showError('No GenzAuth username assigned to your account. Please contact administrator to configure your account.');
+            return;
+        }
+
+        const confirmMsg = `Reset HWID for GenzAuth account: ${clientData.assignedUsername}?\n\nThis will clear the Hardware ID lock on your account.`;
+        if (!confirm(confirmMsg)) {
+            return;
+        }
+
+        const resetButton = document.getElementById('resetButton');
+        resetButton.disabled = true;
+        resetButton.textContent = '🔄 RESETTING...';
+
+        try {
+            const response = await fetch('/client/api/reset-hwid', {
+                method: 'POST',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                showSuccess(data.message);
+
+                // Update local data
+                clientData.hwidResetCount = data.resetCount;
+                clientData.lastHwidReset = data.lastReset;
+
+                // Update UI to reflect new counts
+                updateUI();
+            } else {
+                // Handle specific error cases
+                if (data.configurationError) {
+                    showError('⚠️ ' + data.error);
+                } else if (data.limitReached) {
+                    showError('⚠️ ' + data.error);
+                } else if (data.apiError) {
+                    showError('❌ GenzAuth API Error: ' + data.error);
+                } else {
+                    showError(data.error || 'HWID reset failed. Please contact administrator.');
+                }
+            }
+        } catch (error) {
+            console.error('Reset HWID error:', error);
+            showError('❌ Connection error. Please check your internet and try again.');
+        } finally {
+            resetButton.disabled = false;
+            resetButton.textContent = '🔄 RESET HWID';
+        }
+    }
 
         async function logout() {
             try {

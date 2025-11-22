@@ -152,7 +152,16 @@ async function extendUser(username, days) {
 }
 
 async function resetHwid(username, customSellerKey = null) {
-    return makeRequest('resethwid', { user: username }, customSellerKey);
+    console.log(`[GenzAuth] Resetting HWID for user: ${username}`);
+    const result = await makeRequest('resethwid', { user: username }, customSellerKey);
+    
+    if (result.success) {
+        console.log(`[GenzAuth] ✅ HWID reset successful for: ${username}`);
+    } else {
+        console.log(`[GenzAuth] ❌ HWID reset failed for: ${username} - ${result.error || result.message}`);
+    }
+    
+    return result;
 }
 
 async function fetchAllLicenses() {
