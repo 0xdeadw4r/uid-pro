@@ -61,6 +61,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // Announcements/News
+    announcements: {
+        type: String,
+        default: ''
+    },
     settings: {
         type: Map,
         of: mongoose.Schema.Types.Mixed,

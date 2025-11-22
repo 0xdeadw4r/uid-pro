@@ -551,6 +551,9 @@
             <button class="tab-btn" data-tab="setup" onclick="switchTab('setup', this)">
                 🎥 Setup Guide
             </button>
+            <button class="tab-btn" data-tab="news" onclick="switchTab('news', this)" id="newsTabButton" style="display: none;">
+                📰 News
+            </button>
         </div>
 
         <!-- UID Tab -->
@@ -666,6 +669,18 @@
                 </div>
             </div>
         </div>
+
+        <!-- News Tab -->
+        <div id="news-tab" class="tab-content">
+            <div class="create-form">
+                <h3>📰 Latest News & Announcements</h3>
+                <div id="newsContent">
+                    <p style="color: #999; text-align: center; padding: 2rem;">
+                        Loading news...
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/js/theme.js"></script>
@@ -677,6 +692,7 @@
             document.getElementById('aimkill-tab').classList.remove('active');
             document.getElementById('keys-tab').classList.remove('active');
             document.getElementById('setup-tab').classList.remove('active');
+            document.getElementById('news-tab').classList.remove('active'); // Remove active class from news tab
             const socialTab = document.getElementById('social-tab');
             if (socialTab) socialTab.classList.remove('active');
 
@@ -684,6 +700,11 @@
 
             document.getElementById(tabName + '-tab').classList.add('active');
             btn.classList.add('active');
+
+            // Load news content when the news tab is activated
+            if (tabName === 'news') {
+                loadNewsContent();
+            }
         }
 
         function displayGuestSetupVideo(videoUrl) {
@@ -837,6 +858,13 @@
                     }
                 }
 
+                // Show news tab if enabled in settings
+                if (settings.enableNewsTab) {
+                    document.getElementById('newsTabButton').style.display = 'block';
+                } else {
+                    document.getElementById('newsTabButton').style.display = 'none';
+                }
+
                 loadStoredKeys();
             } catch (error) {
                 console.error('Load dashboard error:', error);
@@ -916,19 +944,19 @@
                 // Set social media URLs with proper validation
                 const youtubeLink = document.getElementById('youtubeLink');
                 const instagramLink = document.getElementById('instagramLink');
-                
+
                 if (youtubeLink && settings.youtubeChannelUrl) {
                     youtubeLink.href = settings.youtubeChannelUrl;
-                    
+
                     // Add click event listener
                     youtubeLink.addEventListener('click', function() {
                         trackClick('youtube');
                     });
                 }
-                
+
                 if (instagramLink && settings.instagramProfileUrl) {
                     instagramLink.href = settings.instagramProfileUrl;
-                    
+
                     // Add click event listener
                     instagramLink.addEventListener('click', function() {
                         trackClick('instagram');
@@ -952,14 +980,14 @@
             const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
             clicked[platform] = true;
             localStorage.setItem('socialClicked', JSON.stringify(clicked));
-            
+
             // Update button text to show it was clicked
             if (platform === 'youtube') {
                 document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
             } else if (platform === 'instagram') {
                 document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
             }
-            
+
             // Check if both are clicked
             if (clicked.youtube && clicked.instagram) {
                 document.getElementById('notifyAdminBtn').style.display = 'block';
@@ -968,14 +996,14 @@
 
         function checkSocialClicks() {
             const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
-            
+
             if (clicked.youtube) {
                 document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
             }
             if (clicked.instagram) {
                 document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
             }
-            
+
             if (clicked.youtube && clicked.instagram) {
                 document.getElementById('notifyAdminBtn').style.display = 'block';
             }
@@ -984,19 +1012,19 @@
         async function notifyAdminSubscribed() {
             const btn = document.getElementById('notifyAdminBtn');
             const originalText = btn.textContent;
-            
+
             try {
                 btn.disabled = true;
                 btn.textContent = 'Verifying...';
-                
+
                 const response = await fetch('/api/guest/notify-subscribed', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok) {
                     localStorage.removeItem('socialClicked');
                     if (data.verified) {
@@ -1211,6 +1239,13 @@
                     }
                 }
 
+                // Show news tab if enabled in settings
+                if (settings.enableNewsTab) {
+                    document.getElementById('newsTabButton').style.display = 'block';
+                } else {
+                    document.getElementById('newsTabButton').style.display = 'none';
+                }
+
                 loadStoredKeys();
 
                 // Initialize social verification check
@@ -1243,6 +1278,37 @@
             }
         }
 
+        async function loadNewsContent() {
+            const newsContentDiv = document.getElementById('newsContent');
+            try {
+                const response = await fetch('/api/news/guest', { credentials: 'include' });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const data = await response.json();
+
+                if (data.success && data.announcements && data.announcements.length > 0) {
+                    let html = '';
+                    data.announcements.forEach(announcement => {
+                        html += `
+                            <div class="news-item" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333;">
+                                <h4 style="color: #FFFFFF; margin-bottom: 0.75rem;">${announcement.title}</h4>
+                                <p style="color: #999; font-size: 13px; line-height: 1.7;">${announcement.content.replace(/\n/g, '<br>')}</p>
+                                <small style="color: #666; font-size: 11px;">Published on: ${new Date(announcement.createdAt).toLocaleDateString()}</small>
+                            </div>
+                        `;
+                    });
+                    newsContentDiv.innerHTML = html;
+                } else {
+                    newsContentDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No news or announcements available at the moment.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading news:', error);
+                newsContentDiv.innerHTML = '<p style="color: #FCA5A5; text-align: center; padding: 2rem;">Failed to load news. Please try again later.</p>';
+            }
+        }
+
+        // Initial load
         loadGuestDashboard();
     </script>
 </body>

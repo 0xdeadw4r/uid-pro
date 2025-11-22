@@ -206,7 +206,7 @@ async function initializePackages() {
 async function initializeProducts() {
   try {
     const productCount = await Product.countDocuments({});
-    
+
     if (productCount === 0) {
       // Create default products
       await Product.create([
@@ -216,6 +216,7 @@ async function initializeProducts() {
           description: 'Create and manage UID bypass accounts',
           isActive: true,
           createdBy: 'system',
+          announcements: '',
           packages: new Map(Object.entries({
             '1day': { display: '1 Day', hours: 24, days: 1, credits: 1, price: 0.50 },
             '3days': { display: '3 Days', hours: 72, days: 3, credits: 3, price: 1.30, popular: true },
@@ -230,6 +231,7 @@ async function initializeProducts() {
           description: 'Create Aimkill user accounts',
           isActive: true,
           createdBy: 'system',
+          announcements: '',
           packages: new Map(Object.entries({
             '1day': { display: '1 Day', days: 1, credits: 3, price: 2.99 },
             '3day': { display: '3 Days', days: 3, credits: 8, price: 7.99 },
@@ -245,6 +247,7 @@ async function initializeProducts() {
           description: 'Silent Aim product for clients',
           isActive: true,
           createdBy: 'system',
+          announcements: '',
           allowHwidReset: false,
           downloadLink: '',
           packages: new Map()
@@ -252,7 +255,7 @@ async function initializeProducts() {
       ]);
       console.log('✅ Default products initialized');
     } else {
-      // Ensure SILENT_AIM product exists
+      // Ensure SILENT_AIM product exists and has announcements field
       const silentAimExists = await Product.findOne({ productKey: 'SILENT_AIM' });
       if (!silentAimExists) {
         await Product.create({
@@ -261,11 +264,17 @@ async function initializeProducts() {
           description: 'Silent Aim product for clients',
           isActive: true,
           createdBy: 'system',
+          announcements: '',
           allowHwidReset: false,
           downloadLink: '',
           packages: new Map()
         });
         console.log('✅ SILENT_AIM product created');
+      } else if (!silentAimExists.announcements) {
+        // Add announcements field if missing
+        silentAimExists.announcements = '';
+        await silentAimExists.save();
+        console.log('✅ SILENT_AIM product updated with announcements field');
       }
       console.log('✅ Products loaded from MongoDB');
     }
@@ -3456,13 +3465,14 @@ app.post('/api/admin/unverify-all-users', requireAuth, requireAdmin, async (req,
 app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
     const products = await Product.find({}).sort({ createdAt: -1 });
-    
+
     const productsData = products.map(product => ({
       productKey: product.productKey,
       displayName: product.displayName,
       description: product.description,
       isActive: product.isActive,
       packages: Object.fromEntries(product.packages),
+      announcements: product.announcements || '',
       genzauthSellerKey: product.genzauthSellerKey || '',
       allowHwidReset: product.allowHwidReset || false,
       maxFreeHwidResets: product.maxFreeHwidResets || 5,
@@ -3471,7 +3481,7 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       settings: Object.fromEntries(product.settings || new Map()),
       createdAt: product.createdAt
     }));
-    
+
     res.json({ success: true, products: productsData });
   } catch (error) {
     console.error('Get products error:', error);
@@ -3481,24 +3491,25 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 
 app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { productKey, displayName, description, packages, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
-    
+    const { productKey, displayName, description, packages, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
+
     if (!productKey || !displayName) {
       return res.status(400).json({ error: 'Product key and display name are required' });
     }
-    
+
     const existingProduct = await Product.findOne({ productKey });
     if (existingProduct) {
       return res.status(400).json({ error: 'Product with this key already exists' });
     }
-    
+
     const packagesMap = new Map(Object.entries(packages || {}));
-    
+
     const product = await Product.create({
       productKey: productKey.toUpperCase().replace(/\s+/g, '_'),
       displayName,
       description: description || '',
       packages: packagesMap,
+      announcements: announcements || '',
       genzauthSellerKey: genzauthSellerKey || '',
       allowHwidReset: allowHwidReset || false,
       maxFreeHwidResets: maxFreeHwidResets || 5,
@@ -3507,9 +3518,9 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       createdBy: req.session.user.username,
       isActive: true
     });
-    
+
     await logActivity(req.session.user.username, 'product-create', `Created new product: ${displayName}`);
-    
+
     res.json({
       success: true,
       message: 'Product created successfully',
@@ -3517,6 +3528,7 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
         productKey: product.productKey,
         displayName: product.displayName,
         description: product.description,
+        announcements: product.announcements,
         genzauthSellerKey: product.genzauthSellerKey ? '***configured***' : '',
         allowHwidReset: product.allowHwidReset,
         downloadLink: product.downloadLink
@@ -3531,27 +3543,28 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    const { displayName, description, packages, isActive, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
-    
+    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
+
     const product = await Product.findOne({ productKey });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    
+
     if (displayName) product.displayName = displayName;
     if (description !== undefined) product.description = description;
     if (isActive !== undefined) product.isActive = isActive;
     if (packages) product.packages = new Map(Object.entries(packages));
+    if (announcements !== undefined) product.announcements = announcements;
     if (genzauthSellerKey !== undefined) product.genzauthSellerKey = genzauthSellerKey;
     if (allowHwidReset !== undefined) product.allowHwidReset = allowHwidReset;
     if (maxFreeHwidResets !== undefined) product.maxFreeHwidResets = maxFreeHwidResets;
     if (hwidResetPrice !== undefined) product.hwidResetPrice = hwidResetPrice;
     if (downloadLink !== undefined) product.downloadLink = downloadLink;
-    
+
     await product.save();
-    
+
     await logActivity(req.session.user.username, 'product-update', `Updated product: ${productKey}`);
-    
+
     res.json({
       success: true,
       message: 'Product updated successfully'
@@ -3565,14 +3578,14 @@ app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req
 app.delete('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    
+
     const product = await Product.findOneAndDelete({ productKey });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
-    
+
     await logActivity(req.session.user.username, 'product-delete', `Deleted product: ${productKey}`);
-    
+
     res.json({
       success: true,
       message: 'Product deleted successfully'

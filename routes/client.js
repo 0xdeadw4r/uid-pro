@@ -256,6 +256,7 @@ router.get('/api/info', isClient, async (req, res) => {
                 downloadLink: downloadLink || '',
                 hasDownloadLink: !!downloadLink,
                 setupVideoLink: product ? (product.setupVideoLink || '') : '',
+                announcements: product ? (product.announcements || '') : '',
                 lastLogin: client.lastLogin,
                 lastHwidReset: client.lastHwidReset,
                 hwidResetCount: client.hwidResetCount,
@@ -266,7 +267,8 @@ router.get('/api/info', isClient, async (req, res) => {
                     maxFreeHwidResets: product.maxFreeHwidResets || 5,
                     hwidResetPrice: product.hwidResetPrice || 0,
                     hasGenzAuth: hasGenzAuth,
-                    setupVideoLink: product.setupVideoLink || ''
+                    setupVideoLink: product.setupVideoLink || '',
+                    announcements: product.announcements || ''
                 } : null
             }
         });

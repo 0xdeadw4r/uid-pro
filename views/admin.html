@@ -684,6 +684,8 @@
             <button class="tab-btn" onclick="switchTab('verified-users', this)">Verified Users</button>
             <button class="tab-btn" onclick="switchTab('clients', this)">Client Management</button>
             <button class="tab-btn" onclick="switchTab('settings', this)">Settings</button>
+            <!-- New Tab for News/Announcements -->
+            <button class="tab-btn" onclick="switchTab('news-announcements', this)">News/Announcements</button>
         </div>
 
         <!-- Dashboard Tab -->
@@ -970,6 +972,13 @@
                     <label>Setup Video Link (Optional - YouTube URL)</label>
                     <input type="url" id="newProductSetupVideoLink" placeholder="https://youtube.com/watch?v=..."
                         style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                </div>
+                <!-- Announcements Field -->
+                <div class="form-group">
+                    <label>Announcements/News (Optional)</label>
+                    <textarea id="newProductAnnouncements" rows="4" placeholder="Enter news or announcements for this product. HTML is supported."
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;"></textarea>
+                    <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">HTML supported. Leave empty to hide announcements tab.</p>
                 </div>
                 <div class="settings-list" style="margin: 1rem 0;">
                     <div class="setting-item">
@@ -1342,6 +1351,40 @@
                 </div>
             </div>
         </div>
+
+        <!-- News/Announcements Tab -->
+        <div id="news-announcements-tab" class="tab-content">
+            <div class="section">
+                <h2>News & Announcements</h2>
+                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                    Manage global news and announcements visible to all users.
+                </p>
+
+                <div id="announcementsMessage" class="message"></div>
+
+                <div class="form-section">
+                    <h3>Global Announcements</h3>
+                    <div class="form-group">
+                        <label>Global Announcement Content (HTML Supported)</label>
+                        <textarea id="globalAnnouncements" rows="6" placeholder="Enter global announcements here..."
+                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;"></textarea>
+                        <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">This content will be displayed on the main dashboard for all users.</p>
+                    </div>
+                    <button class="submit-btn" onclick="saveGlobalAnnouncements()" style="width: auto;">Save Global Announcements</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>Product-Specific Announcements</h3>
+                    <p style="color: #999; margin-bottom: 1rem; font-size: 13px;">
+                        View and manage announcements configured per product.
+                    </p>
+                    <div id="productAnnouncementsList">
+                        <p style="color: #999; text-align: center; padding: 2rem;">Loading product announcements...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <script src="/js/theme.js"></script>
@@ -1375,11 +1418,15 @@
             }
             if (tabName === 'products') {
                 loadProducts();
-            } else if (tabName === 'genzauth') {
+            } else if (tabName === 'genzauth') { // This seems like a duplicate condition for 'genzauth', might need review if 'genzauth' tab exists
                 loadGenzAuthConfig();
             }
             if (tabName === 'verified-users') {
                 loadVerifiedUsers();
+            }
+            if (tabName === 'news-announcements') { // Load announcements when tab is opened
+                loadProductAnnouncements();
+                loadGlobalAnnouncements();
             }
         }
 
@@ -1393,6 +1440,10 @@
 
         function showMessage(message, type = 'success', targetId = 'memberMessage') {
             const msgDiv = document.getElementById(targetId);
+            if (!msgDiv) {
+                console.error(`Message element with ID "${targetId}" not found.`);
+                return;
+            }
             msgDiv.className = `message ${type}`;
             msgDiv.textContent = message;
             msgDiv.style.display = 'block';
@@ -2458,6 +2509,7 @@
                                 <strong>HWID Reset:</strong> ${product.allowHwidReset ? '✅ Enabled' : '❌ Disabled'}<br>
                                 <strong>Download Link:</strong> ${hasDownloadLink ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Setup Video:</strong> ${product.setupVideoLink ? '✅ Set' : '❌ Not set'}<br>
+                                <strong>Announcements:</strong> ${product.announcements ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Created:</strong> ${new Date(product.createdAt).toLocaleDateString()}
                             </p>
                         </div>
@@ -2472,12 +2524,13 @@
             const productKey = document.getElementById('newProductKey').value.trim();
             const displayName = document.getElementById('newProductDisplayName').value.trim();
             const description = document.getElementById('newProductDescription').value.trim();
-            const genzauthSellerKey = document.getElementById('newProductGenzauth').value.trim();
+            const genzauthKey = document.getElementById('newProductGenzauth').value.trim();
             const downloadLink = document.getElementById('newProductDownloadLink').value.trim();
             const setupVideoLink = document.getElementById('newProductSetupVideoLink').value.trim();
-            const allowHwidReset = document.getElementById('newProductAllowHwid').checked;
-            const maxFreeHwidResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
-            const hwidResetPrice = parseFloat(document.getElementById('newProductResetPrice').value) || 0;
+            const announcements = document.getElementById('newProductAnnouncements').value.trim();
+            const allowHwid = document.getElementById('newProductAllowHwid').checked;
+            const maxFreeResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
+            const resetPrice = parseFloat(document.getElementById('newProductResetPrice').value) || 0;
 
             if (!productKey || !displayName) {
                 showMessage('Product key and display name are required', 'error', 'productsMessage');
@@ -2488,39 +2541,42 @@
                 const response = await fetch('/api/admin/products', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
                     body: JSON.stringify({
                         productKey,
                         displayName,
                         description,
-                        genzauthSellerKey,
+                        genzauthSellerKey: genzauthKey,
                         downloadLink,
                         setupVideoLink,
-                        allowHwidReset,
-                        maxFreeHwidResets,
-                        hwidResetPrice,
-                        packages: {}
-                    })
+                        announcements,
+                        allowHwidReset: allowHwid,
+                        maxFreeHwidResets: maxFreeResets,
+                        hwidResetPrice: resetPrice
+                    }),
+                    credentials: 'include'
                 });
 
                 const data = await response.json();
 
-                if (response.ok && data.success) {
-                    showMessage('Product created successfully!', 'success', 'productsMessage');
+                if (response.ok) {
+                    showMessage('Product created successfully', 'success', 'productsMessage');
                     document.getElementById('newProductKey').value = '';
                     document.getElementById('newProductDisplayName').value = '';
                     document.getElementById('newProductDescription').value = '';
                     document.getElementById('newProductGenzauth').value = '';
                     document.getElementById('newProductDownloadLink').value = '';
                     document.getElementById('newProductSetupVideoLink').value = '';
+                    document.getElementById('newProductAnnouncements').value = '';
                     document.getElementById('newProductAllowHwid').checked = false;
+                    document.getElementById('newProductMaxFreeResets').value = '5';
+                    document.getElementById('newProductResetPrice').value = '0';
                     loadProducts();
                 } else {
                     showMessage(data.error || 'Failed to create product', 'error', 'productsMessage');
                 }
             } catch (error) {
                 console.error('Create product error:', error);
-                showMessage('Error creating product', 'error', 'productsMessage');
+                showMessage('Connection error', 'error', 'productsMessage');
             }
         }
 
@@ -2555,49 +2611,56 @@
             try {
                 const response = await fetch('/api/admin/products', { credentials: 'include' });
                 const data = await response.json();
-                
+
                 if (!data.success) {
                     showMessage('Failed to load product details', 'error', 'productsMessage');
                     return;
                 }
-                
+
                 const product = data.products.find(p => p.productKey === productKey);
                 if (!product) {
                     showMessage('Product not found', 'error', 'productsMessage');
                     return;
                 }
-                
+
                 editingProductKey = productKey;
-                
+
                 const editForm = `
                     <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
                         <h4 style="margin: 0 0 1rem 0; color: #fff;">Edit Product: ${product.displayName}</h4>
-                        
+
                         <div class="form-group">
                             <label>Display Name</label>
                             <input type="text" id="edit_displayName" value="${product.displayName || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Description</label>
                             <textarea id="edit_description" rows="2" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">${product.description || ''}</textarea>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Download Link</label>
                             <input type="url" id="edit_downloadLink" value="${product.downloadLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>Setup Video Link (YouTube URL)</label>
                             <input type="url" id="edit_setupVideoLink" value="${product.setupVideoLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
-                        
+
                         <div class="form-group">
                             <label>GenzAuth Seller Key</label>
                             <input type="password" id="edit_genzauthKey" placeholder="${product.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
-                        
+
+                        <div class="form-group">
+                            <label style="display: block; margin-bottom: 0.5rem; color: #999; font-size: 11px; font-weight: 700; text-transform: uppercase;">Announcements/News</label>
+                            <textarea rows="4" id="edit_announcements"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;">${product.announcements || ''}</textarea>
+                            <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">HTML supported. Leave empty to hide announcements tab.</p>
+                        </div>
+
                         <div class="settings-list" style="margin: 1rem 0;">
                             <div class="setting-item">
                                 <div class="setting-control">
@@ -2610,7 +2673,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                             <div class="form-group">
                                 <label>Max Free HWID Resets</label>
@@ -2621,48 +2684,50 @@
                                 <input type="number" id="edit_resetPrice" value="${product.hwidResetPrice || 0}" min="0" step="0.01" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                             </div>
                         </div>
-                        
+
                         <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
                             <button onclick="saveProductEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
                             <button onclick="cancelProductEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
                         </div>
                     </div>
                 `;
-                
+
                 const container = document.getElementById('productsContainer');
                 container.insertAdjacentHTML('afterbegin', editForm);
-                
+
                 document.getElementById('edit_displayName').focus();
-                
+
             } catch (error) {
                 console.error('Edit product error:', error);
                 showMessage('Error loading product for editing', 'error', 'productsMessage');
             }
         }
-        
+
         async function saveProductEdit() {
             if (!editingProductKey) return;
-            
+
             const updates = {};
-            
+
             const displayName = document.getElementById('edit_displayName').value.trim();
             const description = document.getElementById('edit_description').value.trim();
             const downloadLink = document.getElementById('edit_downloadLink').value.trim();
             const setupVideoLink = document.getElementById('edit_setupVideoLink').value.trim();
             const genzauthKey = document.getElementById('edit_genzauthKey').value.trim();
+            const announcements = document.getElementById('edit_announcements').value.trim();
             const allowHwidReset = document.getElementById('edit_allowHwidReset').checked;
             const maxFreeResets = document.getElementById('edit_maxFreeResets').value;
             const resetPrice = document.getElementById('edit_resetPrice').value;
-            
+
             if (displayName) updates.displayName = displayName;
             if (description) updates.description = description;
             updates.downloadLink = downloadLink;
             updates.setupVideoLink = setupVideoLink;
             if (genzauthKey) updates.genzauthSellerKey = genzauthKey;
+            updates.announcements = announcements;
             updates.allowHwidReset = allowHwidReset;
             if (maxFreeResets) updates.maxFreeHwidResets = parseInt(maxFreeResets);
             if (resetPrice) updates.hwidResetPrice = parseFloat(resetPrice);
-            
+
             try {
                 const response = await fetch(`/api/admin/products/${editingProductKey}`, {
                     method: 'PUT',
@@ -2670,9 +2735,9 @@
                     credentials: 'include',
                     body: JSON.stringify(updates)
                 });
-                
+
                 const data = await response.json();
-                
+
                 if (response.ok && data.success) {
                     showMessage('Product updated successfully!', 'success', 'productsMessage');
                     editingProductKey = null;
@@ -2685,7 +2750,7 @@
                 showMessage('Error updating product', 'error', 'productsMessage');
             }
         }
-        
+
         function cancelProductEdit() {
             editingProductKey = null;
             loadProducts();
@@ -3036,6 +3101,74 @@
                 showMessage('Error updating download links', 'error', 'downloadLinksMessage');
             }
         }
+
+        // Announcement Functions
+        async function loadGlobalAnnouncements() {
+            try {
+                const response = await fetch('/api/admin/global-announcements', { credentials: 'include' });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('globalAnnouncements').value = data.announcements || '';
+                }
+            } catch (error) {
+                console.error('Error loading global announcements:', error);
+            }
+        }
+
+        async function saveGlobalAnnouncements() {
+            const announcements = document.getElementById('globalAnnouncements').value.trim();
+            try {
+                const response = await fetch('/api/admin/global-announcements', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ announcements }),
+                    credentials: 'include'
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showMessage('Global announcements updated successfully!', 'success', 'announcementsMessage');
+                } else {
+                    showMessage(data.error || 'Failed to update global announcements', 'error', 'announcementsMessage');
+                }
+            } catch (error) {
+                console.error('Error saving global announcements:', error);
+                showMessage('Connection error', 'error', 'announcementsMessage');
+            }
+        }
+
+        async function loadProductAnnouncements() {
+            try {
+                const response = await fetch('/api/admin/products', { credentials: 'include' });
+                const data = await response.json();
+                const container = document.getElementById('productAnnouncementsList');
+
+                if (!data.success || !data.products || data.products.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No products found to display announcements.</p>';
+                    return;
+                }
+
+                let html = '';
+                data.products.forEach(product => {
+                    if (product.announcements) {
+                        html += `
+                            <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px;">
+                                <h4 style="color: #fff; margin-bottom: 1rem;">${product.displayName} (${product.productKey})</h4>
+                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px; color: #eee; font-size: 13px;">
+                                    ${product.announcements}
+                                </div>
+                            </div>
+                        `;
+                    }
+                });
+
+                container.innerHTML = html || '<p style="color: #999; text-align: center; padding: 2rem;">No announcements configured for any products.</p>';
+
+            } catch (error) {
+                console.error('Error loading product announcements:', error);
+                document.getElementById('productAnnouncementsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Error loading product announcements.</p>';
+            }
+        }
+
 
         const originalSwitchTab = switchTab;
         switchTab = function(tabName, btn) {

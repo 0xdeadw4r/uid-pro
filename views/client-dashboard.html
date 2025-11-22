@@ -169,18 +169,18 @@
             font-size: 14px;
         }
 
-        .download-section, .reset-section {
+        .download-section, .reset-section, .setup-video-section, .news-section {
             text-align: center;
             padding: 2rem 0;
         }
 
-        .download-icon {
+        .download-icon, .setup-icon, .news-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .btn-download, .btn-reset {
+        .btn-download, .btn-reset, .btn-setup, .btn-news {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
@@ -198,12 +198,12 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled) {
+        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled), .btn-setup:hover:not(:disabled), .btn-news:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-download:disabled, .btn-reset:disabled {
+        .btn-download:disabled, .btn-reset:disabled, .btn-setup:disabled, .btn-news:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
@@ -249,7 +249,7 @@
             color: #3B82F6;
         }
 
-        .no-link-message {
+        .no-link-message, .no-video-message, .no-announcements-message {
             text-align: center;
             padding: 2rem;
             color: #999;
@@ -285,6 +285,29 @@
             letter-spacing: 1px;
         }
 
+        /* Setup Video Specific Styles */
+        .setup-video-section iframe {
+            width: 100%;
+            max-width: 720px;
+            height: 405px;
+            border: none;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        /* News Specific Styles */
+        .news-section {
+            text-align: left;
+        }
+        .news-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        .news-content a {
+            color: #3B82F6;
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -311,6 +334,10 @@
             .stats-grid {
                 grid-template-columns: 1fr;
             }
+
+            .setup-video-section iframe {
+                height: 315px;
+            }
         }
     </style>
 </head>
@@ -330,6 +357,8 @@
         <div class="tabs" id="tabsContainer">
             <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
             <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
+            <button class="tab" onclick="showTab('setup')">🎥 Setup Guide</button>
+            <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;">📰 News</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -413,6 +442,30 @@
                 </button>
             </div>
         </div>
+
+        <div id="setupTab" class="tab-content">
+            <h2>Setup Guide</h2>
+            <div id="setupAlert" class="alert"></div>
+
+            <div id="setupVideoSection" class="setup-video-section" style="display: none;">
+                <p style="margin-bottom: 1.5rem; color: #999; font-size: 13px;">
+                    Watch the video below for setup instructions
+                </p>
+                <iframe id="setupVideoIframe" src="" allowfullscreen></iframe>
+            </div>
+
+            <div id="noVideoSection" class="no-video-message" style="display: none;">
+                <p>⚠️ No setup video available. Please contact your administrator.</p>
+            </div>
+        </div>
+
+        <div id="newsTab" class="tab-content">
+            <h2>News & Announcements</h2>
+            <div id="newsAlert" class="alert"></div>
+            <div id="newsContent" class="news-content">
+                <p style="text-align: center; color: #999; padding: 2rem;">Loading announcements...</p>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -431,6 +484,12 @@
             } else if (tabName === 'reset') {
                 tabs[1].classList.add('active');
                 document.getElementById('resetTab').classList.add('active');
+            } else if (tabName === 'setup') {
+                tabs[2].classList.add('active');
+                document.getElementById('setupTab').classList.add('active');
+            } else if (tabName === 'news') {
+                tabs[3].classList.add('active');
+                document.getElementById('newsTab').classList.add('active');
             }
         }
 
@@ -448,6 +507,12 @@
             showAlert('downloadAlert', message, 'error');
             if (document.getElementById('resetTab').classList.contains('active')) {
                 showAlert('resetAlert', message, 'error');
+            }
+            if (document.getElementById('setupTab').classList.contains('active')) {
+                showAlert('setupAlert', message, 'error');
+            }
+            if (document.getElementById('newsTab').classList.contains('active')) {
+                showAlert('newsAlert', message, 'error');
             }
         }
 
@@ -499,7 +564,7 @@
             if (!clientData) return;
 
             const productName = clientData.productInfo ? clientData.productInfo.displayName : clientData.productKey;
-            
+
             document.getElementById('headerUsername').textContent = clientData.username;
             document.getElementById('headerProductType').textContent = productName;
             document.getElementById('productType').textContent = productName;
@@ -556,7 +621,9 @@
                 showTab('download');
             }
 
-            if (clientData.hasDownloadLink && clientData.downloadLink.trim() !== '') {
+            // Download Link Logic
+            const hasDownloadLink = clientData.hasDownloadLink;
+            if (hasDownloadLink && clientData.downloadLink && clientData.downloadLink.trim() !== '') {
                 document.getElementById('downloadButton').href = clientData.downloadLink;
                 document.getElementById('downloadSection').style.display = 'block';
                 document.getElementById('noLinkSection').style.display = 'none';
@@ -564,6 +631,42 @@
                 document.getElementById('downloadSection').style.display = 'none';
                 document.getElementById('noLinkSection').style.display = 'block';
                 showAlert('downloadAlert', 'No download link has been configured. Please contact your administrator.', 'info');
+            }
+
+            // Setup Video Logic
+            const setupVideoLink = clientData.setupVideoLink;
+            const setupVideoIframe = document.getElementById('setupVideoIframe');
+            const setupVideoSection = document.getElementById('setupVideoSection');
+            const noVideoSection = document.getElementById('noVideoSection');
+
+            if (setupVideoLink && setupVideoLink.trim() !== '') {
+                let embedUrl = setupVideoLink;
+                if (embedUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = embedUrl.split('v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                } else if (embedUrl.includes('youtu.be/')) {
+                    const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+                setupVideoIframe.src = embedUrl;
+                setupVideoSection.style.display = 'block';
+                noVideoSection.style.display = 'none';
+            } else {
+                setupVideoSection.style.display = 'none';
+                noVideoSection.style.display = 'block';
+            }
+
+            // News/Announcements Logic
+            const announcements = clientData.announcements;
+            const newsContent = document.getElementById('newsContent');
+            const newsTabButton = document.getElementById('newsTabButton');
+
+            if (announcements && announcements.trim() !== '') {
+                newsTabButton.style.display = 'block';
+                newsContent.innerHTML = announcements;
+            } else {
+                newsTabButton.style.display = 'none';
+                newsContent.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No announcements at this time.</p>';
             }
         }
 
