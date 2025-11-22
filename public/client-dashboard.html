@@ -391,7 +391,8 @@
         <div class="tabs" id="tabsContainer">
             <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
             <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
-            <button class="tab" onclick="showTab('setup')">🎥 Setup Guide</button>
+            <button class="tab" id="setupTabButton" onclick="showTab('setup')">🎥 Setup Guide</button>
+            <button class="tab" id="newsTabButton" style="display: none;">📰 News</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -498,7 +499,17 @@
             </div>
 
             <div id="setupVideoPlayerContainer">
-                <div id="setupVideoPlayer"></div>
+                <iframe id="setupVideoIframe" width="100%" height="400" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 8px; display: none;"></iframe>
+            </div>
+            <div id="noVideoSection" class="no-link-message" style="display: none;">
+                <p>⚠️ No setup video available. Please contact your administrator.</p>
+            </div>
+        </div>
+
+        <div id="newsTab" class="tab-content">
+            <h2>News & Announcements</h2>
+            <div id="newsContent">
+                <p style="text-align: center; color: #999; padding: 2rem;">Loading news...</p>
             </div>
         </div>
     </div>
@@ -524,6 +535,10 @@
                 tabs[2].classList.add('active');
                 document.getElementById('setupTab').classList.add('active');
                 loadSetupVideoLink(); // Load the video link when the tab is shown
+            } else if (tabName === 'news') {
+                tabs[3].classList.add('active');
+                document.getElementById('newsTab').classList.add('active');
+                loadAnnouncements(); // Load announcements when the tab is shown
             }
         }
 
@@ -567,7 +582,6 @@
                     }
                 });
 
-                // Check if response is JSON
                 const contentType = response.headers.get('content-type');
                 if (!contentType || !contentType.includes('application/json')) {
                     console.error('Not authenticated - received HTML instead of JSON');
@@ -700,85 +714,128 @@
                 document.getElementById('noLinkSection').style.display = 'block';
                 showAlert('downloadAlert', 'No download link has been configured. Please contact your administrator.', 'info');
             }
+
+            // Setup Video Logic
+            const setupVideoLink = clientData.setupVideoLink;
+            const setupVideoIframe = document.getElementById('setupVideoIframe');
+            const setupVideoSection = document.getElementById('setupVideoSection');
+            const noVideoSection = document.getElementById('noVideoSection');
+            const setupTabButton = document.getElementById('setupTabButton');
+
+            if (setupVideoLink && setupVideoLink.trim() !== '') {
+                setupTabButton.style.display = 'block';
+                let embedUrl = setupVideoLink;
+                if (embedUrl.includes('youtube.com/watch?v=')) {
+                    const videoId = embedUrl.split('v=')[1].split('&')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                } else if (embedUrl.includes('youtu.be/')) {
+                    const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                }
+                setupVideoIframe.src = embedUrl;
+                setupVideoIframe.style.display = 'block'; // Make iframe visible
+                setupVideoSection.style.display = 'block';
+                noVideoSection.style.display = 'none';
+            } else {
+                setupTabButton.style.display = 'none';
+                setupVideoIframe.style.display = 'none'; // Hide iframe
+                setupVideoSection.style.display = 'none';
+                noVideoSection.style.display = 'block';
+            }
+
+            // News/Announcements Logic
+            const announcements = clientData.announcements;
+            const newsContent = document.getElementById('newsContent');
+            const newsTabButton = document.getElementById('newsTabButton');
+
+            if (announcements && announcements.trim() !== '') {
+                newsTabButton.style.display = 'block';
+                newsContent.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8;">${announcements}</div>`;
+            } else {
+                newsTabButton.style.display = 'none';
+                newsContent.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No announcements at this time.</p>';
+            }
         }
 
         async function resetHwid() {
-        if (!clientData) return;
+            if (!clientData) return;
 
-        if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
-            showError('HWID reset is not available for your product');
-            return;
-        }
-
-        if (!clientData.assignedUsername) {
-            showError('No GenzAuth username assigned to your account. Please contact administrator to configure your account.');
-            return;
-        }
-
-        const confirmMsg = `Reset HWID for GenzAuth account: ${clientData.assignedUsername}?\n\nThis will clear the Hardware ID lock on your account.`;
-        if (!confirm(confirmMsg)) {
-            return;
-        }
-
-        const resetButton = document.getElementById('resetButton');
-        resetButton.disabled = true;
-        resetButton.textContent = '🔄 RESETTING...';
-
-        try {
-            const response = await fetch('/client/api/reset-hwid', {
-                method: 'POST',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                showSuccess(data.message);
-
-                // Update local data
-                clientData.hwidResetCount = data.resetCount;
-                clientData.lastHwidReset = data.lastReset;
-
-                // Update UI to reflect new counts
-                updateUI();
-            } else {
-                // Show popup alert for API failures
-                let errorMsg = '';
-
-                if (data.configurationError) {
-                    errorMsg = '⚠️ Configuration Error\n\n' + data.error + '\n\nPlease contact the administrator.';
-                } else if (data.limitReached) {
-                    errorMsg = '⚠️ Reset Limit Reached\n\n' + data.error;
-                } else if (data.apiError) {
-                    errorMsg = '❌ HWID Reset Failed\n\nGenzAuth API Error: ' + data.error + '\n\nThe API request failed. Please try again or contact administrator.';
-                } else {
-                    errorMsg = '❌ HWID Reset Failed\n\n' + (data.error || 'Unknown error occurred') + '\n\nPlease contact administrator if this continues.';
-                }
-
-                // Show both alert popup and error message on page
-                alert(errorMsg);
-                showError(data.error || 'HWID reset failed from API');
+            if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
+                showError('HWID reset is not available for your product');
+                return;
             }
-        } catch (error) {
-            console.error('Reset HWID error:', error);
-            const errorMsg = '❌ Connection Error\n\nFailed to connect to the server.\n\nPlease check your internet connection and try again.';
-            alert(errorMsg);
-            showError('Connection error. Please check your internet and try again.');
-        } finally {
-            resetButton.disabled = false;
-            resetButton.textContent = '🔄 RESET HWID';
+
+            if (!clientData.assignedUsername) {
+                showError('No GenzAuth username assigned to your account. Please contact administrator to configure your account.');
+                return;
+            }
+
+            const confirmMsg = `Reset HWID for GenzAuth account: ${clientData.assignedUsername}?\n\nThis will clear the Hardware ID lock on your account.`;
+            if (!confirm(confirmMsg)) {
+                return;
+            }
+
+            const resetButton = document.getElementById('resetButton');
+            resetButton.disabled = true;
+            resetButton.textContent = '🔄 RESETTING...';
+
+            try {
+                const response = await fetch('/client/api/reset-hwid', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showSuccess(data.message);
+
+                    // Update local data
+                    clientData.hwidResetCount = data.resetCount;
+                    clientData.lastHwidReset = data.lastReset;
+
+                    // Update UI to reflect new counts
+                    updateUI();
+                } else {
+                    // Show popup alert for API failures
+                    let errorMsg = '';
+
+                    if (data.configurationError) {
+                        errorMsg = '⚠️ Configuration Error\n\n' + data.error + '\n\nPlease contact the administrator.';
+                    } else if (data.limitReached) {
+                        errorMsg = '⚠️ Reset Limit Reached\n\n' + data.error;
+                    } else if (data.apiError) {
+                        errorMsg = '❌ HWID Reset Failed\n\nGenzAuth API Error: ' + data.error + '\n\nThe API request failed. Please try again or contact administrator.';
+                    } else {
+                        errorMsg = '❌ HWID Reset Failed\n\n' + (data.error || 'Unknown error occurred') + '\n\nPlease contact administrator if this continues.';
+                    }
+
+                    // Show both alert popup and error message on page
+                    alert(errorMsg);
+                    showError(data.error || 'HWID reset failed from API');
+                }
+            } catch (error) {
+                console.error('Reset HWID error:', error);
+                const errorMsg = '❌ Connection Error\n\nFailed to connect to the server.\n\nPlease check your internet connection and try again.';
+                alert(errorMsg);
+                showError('Connection error. Please check your internet and try again.');
+            } finally {
+                resetButton.disabled = false;
+                resetButton.textContent = '🔄 RESET HWID';
+            }
         }
-    }
 
         async function loadSetupVideoLink() {
             const setupVideoPlayerContainer = document.getElementById('setupVideoPlayerContainer');
             const setupVideoPlayer = document.getElementById('setupVideoPlayer');
+            const setupVideoIframe = document.getElementById('setupVideoIframe'); // Get the iframe element
 
-            setupVideoPlayer.innerHTML = '';
+            setupVideoPlayer.innerHTML = ''; // Clear any previous content
             setupVideoPlayerContainer.style.display = 'none';
+            setupVideoIframe.style.display = 'none'; // Ensure iframe is hidden initially
 
             try {
                 const response = await fetch('/client/api/setup-video-link', {
@@ -796,8 +853,7 @@
 
                     if (videoLink && videoLink.trim()) {
                         setupVideoPlayerContainer.style.display = 'block';
-                        
-                        // Convert YouTube URL to embed format
+
                         let embedUrl = videoLink;
                         if (videoLink.includes('youtube.com/watch?v=')) {
                             const videoId = videoLink.split('v=')[1].split('&')[0];
@@ -806,10 +862,11 @@
                             const videoId = videoLink.split('youtu.be/')[1].split('?')[0];
                             embedUrl = `https://www.youtube.com/embed/${videoId}`;
                         }
-                        
-                        setupVideoPlayer.innerHTML = `<iframe width="100%" height="400" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 8px;"></iframe>`;
+                        setupVideoIframe.src = embedUrl;
+                        setupVideoIframe.style.display = 'block'; // Show the iframe
                     } else {
-                        setupVideoPlayer.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No setup video available. Contact your administrator.</p>';
+                        // If no video link, show the 'no video' message
+                        document.getElementById('noVideoSection').style.display = 'block';
                     }
                 } else {
                     showError(data.error || 'Failed to load setup video link');
@@ -817,6 +874,32 @@
             } catch (error) {
                 console.error('Load setup video link error:', error);
                 showError('Failed to load setup video link. Please try again.');
+            }
+        }
+
+        async function loadAnnouncements() {
+            const newsContent = document.getElementById('newsContent');
+            try {
+                const response = await fetch('/client/api/announcements', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    const announcements = data.announcements;
+                    if (announcements && announcements.trim() !== '') {
+                        newsContent.innerHTML = `<div style="white-space: pre-wrap; line-height: 1.8;">${announcements}</div>`;
+                    } else {
+                        newsContent.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No announcements at this time.</p>';
+                    }
+                } else {
+                    newsContent.innerHTML = `<p style="text-align: center; color: #EF4444; padding: 2rem;">Error loading announcements: ${data.error || 'Unknown error'}</p>`;
+                }
+            } catch (error) {
+                console.error('Load announcements error:', error);
+                newsContent.innerHTML = '<p style="text-align: center; color: #EF4444; padding: 2rem;">Failed to load announcements. Please try again.</p>';
             }
         }
 

@@ -2706,34 +2706,28 @@
         async function saveProductEdit() {
             if (!editingProductKey) return;
 
-            const updates = {};
+            const updatedData = {
+                displayName: document.getElementById('edit_displayName').value,
+                description: document.getElementById('edit_description').value,
+                allowHwidReset: document.getElementById('edit_allowHwidReset').checked,
+                maxFreeHwidResets: parseInt(document.getElementById('edit_maxFreeResets').value) || 5,
+                hwidResetPrice: parseFloat(document.getElementById('edit_resetPrice').value) || 0,
+                downloadLink: document.getElementById('edit_downloadLink').value.trim(),
+                setupVideoLink: document.getElementById('edit_setupVideoLink').value.trim(),
+                announcements: document.getElementById('edit_announcements').value.trim()
+            };
 
-            const displayName = document.getElementById('edit_displayName').value.trim();
-            const description = document.getElementById('edit_description').value.trim();
-            const downloadLink = document.getElementById('edit_downloadLink').value.trim();
-            const setupVideoLink = document.getElementById('edit_setupVideoLink').value.trim();
-            const genzauthKey = document.getElementById('edit_genzauthKey').value.trim();
-            const announcements = document.getElementById('edit_announcements').value.trim();
-            const allowHwidReset = document.getElementById('edit_allowHwidReset').checked;
-            const maxFreeResets = document.getElementById('edit_maxFreeResets').value;
-            const resetPrice = document.getElementById('edit_resetPrice').value;
-
-            if (displayName) updates.displayName = displayName;
-            if (description) updates.description = description;
-            updates.downloadLink = downloadLink;
-            updates.setupVideoLink = setupVideoLink;
-            if (genzauthKey) updates.genzauthSellerKey = genzauthKey;
-            updates.announcements = announcements;
-            updates.allowHwidReset = allowHwidReset;
-            if (maxFreeResets) updates.maxFreeHwidResets = parseInt(maxFreeResets);
-            if (resetPrice) updates.hwidResetPrice = parseFloat(resetPrice);
+            const sellerKey = document.getElementById('edit_genzauthKey').value;
+            if (sellerKey && sellerKey.trim()) {
+                updatedData.genzauthSellerKey = sellerKey.trim();
+            }
 
             try {
                 const response = await fetch(`/api/admin/products/${editingProductKey}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify(updates)
+                    body: JSON.stringify(updatedData)
                 });
 
                 const data = await response.json();
