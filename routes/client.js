@@ -903,6 +903,114 @@ router.get('/api/setup-video-link', isClient, async (req, res) => {
     }
 });
 
+// Get GenzAuth account expiration info
+router.get('/api/genzauth-expiration', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+
+        if (!client.assignedUsername) {
+            return res.json({
+                success: false,
+                hasAccount: false,
+                message: 'No GenzAuth account assigned'
+            });
+        }
+
+        const Product = require('../models/Product');
+        const product = await Product.findOne({ productKey: client.productKey });
+
+        // Get seller key (product-specific or global)
+        let sellerKey = null;
+        if (product && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
+            sellerKey = product.genzauthSellerKey.trim();
+        } else {
+            const ApiConfig = require('../models/ApiConfig');
+            const config = await ApiConfig.findOne({ configKey: 'main_config' });
+            sellerKey = config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY || null;
+        }
+
+        if (!sellerKey) {
+            return res.json({
+                success: false,
+                hasAccount: true,
+                error: 'GenzAuth not configured'
+            });
+        }
+
+        // Fetch user info from GenzAuth API
+        const userInfo = await genzauth.getUserInfo(client.assignedUsername, sellerKey);
+
+        if (!userInfo.success) {
+            return res.json({
+                success: false,
+                hasAccount: true,
+                error: userInfo.error || userInfo.message || 'Failed to fetch account info'
+            });
+        }
+
+        // Parse expiration date from API response
+        const expiryData = userInfo.data || userInfo;
+        const expiryTimestamp = expiryData.expiry || expiryData.expires || expiryData.expiresAt;
+        
+        if (!expiryTimestamp) {
+            return res.json({
+                success: true,
+                hasAccount: true,
+                username: client.assignedUsername,
+                status: expiryData.status || 'active',
+                expiresAt: null,
+                message: 'Expiration date not available'
+            });
+        }
+
+        // Convert timestamp to date
+        const expiresAt = new Date(parseInt(expiryTimestamp) * 1000);
+        const now = new Date();
+        const timeLeft = expiresAt - now;
+        
+        let timeLeftFormatted = 'Expired';
+        let isActive = false;
+        
+        if (timeLeft > 0) {
+            isActive = true;
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (days > 0) {
+                timeLeftFormatted = `${days}d ${hours}h ${minutes}m`;
+            } else if (hours > 0) {
+                timeLeftFormatted = `${hours}h ${minutes}m`;
+            } else {
+                timeLeftFormatted = `${minutes}m`;
+            }
+        }
+
+        res.json({
+            success: true,
+            hasAccount: true,
+            username: client.assignedUsername,
+            expiresAt: expiresAt.toISOString(),
+            expiresAtFormatted: expiresAt.toLocaleString(),
+            timeLeft: timeLeftFormatted,
+            isActive: isActive,
+            status: expiryData.status || (isActive ? 'active' : 'expired'),
+            hwid: expiryData.hwid || null
+        });
+
+    } catch (error) {
+        console.error('Get GenzAuth expiration error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: 'Failed to fetch account expiration info' 
+        });
+    }
+});
+
 // Admin: Bulk extend client accounts
 router.post('/admin/bulk-extend', isAdminOrOwner, async (req, res) => {
     try {

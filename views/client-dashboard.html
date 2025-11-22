@@ -376,6 +376,25 @@
                 </div>
             </div>
 
+            <div id="genzAuthExpirationCard" class="info-card" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                <div class="info-row">
+                    <span class="info-label">GenzAuth Account:</span>
+                    <span class="info-value" id="genzAuthUsername">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expires At:</span>
+                    <span class="info-value" id="genzAuthExpiry">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Remaining:</span>
+                    <span class="info-value" id="genzAuthTimeLeft" style="font-weight: 700;">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Status:</span>
+                    <span class="info-value" id="genzAuthStatus">-</span>
+                </div>
+            </div>
+
             <div id="uidInfoCard" class="info-card" style="display: none;">
                 <div class="info-row">
                     <span class="info-label">Your UID:</span>
@@ -470,6 +489,7 @@
 
     <script>
         let clientData = null;
+        let expirationRefreshInterval = null;
 
         function showTab(tabName) {
             const tabs = document.querySelectorAll('.tab');
@@ -720,7 +740,50 @@
             }
         }
 
+        async function loadGenzAuthExpiration() {
+            try {
+                const response = await fetch('/client/api/genzauth-expiration', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                const card = document.getElementById('genzAuthExpirationCard');
+                
+                if (response.ok && data.success && data.hasAccount) {
+                    card.style.display = 'block';
+                    document.getElementById('genzAuthUsername').textContent = data.username || '-';
+                    document.getElementById('genzAuthExpiry').textContent = data.expiresAtFormatted || '-';
+                    document.getElementById('genzAuthTimeLeft').textContent = data.timeLeft || '-';
+                    
+                    const statusEl = document.getElementById('genzAuthStatus');
+                    if (data.isActive) {
+                        statusEl.textContent = '✅ Active';
+                        statusEl.style.color = '#10B981';
+                        card.style.background = 'rgba(16, 185, 129, 0.1)';
+                        card.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    } else {
+                        statusEl.textContent = '❌ Expired';
+                        statusEl.style.color = '#EF4444';
+                        card.style.background = 'rgba(239, 68, 68, 0.1)';
+                        card.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Load GenzAuth expiration error:', error);
+            }
+        }
+
         async function logout() {
+            // Clear refresh interval on logout
+            if (expirationRefreshInterval) {
+                clearInterval(expirationRefreshInterval);
+            }
+            
             try {
                 await fetch('/client/api/logout', {
                     method: 'POST',
@@ -735,6 +798,14 @@
 
         setTimeout(() => {
             loadClientData();
+            
+            // Load GenzAuth expiration initially
+            loadGenzAuthExpiration();
+            
+            // Set up auto-refresh every 30 seconds
+            expirationRefreshInterval = setInterval(() => {
+                loadGenzAuthExpiration();
+            }, 30000);
         }, 500);
     </script>
 </body>

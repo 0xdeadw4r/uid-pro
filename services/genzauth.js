@@ -168,6 +168,19 @@ async function fetchAllLicenses() {
     return makeRequest('fetchalllicenses');
 }
 
+async function getUserInfo(username, customSellerKey = null) {
+    console.log(`[GenzAuth] Fetching user info for: ${username}`);
+    const result = await makeRequest('fetchuser', { user: username }, customSellerKey);
+    
+    if (result.success) {
+        console.log(`[GenzAuth] ✅ User info fetched for: ${username}`);
+    } else {
+        console.log(`[GenzAuth] ❌ Failed to fetch user info for: ${username} - ${result.error || result.message}`);
+    }
+    
+    return result;
+}
+
 function generateTestLicense(prefix = 'TEST') {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const segments = [prefix];
@@ -274,5 +287,6 @@ module.exports = {
     deleteUser,
     extendUser,
     resetHwid,
-    fetchAllLicenses
+    fetchAllLicenses,
+    getUserInfo
 };
