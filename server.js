@@ -33,6 +33,78 @@ const io = socketIo(server);
 // For this example, we'll assume it exists and is imported like other models.
 const ChatMessage = require('./models/ChatMessage');
 
+// Socket.IO chat handlers
+io.on('connection', (socket) => {
+  console.log('User connected to chat:', socket.id);
+
+  socket.on('join-chat', async (data) => {
+    const { username, userType } = data;
+    socket.username = username;
+    socket.userType = userType;
+    
+    console.log(`${username} (${userType}) joined chat`);
+    
+    // Notify others that user is online
+    socket.broadcast.emit('user-online', { username });
+  });
+
+  socket.on('send-message', async (data) => {
+    try {
+      const { senderUsername, senderType, receiverUsername, message } = data;
+      
+      // Save message to database
+      const chatMessage = await ChatMessage.create({
+        senderUsername,
+        senderType,
+        receiverUsername,
+        message,
+        isRead: false
+      });
+
+      // Emit to sender (confirmation)
+      socket.emit('message-sent', chatMessage);
+      
+      // Emit to receiver (if online)
+      io.sockets.sockets.forEach((s) => {
+        if (s.username === receiverUsername) {
+          s.emit('new-message', chatMessage);
+        }
+      });
+    } catch (error) {
+      console.error('Send message error:', error);
+      socket.emit('error', { message: 'Failed to send message' });
+    }
+  });
+
+  socket.on('typing', (data) => {
+    const { receiverUsername } = data;
+    io.sockets.sockets.forEach((s) => {
+      if (s.username === receiverUsername) {
+        s.emit('user-typing', { username: socket.username });
+      }
+    });
+  });
+
+  socket.on('mark-read', async (data) => {
+    try {
+      const { messageIds } = data;
+      await ChatMessage.updateMany(
+        { _id: { $in: messageIds } },
+        { $set: { isRead: true, readAt: new Date() } }
+      );
+    } catch (error) {
+      console.error('Mark read error:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      console.log(`${socket.username} disconnected from chat`);
+      socket.broadcast.emit('user-offline', { username: socket.username });
+    }
+  });
+});
+
 
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -630,6 +702,10 @@ app.get('/invoices', requireAuth, (req, res) => {
 
 app.get('/aimkill-packages', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'aimkill-packages.html'));
+});
+
+app.get('/chat', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'chat.html'));
 });
 
 app.post('/api/register', async (req, res) => {
@@ -3337,6 +3413,40 @@ app.post('/api/admin/mass-delete-api-keys', requireAuth, requireAdmin, async (re
   } catch (error) {
     console.error('Mass delete API keys error:', error.message);
     res.status(500).json({ error: 'Failed to mass delete API keys' });
+  }
+});
+
+// Chat API endpoints
+app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const Client = require('./models/Client');
+    const clients = await Client.find({ isActive: true })
+      .select('username productKey')
+      .sort({ username: 1 });
+    
+    res.json({ success: true, clients });
+  } catch (error) {
+    console.error('Get chat clients error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch clients' });
+  }
+});
+
+app.get('/api/chat/history', requireAuth, async (req, res) => {
+  try {
+    const { withUser } = req.query;
+    const currentUser = req.session.user.username;
+    
+    const messages = await ChatMessage.find({
+      $or: [
+        { senderUsername: currentUser, receiverUsername: withUser },
+        { senderUsername: withUser, receiverUsername: currentUser }
+      ]
+    }).sort({ timestamp: 1 }).limit(100);
+    
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error('Get chat history error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
   }
 });
 
