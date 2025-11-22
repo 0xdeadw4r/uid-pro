@@ -495,15 +495,38 @@
             <h2>Setup Guide</h2>
             <div id="setupAlert" class="alert"></div>
 
-            <div id="setupVideoSection" class="setup-video-section" style="display: none;">
-                <p style="margin-bottom: 1.5rem; color: #999; font-size: 13px;">
-                    Watch the video below for setup instructions
-                </p>
-                <iframe id="setupVideoIframe" src="" allowfullscreen></iframe>
+            <!-- Setup Video Card -->
+            <div id="setupVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📹 Setup Video</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="toggleSetupVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;">▶️ PLAY</button>
+                        <a id="openSetupVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;">🔗 OPEN</a>
+                    </div>
+                </div>
+                <div id="setupVideoPlayer" style="display: none; margin-top: 1rem;">
+                    <iframe id="setupVideoIframe" src="" allowfullscreen style="width: 100%; height: 480px; border-radius: 8px; border: none;"></iframe>
+                </div>
+                <p style="color: #666; font-size: 11px; margin: 0.5rem 0 0 0;">Watch this video for complete setup instructions</p>
+            </div>
+
+            <!-- Guest Video Card -->
+            <div id="guestVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">🎬 Guest Video</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="toggleGuestVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;">▶️ PLAY</button>
+                        <a id="openGuestVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;">🔗 OPEN</a>
+                    </div>
+                </div>
+                <div id="guestVideoPlayer" style="display: none; margin-top: 1rem;">
+                    <iframe id="guestVideoIframe" src="" allowfullscreen style="width: 100%; height: 480px; border-radius: 8px; border: none;"></iframe>
+                </div>
+                <p style="color: #666; font-size: 11px; margin: 0.5rem 0 0 0;">Additional video content for your reference</p>
             </div>
 
             <div id="noVideoSection" class="no-video-message" style="display: none;">
-                <p>⚠️ No setup video available. Please contact your administrator.</p>
+                <p>⚠️ No setup videos available. Please contact your administrator.</p>
             </div>
         </div>
 
@@ -682,28 +705,55 @@
                 showAlert('downloadAlert', 'No download link has been configured. Please contact your administrator.', 'info');
             }
 
-            // Setup Video Logic
+            // Video Logic
             const setupVideoLink = clientData.setupVideoLink;
-            const setupVideoIframe = document.getElementById('setupVideoIframe');
-            const setupVideoSection = document.getElementById('setupVideoSection');
+            const guestVideoLink = clientData.guestVideoLink;
+            const setupVideoCard = document.getElementById('setupVideoCard');
+            const guestVideoCard = document.getElementById('guestVideoCard');
             const noVideoSection = document.getElementById('noVideoSection');
 
+            let hasAnyVideo = false;
+
+            // Setup Video
             if (setupVideoLink && setupVideoLink.trim() !== '') {
-                let embedUrl = setupVideoLink;
-                if (embedUrl.includes('youtube.com/watch?v=')) {
-                    const videoId = embedUrl.split('v=')[1].split('&')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
-                } else if (embedUrl.includes('youtu.be/')) {
-                    const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
-                    embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                hasAnyVideo = true;
+                let embedUrl = convertToEmbedUrl(setupVideoLink);
+                document.getElementById('setupVideoIframe').src = embedUrl;
+                document.getElementById('openSetupVideo').href = setupVideoLink;
+                setupVideoCard.style.display = 'block';
+                
+                // Attach event listener for toggle button
+                const toggleBtn = document.getElementById('toggleSetupVideo');
+                if (toggleBtn) {
+                    toggleBtn.onclick = function() {
+                        toggleVideoPlayer('setupVideoPlayer', 'toggleSetupVideo');
+                    };
                 }
-                setupVideoIframe.src = embedUrl;
-                setupVideoSection.style.display = 'block';
-                noVideoSection.style.display = 'none';
             } else {
-                setupVideoSection.style.display = 'none';
-                noVideoSection.style.display = 'block';
+                setupVideoCard.style.display = 'none';
             }
+
+            // Guest Video
+            if (guestVideoLink && guestVideoLink.trim() !== '') {
+                hasAnyVideo = true;
+                let embedUrl = convertToEmbedUrl(guestVideoLink);
+                document.getElementById('guestVideoIframe').src = embedUrl;
+                document.getElementById('openGuestVideo').href = guestVideoLink;
+                guestVideoCard.style.display = 'block';
+                
+                // Attach event listener for toggle button
+                const toggleBtn = document.getElementById('toggleGuestVideo');
+                if (toggleBtn) {
+                    toggleBtn.onclick = function() {
+                        toggleVideoPlayer('guestVideoPlayer', 'toggleGuestVideo');
+                    };
+                }
+            } else {
+                guestVideoCard.style.display = 'none';
+            }
+
+            // Show/hide no video message
+            noVideoSection.style.display = hasAnyVideo ? 'none' : 'block';
 
             // News/Announcements Logic
             const announcements = clientData.announcements;
@@ -804,6 +854,31 @@
                 }
             } catch (error) {
                 console.error('Load GenzAuth expiration error:', error);
+            }
+        }
+
+        function convertToEmbedUrl(videoUrl) {
+            let embedUrl = videoUrl;
+            if (embedUrl.includes('youtube.com/watch?v=')) {
+                const videoId = embedUrl.split('v=')[1].split('&')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            } else if (embedUrl.includes('youtu.be/')) {
+                const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+            return embedUrl;
+        }
+
+        function toggleVideoPlayer(playerElementId, buttonElementId) {
+            const player = document.getElementById(playerElementId);
+            const button = document.getElementById(buttonElementId);
+            
+            if (player.style.display === 'none' || player.style.display === '') {
+                player.style.display = 'block';
+                button.textContent = '⏸️ HIDE';
+            } else {
+                player.style.display = 'none';
+                button.textContent = '▶️ PLAY';
             }
         }
 

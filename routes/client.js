@@ -256,6 +256,7 @@ router.get('/api/info', isClient, async (req, res) => {
                 downloadLink: downloadLink || '',
                 hasDownloadLink: !!downloadLink,
                 setupVideoLink: product ? (product.setupVideoLink || '') : '',
+                guestVideoLink: product ? (product.guestVideoLink || '') : '',
                 announcements: product ? (product.announcements || '') : '',
                 lastLogin: client.lastLogin,
                 lastHwidReset: client.lastHwidReset,
@@ -268,6 +269,7 @@ router.get('/api/info', isClient, async (req, res) => {
                     hwidResetPrice: product.hwidResetPrice || 0,
                     hasGenzAuth: hasGenzAuth,
                     setupVideoLink: product.setupVideoLink || '',
+                    guestVideoLink: product.guestVideoLink || '',
                     announcements: product.announcements || ''
                 } : null
             }
@@ -764,7 +766,38 @@ router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
     }
 });
 
-// Admin: Update setup video link for product
+// Admin: Update video links for product
+router.put('/admin/video-links/:productKey', isAdminOrOwner, async (req, res) => {
+    try {
+        const { productKey } = req.params;
+        const { setupVideoLink, guestVideoLink } = req.body;
+
+        const Product = require('../models/Product');
+
+        const product = await Product.findOne({ productKey });
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        if (setupVideoLink !== undefined) {
+            product.setupVideoLink = setupVideoLink || '';
+        }
+        if (guestVideoLink !== undefined) {
+            product.guestVideoLink = guestVideoLink || '';
+        }
+        await product.save();
+
+        res.json({
+            success: true,
+            message: 'Video links updated successfully'
+        });
+    } catch (error) {
+        console.error('Update video links error:', error);
+        res.status(500).json({ error: 'Failed to update video links' });
+    }
+});
+
+// Admin: Update setup video link for product (legacy endpoint for backward compatibility)
 router.put('/admin/setup-video-link/:productKey', isAdminOrOwner, async (req, res) => {
     try {
         const { productKey } = req.params;

@@ -61,6 +61,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // Guest Video Link
+    guestVideoLink: {
+        type: String,
+        default: ''
+    },
     // Announcements/News
     announcements: {
         type: String,

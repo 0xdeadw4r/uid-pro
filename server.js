@@ -3478,6 +3478,8 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       maxFreeHwidResets: product.maxFreeHwidResets || 5,
       hwidResetPrice: product.hwidResetPrice || 0,
       downloadLink: product.downloadLink || '',
+      setupVideoLink: product.setupVideoLink || '',
+      guestVideoLink: product.guestVideoLink || '',
       settings: Object.fromEntries(product.settings || new Map()),
       createdAt: product.createdAt
     }));
@@ -3491,10 +3493,19 @@ app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 
 app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { productKey, displayName, description, packages, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
+    const { productKey, displayName, description, packages, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink } = req.body;
 
     if (!productKey || !displayName) {
       return res.status(400).json({ error: 'Product key and display name are required' });
+    }
+
+    // Validate video links if provided
+    const urlPattern = /^https?:\/\/.+/i;
+    if (setupVideoLink && setupVideoLink.trim() && !urlPattern.test(setupVideoLink.trim())) {
+      return res.status(400).json({ error: 'Setup video link must be a valid URL starting with http:// or https://' });
+    }
+    if (guestVideoLink && guestVideoLink.trim() && !urlPattern.test(guestVideoLink.trim())) {
+      return res.status(400).json({ error: 'Guest video link must be a valid URL starting with http:// or https://' });
     }
 
     const existingProduct = await Product.findOne({ productKey });
@@ -3515,6 +3526,8 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
       maxFreeHwidResets: maxFreeHwidResets || 5,
       hwidResetPrice: hwidResetPrice || 0,
       downloadLink: downloadLink || '',
+      setupVideoLink: setupVideoLink || '',
+      guestVideoLink: guestVideoLink || '',
       createdBy: req.session.user.username,
       isActive: true
     });
@@ -3543,11 +3556,20 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink } = req.body;
+    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink } = req.body;
 
     const product = await Product.findOne({ productKey });
     if (!product) {
       return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Validate video links if provided
+    const urlPattern = /^https?:\/\/.+/i;
+    if (setupVideoLink !== undefined && setupVideoLink.trim() && !urlPattern.test(setupVideoLink.trim())) {
+      return res.status(400).json({ error: 'Setup video link must be a valid URL starting with http:// or https://' });
+    }
+    if (guestVideoLink !== undefined && guestVideoLink.trim() && !urlPattern.test(guestVideoLink.trim())) {
+      return res.status(400).json({ error: 'Guest video link must be a valid URL starting with http:// or https://' });
     }
 
     if (displayName) product.displayName = displayName;
@@ -3560,6 +3582,8 @@ app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req
     if (maxFreeHwidResets !== undefined) product.maxFreeHwidResets = maxFreeHwidResets;
     if (hwidResetPrice !== undefined) product.hwidResetPrice = hwidResetPrice;
     if (downloadLink !== undefined) product.downloadLink = downloadLink;
+    if (setupVideoLink !== undefined) product.setupVideoLink = setupVideoLink;
+    if (guestVideoLink !== undefined) product.guestVideoLink = guestVideoLink;
 
     await product.save();
 

@@ -973,6 +973,12 @@
                     <input type="url" id="newProductSetupVideoLink" placeholder="https://youtube.com/watch?v=..."
                         style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                 </div>
+                <div class="form-group">
+                    <label>Guest Video Link (Optional - YouTube URL)</label>
+                    <input type="url" id="newProductGuestVideoLink" placeholder="https://youtube.com/watch?v=..."
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">Separate video for guests/non-authenticated users</p>
+                </div>
                 <!-- Announcements Field -->
                 <div class="form-group">
                     <label>Announcements/News (Optional)</label>
@@ -2509,6 +2515,7 @@
                                 <strong>HWID Reset:</strong> ${product.allowHwidReset ? '✅ Enabled' : '❌ Disabled'}<br>
                                 <strong>Download Link:</strong> ${hasDownloadLink ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Setup Video:</strong> ${product.setupVideoLink ? '✅ Set' : '❌ Not set'}<br>
+                                <strong>Guest Video:</strong> ${product.guestVideoLink ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Announcements:</strong> ${product.announcements ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Created:</strong> ${new Date(product.createdAt).toLocaleDateString()}
                             </p>
@@ -2527,6 +2534,7 @@
             const genzauthKey = document.getElementById('newProductGenzauth').value.trim();
             const downloadLink = document.getElementById('newProductDownloadLink').value.trim();
             const setupVideoLink = document.getElementById('newProductSetupVideoLink').value.trim();
+            const guestVideoLink = document.getElementById('newProductGuestVideoLink').value.trim();
             const announcements = document.getElementById('newProductAnnouncements').value.trim();
             const allowHwid = document.getElementById('newProductAllowHwid').checked;
             const maxFreeResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
@@ -2548,6 +2556,7 @@
                         genzauthSellerKey: genzauthKey,
                         downloadLink,
                         setupVideoLink,
+                        guestVideoLink,
                         announcements,
                         allowHwidReset: allowHwid,
                         maxFreeHwidResets: maxFreeResets,
@@ -2566,6 +2575,7 @@
                     document.getElementById('newProductGenzauth').value = '';
                     document.getElementById('newProductDownloadLink').value = '';
                     document.getElementById('newProductSetupVideoLink').value = '';
+                    document.getElementById('newProductGuestVideoLink').value = '';
                     document.getElementById('newProductAnnouncements').value = '';
                     document.getElementById('newProductAllowHwid').checked = false;
                     document.getElementById('newProductMaxFreeResets').value = '5';
@@ -2650,6 +2660,12 @@
                         </div>
 
                         <div class="form-group">
+                            <label>Guest Video Link (YouTube URL)</label>
+                            <input type="url" id="edit_guestVideoLink" value="${product.guestVideoLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">Separate video for guests/non-authenticated users</p>
+                        </div>
+
+                        <div class="form-group">
                             <label>GenzAuth Seller Key</label>
                             <input type="password" id="edit_genzauthKey" placeholder="${product.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
@@ -2714,6 +2730,7 @@
                 hwidResetPrice: parseFloat(document.getElementById('edit_resetPrice').value) || 0,
                 downloadLink: document.getElementById('edit_downloadLink').value.trim(),
                 setupVideoLink: document.getElementById('edit_setupVideoLink').value.trim(),
+                guestVideoLink: document.getElementById('edit_guestVideoLink').value.trim(),
                 announcements: document.getElementById('edit_announcements').value.trim()
             };
 
