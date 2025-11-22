@@ -2455,7 +2455,8 @@ app.get('/api/guest-settings', async (req, res) => {
         guestPassMaxDuration: '1day',
         requireSocialVerification: false,
         youtubeChannelUrl: '',
-        instagramProfileUrl: ''
+        instagramProfileUrl: '',
+        guestVideoUrl: ''
       });
     }
 
@@ -2465,7 +2466,8 @@ app.get('/api/guest-settings', async (req, res) => {
       guestPassMaxDuration: adminUser.guestPassMaxDuration || '1day',
       requireSocialVerification: adminUser.requireSocialVerification === true,
       youtubeChannelUrl: adminUser.youtubeChannelUrl || '',
-      instagramProfileUrl: adminUser.instagramProfileUrl || ''
+      instagramProfileUrl: adminUser.instagramProfileUrl || '',
+      guestVideoUrl: adminUser.guestVideoUrl || ''
     });
   } catch (error) {
     res.json({
@@ -2474,7 +2476,8 @@ app.get('/api/guest-settings', async (req, res) => {
       guestPassMaxDuration: '1day',
       requireSocialVerification: false,
       youtubeChannelUrl: '',
-      instagramProfileUrl: ''
+      instagramProfileUrl: '',
+      guestVideoUrl: ''
     });
   }
 });
@@ -2482,15 +2485,50 @@ app.get('/api/guest-settings', async (req, res) => {
 // Admin update guest settings
 app.post('/api/admin/guest-settings', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { allowGuestFreeUID, allowGuestFreeAimkill, guestPassMaxDuration, requireSocialVerification, youtubeChannelUrl, instagramProfileUrl } = req.body;
+    const { allowGuestFreeUID, allowGuestFreeAimkill, guestPassMaxDuration, requireSocialVerification, youtubeChannelUrl, instagramProfileUrl, guestVideoUrl } = req.body;
 
     const admin = await User.findOne({ username: 'admin' });
 
     admin.allowGuestFreeUID = allowGuestFreeUID === true;
     admin.allowGuestFreeAimkill = allowGuestFreeAimkill === true;
     admin.requireSocialVerification = requireSocialVerification === true;
-    admin.youtubeChannelUrl = youtubeChannelUrl || '';
-    admin.instagramProfileUrl = instagramProfileUrl || '';
+    
+    // Only update URLs if new values are provided (non-empty)
+    if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() !== '') {
+      admin.youtubeChannelUrl = youtubeChannelUrl;
+    } else if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() === '') {
+      admin.youtubeChannelUrl = '';
+    }
+    
+    if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() !== '') {
+      admin.instagramProfileUrl = instagramProfileUrl;
+    } else if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() === '') {
+      admin.instagramProfileUrl = '';
+    }
+    
+    if (guestVideoUrl !== undefined) {
+      const trimmedUrl = (guestVideoUrl || '').trim();
+      
+      // Only update if a new URL is provided or explicitly cleared
+      if (trimmedUrl !== '') {
+        // Convert YouTube watch URLs to embed URLs
+        let processedUrl = trimmedUrl;
+        if (processedUrl.includes('youtube.com/watch?v=')) {
+          const videoId = processedUrl.split('v=')[1]?.split('&')[0];
+          if (videoId) {
+            processedUrl = `https://www.youtube.com/embed/${videoId}`;
+          }
+        } else if (processedUrl.includes('youtu.be/')) {
+          const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
+          if (videoId) {
+            processedUrl = `https://www.youtube.com/embed/${videoId}`;
+          }
+        }
+        admin.guestVideoUrl = processedUrl;
+      }
+      // If empty string sent and field already has a value, keep the existing value
+      // This allows other settings to be updated without erasing the video URL
+    }
 
     if (guestPassMaxDuration && ['1day', '3days', '7days', '15days', '30days'].includes(guestPassMaxDuration)) {
       admin.guestPassMaxDuration = guestPassMaxDuration;

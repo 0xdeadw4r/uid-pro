@@ -1263,23 +1263,12 @@
                 // Initialize social verification check
                 await checkSocialVerification();
 
-                // Load setup video for AIMKILL product
+                // Load setup video from guest settings
                 try {
-                    const packagesResponse = await fetch('/api/aimkill-packages', { credentials: 'include' });
-                    if (packagesResponse.ok) {
-                        // Get AIMKILL product info
-                        const productsResponse = await fetch('/api/admin/products', { credentials: 'include' });
-                        if (productsResponse.ok) {
-                            const productsData = await productsResponse.json();
-                            if (productsData.success && productsData.products) {
-                                const aimkillProduct = productsData.products.find(p => p.productKey === 'AIMKILL');
-                                if (aimkillProduct && aimkillProduct.setupVideoLink) {
-                                    displayGuestSetupVideo(aimkillProduct.setupVideoLink);
-                                } else {
-                                    displayGuestSetupVideo('');
-                                }
-                            }
-                        }
+                    if (settings.guestVideoUrl && settings.guestVideoUrl.trim()) {
+                        displayGuestSetupVideo(settings.guestVideoUrl);
+                    } else {
+                        displayGuestSetupVideo('');
                     }
                 } catch (error) {
                     console.error('Error loading setup video:', error);

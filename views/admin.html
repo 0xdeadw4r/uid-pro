@@ -1353,6 +1353,17 @@
                                     style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
                             </div>
                         </div>
+
+                        <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
+                            <div class="setting-info" style="width: 100%;">
+                                <label class="setting-title">Guest Setup Video URL</label>
+                                <p class="setting-description" style="margin-bottom: 0.5rem;">YouTube or video URL for guest dashboard (optional)</p>
+                                <input type="url" id="guestVideoUrl" placeholder="https://youtube.com/watch?v=..."
+                                    onchange="saveGuestSettings()"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
+                                <p style="color: #666; font-size: 11px; margin-top: 0.5rem;">This video will be displayed on the guest dashboard to help guests understand how to use the system</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1911,6 +1922,7 @@
                 document.getElementById('requireSocialVerification').checked = settings.requireSocialVerification || false;
                 document.getElementById('youtubeChannelUrl').value = settings.youtubeChannelUrl || '';
                 document.getElementById('instagramProfileUrl').value = settings.instagramProfileUrl || '';
+                document.getElementById('guestVideoUrl').value = settings.guestVideoUrl || '';
             } catch (error) {
                 console.error('Error loading settings:', error);
             }
@@ -1923,6 +1935,7 @@
             const requireSocial = document.getElementById('requireSocialVerification').checked;
             const youtubeUrl = document.getElementById('youtubeChannelUrl').value.trim();
             const instagramUrl = document.getElementById('instagramProfileUrl').value.trim();
+            const guestVideoUrl = document.getElementById('guestVideoUrl').value.trim();
 
             try {
                 const response = await fetch('/api/admin/guest-settings', {
@@ -1934,7 +1947,8 @@
                         guestPassMaxDuration: maxDuration,
                         requireSocialVerification: requireSocial,
                         youtubeChannelUrl: youtubeUrl,
-                        instagramProfileUrl: instagramUrl
+                        instagramProfileUrl: instagramUrl,
+                        guestVideoUrl: guestVideoUrl
                     }),
                     credentials: 'include'
                 });
