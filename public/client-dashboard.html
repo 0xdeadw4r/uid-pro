@@ -493,17 +493,11 @@
             <div class="setup-section">
                 <div class="setup-icon">🎥</div>
                 <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
-                    Configure your setup video link below
+                    Watch the setup guide video below
                 </p>
-                <div class="setup-input-group">
-                    <label for="setupVideoLinkInput">Setup Video URL:</label>
-                    <input type="text" id="setupVideoLinkInput" placeholder="Enter video URL">
-                    <button class="btn-save" onclick="saveSetupVideoLink()" id="saveSetupButton">Save Link</button>
-                </div>
             </div>
 
-            <div id="setupVideoPlayerContainer" class="info-card" style="display: none;">
-                <h3 style="margin-bottom: 1rem; color: #FFFFFF; font-size: 1.1rem;">Current Setup Video:</h3>
+            <div id="setupVideoPlayerContainer">
                 <div id="setupVideoPlayer"></div>
             </div>
         </div>
@@ -780,14 +774,9 @@
     }
 
         async function loadSetupVideoLink() {
-            const setupVideoLinkInput = document.getElementById('setupVideoLinkInput');
-            const saveSetupButton = document.getElementById('saveSetupButton');
             const setupVideoPlayerContainer = document.getElementById('setupVideoPlayerContainer');
             const setupVideoPlayer = document.getElementById('setupVideoPlayer');
 
-            setupVideoLinkInput.disabled = true;
-            saveSetupButton.disabled = true;
-            saveSetupButton.textContent = 'Loading...';
             setupVideoPlayer.innerHTML = '';
             setupVideoPlayerContainer.style.display = 'none';
 
@@ -804,12 +793,23 @@
 
                 if (response.ok && data.success) {
                     const videoLink = data.videoLink;
-                    setupVideoLinkInput.value = videoLink || '';
 
-                    if (videoLink) {
+                    if (videoLink && videoLink.trim()) {
                         setupVideoPlayerContainer.style.display = 'block';
-                        // Simple way to embed video, you might want a more robust solution
-                        setupVideoPlayer.innerHTML = `<iframe width="100%" height="315" src="${videoLink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>`;
+                        
+                        // Convert YouTube URL to embed format
+                        let embedUrl = videoLink;
+                        if (videoLink.includes('youtube.com/watch?v=')) {
+                            const videoId = videoLink.split('v=')[1].split('&')[0];
+                            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                        } else if (videoLink.includes('youtu.be/')) {
+                            const videoId = videoLink.split('youtu.be/')[1].split('?')[0];
+                            embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                        }
+                        
+                        setupVideoPlayer.innerHTML = `<iframe width="100%" height="400" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 8px;"></iframe>`;
+                    } else {
+                        setupVideoPlayer.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No setup video available. Contact your administrator.</p>';
                     }
                 } else {
                     showError(data.error || 'Failed to load setup video link');
@@ -817,59 +817,8 @@
             } catch (error) {
                 console.error('Load setup video link error:', error);
                 showError('Failed to load setup video link. Please try again.');
-            } finally {
-                setupVideoLinkInput.disabled = false;
-                saveSetupButton.disabled = false;
-                saveSetupButton.textContent = 'Save Link';
             }
         }
-
-        async function saveSetupVideoLink() {
-            const setupVideoLinkInput = document.getElementById('setupVideoLinkInput');
-            const saveSetupButton = document.getElementById('saveSetupButton');
-            const videoLink = setupVideoLinkInput.value.trim();
-
-            if (!videoLink) {
-                showError('Please enter a valid video URL.');
-                return;
-            }
-
-            // Basic validation for YouTube links
-            if (!videoLink.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/)) {
-                showError('Please enter a valid YouTube video URL.');
-                return;
-            }
-
-            saveSetupButton.disabled = true;
-            saveSetupButton.textContent = 'Saving...';
-
-            try {
-                const response = await fetch('/client/api/setup-video-link', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ videoLink: videoLink }),
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showSuccess('Setup video link updated successfully!');
-                    loadSetupVideoLink(); // Reload to display the updated video
-                } else {
-                    showError(data.error || 'Failed to update setup video link');
-                }
-            } catch (error) {
-                console.error('Save setup video link error:', error);
-                showError('Failed to update setup video link. Please try again.');
-            } finally {
-                saveSetupButton.disabled = false;
-                saveSetupButton.textContent = 'Save Link';
-            }
-        }
-
 
         async function logout() {
             try {

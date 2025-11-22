@@ -809,4 +809,26 @@ router.delete('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     }
 });
 
+// Get Setup Video Link (for client dashboard)
+router.get('/api/setup-video-link', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+
+        const Product = require('../models/Product');
+        const product = await Product.findOne({ productKey: client.productKey });
+
+        res.json({
+            success: true,
+            videoLink: product ? (product.setupVideoLink || '') : ''
+        });
+    } catch (error) {
+        console.error('Get setup video link error:', error);
+        res.status(500).json({ error: 'Failed to get setup video link' });
+    }
+});
+
 module.exports = router;

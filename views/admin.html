@@ -966,6 +966,11 @@
                     <input type="url" id="newProductDownloadLink" placeholder="https://example.com/download"
                         style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                 </div>
+                <div class="form-group">
+                    <label>Setup Video Link (Optional - YouTube URL)</label>
+                    <input type="url" id="newProductSetupVideoLink" placeholder="https://youtube.com/watch?v=..."
+                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                </div>
                 <div class="settings-list" style="margin: 1rem 0;">
                     <div class="setting-item">
                         <div class="setting-control">
@@ -2452,6 +2457,7 @@
                                 <strong>GenzAuth API:</strong> ${hasGenzauth ? '✅ Configured' : '❌ Not configured'}<br>
                                 <strong>HWID Reset:</strong> ${product.allowHwidReset ? '✅ Enabled' : '❌ Disabled'}<br>
                                 <strong>Download Link:</strong> ${hasDownloadLink ? '✅ Set' : '❌ Not set'}<br>
+                                <strong>Setup Video:</strong> ${product.setupVideoLink ? '✅ Set' : '❌ Not set'}<br>
                                 <strong>Created:</strong> ${new Date(product.createdAt).toLocaleDateString()}
                             </p>
                         </div>
@@ -2468,6 +2474,7 @@
             const description = document.getElementById('newProductDescription').value.trim();
             const genzauthSellerKey = document.getElementById('newProductGenzauth').value.trim();
             const downloadLink = document.getElementById('newProductDownloadLink').value.trim();
+            const setupVideoLink = document.getElementById('newProductSetupVideoLink').value.trim();
             const allowHwidReset = document.getElementById('newProductAllowHwid').checked;
             const maxFreeHwidResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
             const hwidResetPrice = parseFloat(document.getElementById('newProductResetPrice').value) || 0;
@@ -2488,6 +2495,7 @@
                         description,
                         genzauthSellerKey,
                         downloadLink,
+                        setupVideoLink,
                         allowHwidReset,
                         maxFreeHwidResets,
                         hwidResetPrice,
@@ -2504,6 +2512,7 @@
                     document.getElementById('newProductDescription').value = '';
                     document.getElementById('newProductGenzauth').value = '';
                     document.getElementById('newProductDownloadLink').value = '';
+                    document.getElementById('newProductSetupVideoLink').value = '';
                     document.getElementById('newProductAllowHwid').checked = false;
                     loadProducts();
                 } else {
@@ -2544,6 +2553,7 @@
             const displayName = prompt('Enter new display name (leave empty to keep current):');
             const description = prompt('Enter new description (leave empty to keep current):');
             const downloadLink = prompt('Enter new download link (leave empty to keep current):');
+            const setupVideoLink = prompt('Enter new setup video link (YouTube URL, leave empty to keep current):');
             const genzauthKey = prompt('Enter new GenzAuth seller key (leave empty to keep current):');
             const allowHwidResetInput = prompt('Allow HWID reset? (yes/no, leave empty to keep current):');
             const maxFreeResetsInput = prompt('Max free HWID resets (leave empty to keep current):');
@@ -2553,6 +2563,7 @@
             if (displayName && displayName.trim()) updates.displayName = displayName.trim();
             if (description !== null && description.trim()) updates.description = description.trim();
             if (downloadLink !== null) updates.downloadLink = downloadLink.trim();
+            if (setupVideoLink !== null) updates.setupVideoLink = setupVideoLink.trim();
             if (genzauthKey !== null) updates.genzauthSellerKey = genzauthKey.trim();
             if (allowHwidResetInput && (allowHwidResetInput.toLowerCase() === 'yes' || allowHwidResetInput.toLowerCase() === 'no')) {
                 updates.allowHwidReset = allowHwidResetInput.toLowerCase() === 'yes';
