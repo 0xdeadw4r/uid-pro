@@ -953,21 +953,22 @@ router.get('/api/genzauth-expiration', isClient, async (req, res) => {
         }
 
         // Parse expiration date from API response
-        const expiryData = userInfo.data || userInfo;
-        const expiryTimestamp = expiryData.expiry || expiryData.expires || expiryData.expiresAt;
+        // GenzAuth returns data in the format: { expiry, hwid, ip, lastlogin, username, etc. }
+        const apiData = userInfo.data || {};
+        const expiryTimestamp = apiData.expiry || apiData.expires || apiData.expiresAt;
         
         if (!expiryTimestamp) {
             return res.json({
                 success: true,
                 hasAccount: true,
                 username: client.assignedUsername,
-                status: expiryData.status || 'active',
+                status: 'active',
                 expiresAt: null,
-                message: 'Expiration date not available'
+                message: 'Expiration date not available from API'
             });
         }
 
-        // Convert timestamp to date
+        // GenzAuth returns Unix timestamp, convert to milliseconds
         const expiresAt = new Date(parseInt(expiryTimestamp) * 1000);
         const now = new Date();
         const timeLeft = expiresAt - now;
@@ -998,8 +999,10 @@ router.get('/api/genzauth-expiration', isClient, async (req, res) => {
             expiresAtFormatted: expiresAt.toLocaleString(),
             timeLeft: timeLeftFormatted,
             isActive: isActive,
-            status: expiryData.status || (isActive ? 'active' : 'expired'),
-            hwid: expiryData.hwid || null
+            status: isActive ? 'active' : 'expired',
+            hwid: apiData.hwid || null,
+            ip: apiData.ip || null,
+            lastLogin: apiData.lastlogin || null
         });
 
     } catch (error) {

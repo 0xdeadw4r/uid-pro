@@ -169,16 +169,54 @@ async function fetchAllLicenses() {
 }
 
 async function getUserInfo(username, customSellerKey = null) {
-    console.log(`[GenzAuth] Fetching user info for: ${username}`);
-    const result = await makeRequest('fetchuser', { user: username }, customSellerKey);
-    
-    if (result.success) {
-        console.log(`[GenzAuth] ✅ User info fetched for: ${username}`);
-    } else {
-        console.log(`[GenzAuth] ❌ Failed to fetch user info for: ${username} - ${result.error || result.message}`);
+    try {
+        const SELLER_KEY = customSellerKey || await getSellerKey();
+        
+        if (!SELLER_KEY) {
+            console.log('⚠️ GenzAuth not configured - using TEST mode');
+            return {
+                success: false,
+                error: 'TEST mode - GenzAuth not configured',
+                isTestMode: true
+            };
+        }
+
+        console.log(`[GenzAuth] Fetching user info for: ${username}`);
+        
+        const params = new URLSearchParams({
+            sellerkey: SELLER_KEY,
+            type: 'fetchuser',
+            user: username,
+            format: 'json'
+        });
+
+        const url = `${GENZAUTH_API_BASE}?${params.toString()}`;
+        const response = await axios.get(url, { timeout: 15000 });
+        
+        console.log(`[GenzAuth API] Response Status: ${response.status}`);
+        console.log(`[GenzAuth API] Response Data:`, response.data);
+        
+        if (response.data && response.data.success !== false) {
+            console.log(`[GenzAuth] ✅ User info fetched for: ${username}`);
+            return {
+                success: true,
+                data: response.data
+            };
+        }
+        
+        console.log(`[GenzAuth] ❌ Failed to fetch user info for: ${username}`);
+        return {
+            success: false,
+            error: response.data?.message || 'Failed to fetch user info'
+        };
+    } catch (error) {
+        console.error(`[GenzAuth] Error fetching user info:`, error.message);
+        return {
+            success: false,
+            error: error.message,
+            isTestMode: false
+        };
     }
-    
-    return result;
 }
 
 function generateTestLicense(prefix = 'TEST') {
