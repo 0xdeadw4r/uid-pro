@@ -181,7 +181,28 @@ router.get('/dashboard', isClient, (req, res) => {
     res.sendFile(path.join(__dirname, '../views/client-dashboard.html'));
 });
 
-// Get Client Info
+// Get chat history for client
+router.get('/api/chat/history', isClient, async (req, res) => {
+    try {
+        const { withUser } = req.query;
+        const currentUser = req.session.clientUsername;
+
+        const ChatMessage = require('../models/ChatMessage');
+        const messages = await ChatMessage.find({
+            $or: [
+                { senderUsername: currentUser, receiverUsername: withUser },
+                { senderUsername: withUser, receiverUsername: currentUser }
+            ]
+        }).sort({ timestamp: 1 }).limit(100);
+
+        res.json({ success: true, messages });
+    } catch (error) {
+        console.error('Get chat history error:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
+    }
+});
+
+// Get client info (dashboard data)
 router.get('/api/info', isClient, async (req, res) => {
     try {
         console.log('📊 Getting client info for session:', req.sessionID);
@@ -221,7 +242,7 @@ router.get('/api/info', isClient, async (req, res) => {
         // Check if GenzAuth is configured (product-specific or global)
         let hasGenzAuth = false;
         let genzAuthSource = 'none';
-        
+
         if (product && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
             hasGenzAuth = true;
             genzAuthSource = 'product';
@@ -241,7 +262,7 @@ router.get('/api/info', isClient, async (req, res) => {
                 }
             }
         }
-        
+
         console.log(`✅ Client ${client.username} - GenzAuth: ${hasGenzAuth} (source: ${genzAuthSource})`);
 
         res.json({
@@ -406,7 +427,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
             const productSellerKey = product.genzauthSellerKey && product.genzauthSellerKey.trim() 
                 ? product.genzauthSellerKey.trim() 
                 : null;
-            
+
             // Get global seller key from ApiConfig as fallback
             let sellerKeyToUse = productSellerKey;
             if (!sellerKeyToUse) {
@@ -418,7 +439,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
             console.log(`🔄 Resetting HWID for GenzAuth user: ${client.assignedUsername}`);
             console.log(`   Product: ${product.displayName} (${product.productKey})`);
             console.log(`   Using ${productSellerKey ? 'product-specific' : 'global'} GenzAuth seller key`);
-            
+
             // Check if we have any seller key configured
             if (!sellerKeyToUse) {
                 console.error(`❌ GenzAuth not configured - no seller key available`);
@@ -430,7 +451,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
 
             // Call GenzAuth reset HWID API
             const result = await genzauth.resetHwid(client.assignedUsername, sellerKeyToUse);
-            
+
             // Handle TEST mode
             if (result.isTestMode) {
                 console.error(`❌ GenzAuth in TEST mode - seller key not configured properly`);
@@ -439,7 +460,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
                     configurationError: true
                 });
             }
-            
+
             // Handle API failures
             if (!result.success) {
                 const errorMsg = result.error || result.message || 'Unknown error';
@@ -449,7 +470,7 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
                     apiError: true
                 });
             }
-            
+
             console.log(`✅ HWID reset successful for: ${client.assignedUsername}`);
         } catch (error) {
             console.error('❌ GenzAuth HWID reset error:', error);
@@ -465,9 +486,9 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
         await client.save();
 
         const resetsRemaining = maxFreeResets - client.hwidResetCount;
-        
+
         console.log(`✅ Client HWID reset completed. Resets used: ${client.hwidResetCount}/${maxFreeResets}`);
-        
+
         res.json({
             success: true,
             message: `HWID reset successfully for ${client.assignedUsername}. You have ${resetsRemaining} free reset(s) remaining.`,
@@ -539,7 +560,7 @@ router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
 
         // Get the admin user who is creating this client
         let adminUser = null;
-        
+
         if (req.session.userId) {
             adminUser = await User.findById(req.session.userId);
         } else if (req.session.user && req.session.user.username) {
@@ -547,7 +568,7 @@ router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
         } else if (req.session.user && req.session.user._id) {
             adminUser = await User.findById(req.session.user._id);
         }
-        
+
         if (!adminUser) {
             return res.status(401).json({ error: 'Admin user not found' });
         }
@@ -561,25 +582,25 @@ router.post('/admin/clients', isAdminOrOwner, async (req, res) => {
             try {
                 const genzauth = require('../services/genzauth');
                 const duration = parseInt(genzAuthDuration) || 30;
-                
+
                 console.log(`📝 Creating GenzAuth account for client: ${username}`);
                 console.log(`   GenzAuth Username: ${genzAuthUsername}`);
                 console.log(`   Duration: ${duration} days`);
                 console.log(`   Product: ${product.displayName} (${productKey})`);
-                
+
                 // Use product-specific seller key if available
                 const productSellerKey = product.genzauthSellerKey && product.genzauthSellerKey.trim() 
                     ? product.genzauthSellerKey.trim() 
                     : null;
-                
+
                 if (productSellerKey) {
                     console.log(`   Using product-specific GenzAuth seller key`);
                 } else {
                     console.log(`   Using global GenzAuth seller key`);
                 }
-                
+
                 const result = await genzauth.createUser(genzAuthUsername, genzAuthPassword, duration);
-                
+
                 if (result.success) {
                     console.log(`✅ GenzAuth account created successfully: ${genzAuthUsername}`);
                     console.log(`   This account will be used for HWID reset functionality`);
@@ -654,7 +675,7 @@ router.put('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
         if (updates.password && updates.password.length < 8) { // Basic password length check
             return res.status(400).json({ error: 'Password must be at least 8 characters long.' });
         }
-        
+
         // Handle customDownloadLink separately if it's being updated
         if (updates.customDownloadLink !== undefined) {
             const clientForLinkUpdate = await Client.findById(id);
@@ -848,7 +869,7 @@ router.delete('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
 router.post('/api/track-download', isClient, async (req, res) => {
     try {
         const client = await Client.findById(req.session.clientId);
-        
+
         if (!client) {
             return res.status(404).json({ error: 'Client not found' });
         }
@@ -918,7 +939,7 @@ router.post('/api/purchase-hwid-reset', isClient, async (req, res) => {
 router.get('/api/setup-video-link', isClient, async (req, res) => {
     try {
         const client = await Client.findById(req.session.clientId);
-        
+
         if (!client) {
             return res.status(404).json({ error: 'Client not found' });
         }
@@ -940,7 +961,7 @@ router.get('/api/setup-video-link', isClient, async (req, res) => {
 router.get('/api/genzauth-expiration', isClient, async (req, res) => {
     try {
         const client = await Client.findById(req.session.clientId);
-        
+
         if (!client) {
             return res.status(404).json({ error: 'Client not found' });
         }
@@ -989,7 +1010,7 @@ router.get('/api/genzauth-expiration', isClient, async (req, res) => {
         // GenzAuth returns data in the format: { expiry, hwid, ip, lastlogin, username, etc. }
         const apiData = userInfo.data || {};
         const expiryTimestamp = apiData.expiry || apiData.expires || apiData.expiresAt;
-        
+
         if (!expiryTimestamp) {
             return res.json({
                 success: true,
@@ -1005,16 +1026,16 @@ router.get('/api/genzauth-expiration', isClient, async (req, res) => {
         const expiresAt = new Date(parseInt(expiryTimestamp) * 1000);
         const now = new Date();
         const timeLeft = expiresAt - now;
-        
+
         let timeLeftFormatted = 'Expired';
         let isActive = false;
-        
+
         if (timeLeft > 0) {
             isActive = true;
             const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
             const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-            
+
             if (days > 0) {
                 timeLeftFormatted = `${days}d ${hours}h ${minutes}m`;
             } else if (hours > 0) {

@@ -494,6 +494,7 @@
                 HWID</button>
             <button class="tab" onclick="showTab('setup')"> Setup Guide</button>
             <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;"> News</button>
+            <button class="tab" onclick="showTab('chat')"> 💬 Chat</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -644,33 +645,65 @@
                 <p style="text-align: center; color: #999; padding: 2rem;">Loading announcements...</p>
             </div>
         </div>
+
+        <!-- Chat Tab Content -->
+        <div id="chatTab" class="tab-content">
+            <h2>💬 Chat with Support</h2>
+            <div class="chat-container">
+                <div class="chat-header">Client Chat</div>
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Messages will be loaded here -->
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatMessageInput" placeholder="Type your message...">
+                    <button class="btn-send" onclick="sendMessage()">Send</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
         let clientData = null;
         let expirationRefreshInterval = null;
-        let socket = null; // Socket.IO client instance
+        let clientSocket = null; // Socket.IO client instance
+        let currentClientUser = null;
+        let isClientSending = false;
 
-        // Initialize Socket.IO connection
-        function initializeChat() {
-            socket = io();
+        // Initialize Socket.IO connection for the client
+        function initializeClientChat() {
+            clientSocket = io();
 
-            socket.on('connect', () => {
+            clientSocket.on('connect', () => {
                 console.log('Connected to chat server');
-                // You might want to join a specific room or send user info here
+                if (currentClientUser) {
+                    clientSocket.emit('user_connected', { userId: currentClientUser.id, username: currentClientUser.username, userType: 'client' });
+                }
             });
 
-            socket.on('disconnect', () => {
+            clientSocket.on('disconnect', () => {
                 console.log('Disconnected from chat server');
+                document.getElementById('chatMessageInput').disabled = true;
+                document.querySelector('.btn-send').disabled = true;
             });
 
-            socket.on('chat message', (msg) => {
+            clientSocket.on('chat_message', (msg) => {
                 displayMessage(msg);
             });
 
-            socket.on('error', (err) => {
+            clientSocket.on('admin_message', (msg) => {
+                displayMessage(msg);
+            });
+
+            clientSocket.on('error', (err) => {
                 console.error('Chat server error:', err);
+                showAlert('chatAlert', 'Connection error: ' + err, 'error');
+            });
+
+            clientSocket.on('message_sent_ack', () => {
+                isClientSending = false;
+                document.getElementById('chatMessageInput').disabled = false;
+                document.querySelector('.btn-send').disabled = false;
             });
         }
 
@@ -681,9 +714,7 @@
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
 
-            // Determine if the message was sent by the current client
-            // This check might need to be more robust depending on how you identify users
-            const isSentByCurrentUser = msg.senderId === socket.id; // Assuming senderId is available
+            const isSentByCurrentUser = msg.senderId === (currentClientUser ? currentClientUser.id : null);
 
             if (isSentByCurrentUser) {
                 messageElement.classList.add('sent');
@@ -693,15 +724,14 @@
 
             let senderInfo = '';
             if (msg.senderName) {
-                senderInfo = `<span class="sender">${msg.senderName}</span>`;
+                senderInfo = `<span class="sender">${msg.senderName}${msg.senderType === 'admin' ? ' (Admin)' : ''}</span>`;
             } else if (msg.senderId) {
-                senderInfo = `<span class="sender">User: ${msg.senderId.substring(0, 6)}</span>`; // Display a short ID if name not available
+                senderInfo = `<span class="sender">User: ${msg.senderId.substring(0, 6)}</span>`;
             }
 
             messageElement.innerHTML = `${senderInfo}${msg.text}`;
             messagesContainer.appendChild(messageElement);
 
-            // Auto-scroll to the bottom
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -709,17 +739,23 @@
             const input = document.getElementById('chatMessageInput');
             const messageText = input.value.trim();
 
-            if (messageText && socket && socket.connected) {
+            if (messageText && clientSocket && clientSocket.connected && currentClientUser && !isClientSending) {
+                isClientSending = true;
+                document.getElementById('chatMessageInput').disabled = true;
+                document.querySelector('.btn-send').disabled = true;
+
                 const messageData = {
                     text: messageText,
-                    // Add sender information if available and needed
-                    // senderName: clientData ? clientData.username : 'Client',
-                    // senderId: clientData ? clientData.id : undefined
+                    senderId: currentClientUser.id,
+                    senderName: currentClientUser.username,
+                    senderType: 'client'
                 };
-                socket.emit('chat message', messageData);
+                clientSocket.emit('chat_message', messageData);
                 input.value = '';
-            } else if (!socket || !socket.connected) {
+            } else if (!clientSocket || !clientSocket.connected) {
                 alert('Chat is not connected. Please try again later.');
+            } else if (isClientSending) {
+                alert('Your previous message is still sending. Please wait.');
             }
         }
 
@@ -730,26 +766,31 @@
             tabs.forEach(tab => tab.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
 
-            // Find the button that corresponds to the tabName and add 'active' class
             const activeTabButton = document.querySelector(`.tab[onclick="showTab('${tabName}')"]`);
             if (activeTabButton) {
                 activeTabButton.classList.add('active');
             }
 
-            // Show the corresponding tab content
             const tabContent = document.getElementById(`${tabName}Tab`);
             if (tabContent) {
                 tabContent.classList.add('active');
             }
+
+            // Initialize chat connection if the chat tab is activated
+            if (tabName === 'chat' && clientSocket && !clientSocket.connected) {
+                initializeClientChat();
+            }
         }
 
         function showAlert(elementId, message, type) {
-            const alert = document.getElementById(elementId);
-            alert.className = `alert alert-${type} show`;
-            alert.textContent = message;
+            const alertElement = document.getElementById(elementId);
+            if (!alertElement) return;
+
+            alertElement.className = `alert alert-${type} show`;
+            alertElement.textContent = message;
 
             setTimeout(() => {
-                alert.classList.remove('show');
+                alertElement.classList.remove('show');
             }, 5000);
         }
 
@@ -763,6 +804,9 @@
             }
             if (document.getElementById('newsTab').classList.contains('active')) {
                 showAlert('newsAlert', message, 'error');
+            }
+            if (document.getElementById('chatTab').classList.contains('active')) {
+                showAlert('chatAlert', message, 'error');
             }
         }
 
@@ -800,6 +844,7 @@
 
                 if (response.ok && data.success) {
                     clientData = data.client;
+                    currentClientUser = data.client; // Set current user for chat
                     updateUI();
                 } else {
                     showError(data.error || 'Failed to load client data');
@@ -900,7 +945,6 @@
                 document.getElementById('openSetupVideo').href = setupVideoLink;
                 setupVideoCard.style.display = 'block';
 
-                // Attach event listener for toggle button
                 const toggleBtn = document.getElementById('toggleSetupVideo');
                 if (toggleBtn) {
                     toggleBtn.onclick = function() {
@@ -919,7 +963,6 @@
                 document.getElementById('openGuestVideo').href = guestVideoLink;
                 guestVideoCard.style.display = 'block';
 
-                // Attach event listener for toggle button
                 const toggleBtn = document.getElementById('toggleGuestVideo');
                 if (toggleBtn) {
                     toggleBtn.onclick = function() {
@@ -930,7 +973,6 @@
                 guestVideoCard.style.display = 'none';
             }
 
-            // Show/hide no video message
             noVideoSection.style.display = hasAnyVideo ? 'none' : 'block';
 
             // News/Announcements Logic
@@ -1053,7 +1095,7 @@
 
             if (player.style.display === 'none' || player.style.display === '') {
                 player.style.display = 'block';
-                button.textContent = '⏸️ HIDE';
+                button.textContent = ' HIDE';
             } else {
                 player.style.display = 'none';
                 button.textContent = '▶️ PLAY';
@@ -1061,13 +1103,11 @@
         }
 
         async function logout() {
-            // Clear refresh interval on logout
             if (expirationRefreshInterval) {
                 clearInterval(expirationRefreshInterval);
             }
-            // Disconnect socket on logout
-            if (socket) {
-                socket.disconnect();
+            if (clientSocket) {
+                clientSocket.disconnect();
             }
 
             try {
@@ -1082,7 +1122,6 @@
             }
         }
 
-        // Handle Enter key press for chat input
         document.addEventListener('DOMContentLoaded', () => {
             const chatMessageInput = document.getElementById('chatMessageInput');
             const sendButton = document.querySelector('.btn-send');
@@ -1090,7 +1129,7 @@
             if (chatMessageInput) {
                 chatMessageInput.addEventListener('keypress', (e) => {
                     if (e.key === 'Enter') {
-                        e.preventDefault(); // Prevent default form submission if it were in a form
+                        e.preventDefault();
                         sendMessage();
                     }
                 });
@@ -1100,35 +1139,18 @@
                 sendButton.addEventListener('click', sendMessage);
             }
 
-            // Initialize chat when the page loads, after client data is potentially loaded
-            // to get user info for chat if needed.
             setTimeout(() => {
                 loadClientData();
-
-                // Load GenzAuth expiration initially
                 loadGenzAuthExpiration();
-
-                // Set up auto-refresh every 30 seconds
                 expirationRefreshInterval = setInterval(() => {
                     loadGenzAuthExpiration();
                 }, 30000);
 
-                // Initialize chat connection after initial data load
-                initializeChat();
-
-                // If the current page is the chat page, show the chat interface
-                if (window.location.pathname === '/chat') {
-                    // Code to display the chat interface, potentially fetching past messages
-                    // For now, we'll just ensure the chat elements are visible
-                    // You would likely have a dedicated chat page with its own structure
-                    // For this example, we'll assume the chat structure is part of this HTML
-                    // and just focus on the connection and sending/receiving.
-                    // If this HTML is *only* for the dashboard, then the chat page needs its own file.
-                    // Assuming for now that this HTML *could* be extended or used as a base.
-
-                    // If this dashboard is *not* the chat page, then initializeChat() should
-                    // only happen when navigating TO the chat page.
-                    // For this merge, we'll assume the chat page HTML is included and needs initialization.
+                // Initialize chat connection only if the chat tab is active or will be activated
+                // We defer it to the showTab function to ensure we only connect when needed.
+                // However, if the page loads directly to the chat tab (e.g., /chat URL), it needs to connect.
+                if (window.location.hash === '#chat' || window.location.pathname === '/chat') {
+                    initializeClientChat();
                 }
 
             }, 500);
