@@ -491,9 +491,10 @@
     <div class="container">
         <!-- Discord Verification Required -->
         <div id="discordRequired" class="guest-status-card" style="display: none;">
-            <h2>🔒 Discord Verification Required</h2>
+            <h2> Discord Verification Required 🔒</h2>
             <p style="color: #999; margin: 1rem 0;">To use guest features, please verify your Discord account first.</p>
-            <a href="/auth/discord" class="btn-primary" style="text-decoration: none; display: inline-block; margin-top: 1rem;">
+            <a href="/auth/discord" class="btn-primary"
+                style="text-decoration: none; display: inline-block; margin-top: 1rem;">
                 Verify with Discord
             </a>
         </div>
@@ -501,16 +502,21 @@
         <!-- Social Media Verification Required -->
         <div id="socialVerificationRequired" class="guest-status-card" style="display: none;">
             <h2>📱 Social Media Verification Required</h2>
-            <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe and follow our social media channels.</p>
+            <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe
+                and follow our social media channels.</p>
             <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
+                <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
+                    style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
                     <span id="youtubeStatus">📺 Subscribe on YouTube</span>
                 </a>
-                <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
+                <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
+                    style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
                     <span id="instagramStatus">📷 Follow on Instagram</span>
                 </a>
             </div>
-            <button id="notifyAdminBtn" class="btn-primary" style="display: none; background: #10B981; color: #fff; margin-top: 1rem;" onclick="notifyAdminSubscribed()">
+            <button id="notifyAdminBtn" class="btn-primary"
+                style="display: none; background: #10B981; color: #fff; margin-top: 1rem;"
+                onclick="notifyAdminSubscribed()">
                 ✅ I've Subscribed & Followed - Get Access
             </button>
             <div class="limitations-card" style="margin-top: 1.5rem;">
@@ -540,18 +546,19 @@
         <!-- Tabs -->
         <div class="tabs" id="tabsContainer" style="display: flex;">
             <button class="tab-btn active" data-tab="uid" onclick="switchTab('uid', this)">
-                 Create UID
+                Create UID
             </button>
             <button class="tab-btn" data-tab="aimkill" onclick="switchTab('aimkill', this)">
-                 Create Account
+                Create Account
             </button>
             <button class="tab-btn" data-tab="keys" onclick="switchTab('keys', this)">
-                 Your Account
+                Your Account
             </button>
             <button class="tab-btn" data-tab="setup" onclick="switchTab('setup', this)">
                 🎥 Setup Guide
             </button>
-            <button class="tab-btn" data-tab="news" onclick="switchTab('news', this)" id="newsTabButton" style="display: none;">
+            <button class="tab-btn" data-tab="news" onclick="switchTab('news', this)" id="newsTabButton"
+                style="display: none;">
                 📰 News
             </button>
         </div>
@@ -601,11 +608,13 @@
                 <form id="createAimkillForm">
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" id="aimkillUsername" placeholder="Must start with DC (e.g., DCuser123)" required pattern="DC.*" minlength="3">
+                        <input type="text" id="aimkillUsername" placeholder="Must start with DC (e.g., DCuser123)"
+                            required pattern="DC.*" minlength="3">
                     </div>
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" id="aimkillPassword" placeholder="Minimum 6 characters" required minlength="6">
+                        <input type="password" id="aimkillPassword" placeholder="Minimum 6 characters" required
+                            minlength="6">
                     </div>
                     <div class="form-group">
                         <label>Duration Package</label>
@@ -655,8 +664,11 @@
                         </p>
                     </div>
                     <div id="guestVideoContainer" style="max-width: 800px; margin: 0 auto;">
-                        <div id="guestVideoFrame" style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #1a1a1a;">
-                            <iframe id="guestSetupVideoIframe" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>
+                        <div id="guestVideoFrame"
+                            style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #1a1a1a;">
+                            <iframe id="guestSetupVideoIframe"
+                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
+                                allowfullscreen></iframe>
                         </div>
                     </div>
                 </div>
@@ -949,7 +961,7 @@
                     youtubeLink.href = settings.youtubeChannelUrl;
 
                     // Add click event listener
-                    youtubeLink.addEventListener('click', function() {
+                    youtubeLink.addEventListener('click', function () {
                         trackClick('youtube');
                     });
                 }
@@ -958,7 +970,7 @@
                     instagramLink.href = settings.instagramProfileUrl;
 
                     // Add click event listener
-                    instagramLink.addEventListener('click', function() {
+                    instagramLink.addEventListener('click', function () {
                         trackClick('instagram');
                     });
                 }

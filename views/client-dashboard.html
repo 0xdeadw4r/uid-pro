@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -123,8 +124,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .tab-content h2 {
@@ -169,18 +177,26 @@
             font-size: 14px;
         }
 
-        .download-section, .reset-section, .setup-video-section, .news-section {
+        .download-section,
+        .reset-section,
+        .setup-video-section,
+        .news-section {
             text-align: center;
             padding: 2rem 0;
         }
 
-        .download-icon, .setup-icon, .news-icon {
+        .download-icon,
+        .setup-icon,
+        .news-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .btn-download, .btn-reset, .btn-setup, .btn-news {
+        .btn-download,
+        .btn-reset,
+        .btn-setup,
+        .btn-news {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
@@ -198,12 +214,18 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled), .btn-setup:hover:not(:disabled), .btn-news:hover:not(:disabled) {
+        .btn-download:hover:not(:disabled),
+        .btn-reset:hover:not(:disabled),
+        .btn-setup:hover:not(:disabled),
+        .btn-news:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-download:disabled, .btn-reset:disabled, .btn-setup:disabled, .btn-news:disabled {
+        .btn-download:disabled,
+        .btn-reset:disabled,
+        .btn-setup:disabled,
+        .btn-news:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
@@ -249,7 +271,9 @@
             color: #3B82F6;
         }
 
-        .no-link-message, .no-video-message, .no-announcements-message {
+        .no-link-message,
+        .no-video-message,
+        .no-announcements-message {
             text-align: center;
             padding: 2rem;
             color: #999;
@@ -299,10 +323,12 @@
         .news-section {
             text-align: left;
         }
+
         .news-content p {
             margin-bottom: 1rem;
             line-height: 1.6;
         }
+
         .news-content a {
             color: #3B82F6;
             text-decoration: underline;
@@ -341,6 +367,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Client Dashboard</h1>
@@ -355,10 +382,11 @@
 
     <div class="container">
         <div class="tabs" id="tabsContainer">
-            <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
-            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
-            <button class="tab" onclick="showTab('setup')">🎥 Setup Guide</button>
-            <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;">📰 News</button>
+            <button class="tab active" onclick="showTab('download')"> Download Files</button>
+            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset
+                HWID</button>
+            <button class="tab" onclick="showTab('setup')"> Setup Guide</button>
+            <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;"> News</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -376,7 +404,8 @@
                 </div>
             </div>
 
-            <div id="genzAuthExpirationCard" class="info-card" style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+            <div id="genzAuthExpirationCard" class="info-card"
+                style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
                 <div class="info-row">
                     <span class="info-label">GenzAuth Account:</span>
                     <span class="info-value" id="genzAuthUsername">-</span>
@@ -457,7 +486,7 @@
                     Reset the Hardware ID for your assigned account
                 </p>
                 <button class="btn-reset" onclick="resetHwid()" id="resetButton">
-                    🔄 Reset HWID
+                    Reset HWID
                 </button>
             </div>
         </div>
@@ -751,13 +780,13 @@
                 const data = await response.json();
 
                 const card = document.getElementById('genzAuthExpirationCard');
-                
+
                 if (response.ok && data.success && data.hasAccount) {
                     card.style.display = 'block';
                     document.getElementById('genzAuthUsername').textContent = data.username || '-';
                     document.getElementById('genzAuthExpiry').textContent = data.expiresAtFormatted || '-';
                     document.getElementById('genzAuthTimeLeft').textContent = data.timeLeft || '-';
-                    
+
                     const statusEl = document.getElementById('genzAuthStatus');
                     if (data.isActive) {
                         statusEl.textContent = '✅ Active';
@@ -783,7 +812,7 @@
             if (expirationRefreshInterval) {
                 clearInterval(expirationRefreshInterval);
             }
-            
+
             try {
                 await fetch('/client/api/logout', {
                     method: 'POST',
@@ -798,10 +827,10 @@
 
         setTimeout(() => {
             loadClientData();
-            
+
             // Load GenzAuth expiration initially
             loadGenzAuthExpiration();
-            
+
             // Set up auto-refresh every 30 seconds
             expirationRefreshInterval = setInterval(() => {
                 loadGenzAuthExpiration();
@@ -809,4 +838,5 @@
         }, 500);
     </script>
 </body>
+
 </html>
