@@ -74,6 +74,18 @@ Free guest accounts have limited one-time access:
   - Set maximum duration for guest passes (1day to 30days)
 - Applies to both UID creation and Aimkill key/account creation endpoints
 
+### Guest Video Management
+Admins can configure a setup video that appears for all guests:
+- **Admin Configuration**: Set video URL in Settings → Guest Configuration tab
+- **Video URL Persistence**: URL is preserved across other settings updates (won't be erased when changing other guest settings)
+- **YouTube Support**: Automatically converts YouTube watch URLs (`youtube.com/watch?v=`) and short URLs (`youtu.be/`) to embed format
+- **External Videos**: Supports any embeddable video link (YouTube, Vimeo, etc.)
+- **Guest Display**: Video appears in guest dashboard Setup tab
+- **Database Storage**: Video URL stored in admin user document (`guestVideoUrl` field in User model)
+- **API Endpoints**: 
+  - GET `/api/guest-settings` returns the configured video URL
+  - POST `/api/admin/guest-settings` saves the video URL with automatic YouTube conversion
+
 ### UID Management
 UIDs are time-bound licenses with:
 - Automatic expiration tracking
