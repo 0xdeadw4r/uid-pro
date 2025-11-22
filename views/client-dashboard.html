@@ -775,10 +775,7 @@
                     senderType: 'client'
                 };
 
-                // Display message immediately
-                displayMessage(messageData, true);
-
-                // Send to server
+                // Send to server (don't display immediately, wait for server echo)
                 clientSocket.emit('chat_message', messageData);
                 input.value = '';
             } else {

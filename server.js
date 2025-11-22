@@ -43,12 +43,12 @@ io.on('connection', (socket) => {
     const { username, userType } = data;
     socket.username = username;
     socket.userType = userType;
-    
+
     // Store socket reference
     connectedUsers.set(username, socket);
-    
+
     console.log(`${username} (${userType}) joined chat`);
-    
+
     // Notify all admins that a user is online
     connectedUsers.forEach((userSocket, user) => {
       if (userSocket.userType === 'admin') {
@@ -60,9 +60,9 @@ io.on('connection', (socket) => {
   socket.on('chat_message', async (data) => {
     try {
       const { text, senderId, senderName, senderType } = data;
-      
+
       console.log(`Chat message from ${senderName} (${senderType}): ${text}`);
-      
+
       // Determine receiver based on sender type
       let receiverUsername = null;
       if (senderType === 'client') {
@@ -73,7 +73,7 @@ io.on('connection', (socket) => {
         // Admin sending to specific client
         receiverUsername = data.receiverUsername || senderId;
       }
-      
+
       // Save message to database
       const chatMessage = await ChatMessage.create({
         senderUsername: senderName || socket.username,
@@ -91,7 +91,7 @@ io.on('connection', (socket) => {
         senderType: senderType,
         timestamp: chatMessage.timestamp
       });
-      
+
       // Emit to receiver if online
       if (senderType === 'client') {
         // Send to all admins
@@ -129,7 +129,7 @@ io.on('connection', (socket) => {
     if (socket.username) {
       console.log(`${socket.username} disconnected from chat`);
       connectedUsers.delete(socket.username);
-      
+
       // Notify admins
       connectedUsers.forEach((userSocket, user) => {
         if (userSocket.userType === 'admin') {
@@ -780,7 +780,7 @@ app.post('/api/register', async (req, res) => {
 
     await logActivity(username, 'registration', guestStatus ? 'New guest account created' : 'New account created');
     await logLoginAttempt(username, true, ip);
-    await notifyAdminAction(username, guestStatus ? 'New Guest Registration' : 'New Registration', username);
+    await notifyAdminAction(username, guestStatus ? 'New Registration' : 'New Registration', username);
 
     res.json({
       success: true,
@@ -853,7 +853,7 @@ app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
     const clients = await Client.find({ isActive: true })
       .select('username productKey')
       .sort({ username: 1 });
-    
+
     res.json({ success: true, clients });
   } catch (error) {
     console.error('Get chat clients error:', error);
@@ -865,14 +865,17 @@ app.get('/api/chat/history', requireAuth, async (req, res) => {
   try {
     const { withUser } = req.query;
     const currentUser = req.session.user.username;
-    
+
     const messages = await ChatMessage.find({
       $or: [
         { senderUsername: currentUser, receiverUsername: withUser },
         { senderUsername: withUser, receiverUsername: currentUser }
       ]
-    }).sort({ timestamp: 1 }).limit(100);
-    
+    }).sort({ timestamp: -1 }).limit(50).exec();
+
+    // Reverse to show oldest first
+    messages.reverse();
+
     res.json({ success: true, messages });
   } catch (error) {
     console.error('Get chat history error:', error);
@@ -3043,7 +3046,7 @@ app.post('/api/aimkill/create-user', requireAuth, checkGuestFreeAimkill, checkUs
         }
       }
 
-      // Get admin-configured max duration
+      // Get max duration from admin settings
       const maxDuration = adminUser?.guestPassMaxDuration || '1day';
       const maxDays = parseInt(maxDuration.match(/\d+/)?.[0]) || 1;
 
@@ -3494,7 +3497,7 @@ app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
     const clients = await Client.find({ isActive: true })
       .select('username productKey')
       .sort({ username: 1 });
-    
+
     res.json({ success: true, clients });
   } catch (error) {
     console.error('Get chat clients error:', error);
@@ -3506,14 +3509,17 @@ app.get('/api/chat/history', requireAuth, async (req, res) => {
   try {
     const { withUser } = req.query;
     const currentUser = req.session.user.username;
-    
+
     const messages = await ChatMessage.find({
       $or: [
         { senderUsername: currentUser, receiverUsername: withUser },
         { senderUsername: withUser, receiverUsername: currentUser }
       ]
-    }).sort({ timestamp: 1 }).limit(100);
-    
+    }).sort({ timestamp: -1 }).limit(50).exec();
+
+    // Reverse to show oldest first
+    messages.reverse();
+
     res.json({ success: true, messages });
   } catch (error) {
     console.error('Get chat history error:', error);

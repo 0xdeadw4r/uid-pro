@@ -1680,7 +1680,7 @@
                 receiverUsername: selectedClient
             };
 
-            displayAdminMessage(messageData, true);
+            // Send to server (wait for server echo, don't display immediately)
             adminSocket.emit('chat_message', messageData);
             input.value = '';
         }

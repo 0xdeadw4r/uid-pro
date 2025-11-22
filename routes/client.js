@@ -193,7 +193,10 @@ router.get('/api/chat/history', isClient, async (req, res) => {
                 { senderUsername: currentUser, receiverUsername: withUser },
                 { senderUsername: withUser, receiverUsername: currentUser }
             ]
-        }).sort({ timestamp: 1 }).limit(100);
+        }).sort({ timestamp: -1 }).limit(50).exec();
+        
+        // Reverse to show oldest first
+        messages.reverse();
 
         res.json({ success: true, messages });
     } catch (error) {

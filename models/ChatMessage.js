@@ -49,4 +49,25 @@ const chatMessageSchema = new mongoose.Schema({
 chatMessageSchema.index({ senderUsername: 1, receiverUsername: 1, timestamp: -1 });
 chatMessageSchema.index({ timestamp: -1 });
 
+// Static method to clean up old messages (keep only last 100 per conversation)
+chatMessageSchema.statics.cleanupOldMessages = async function() {
+    try {
+        // Delete messages older than 30 days
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const result = await this.deleteMany({
+            timestamp: { $lt: thirtyDaysAgo }
+        });
+        
+        if (result.deletedCount > 0) {
+            console.log(`🗑️ Cleaned up ${result.deletedCount} old chat messages`);
+        }
+        
+        return result;
+    } catch (error) {
+        console.error('Chat message cleanup error:', error);
+    }
+};
+
 module.exports = mongoose.model('ChatMessage', chatMessageSchema);
