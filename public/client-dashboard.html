@@ -657,20 +657,28 @@
                 // Update UI to reflect new counts
                 updateUI();
             } else {
-                // Handle specific error cases
+                // Show popup alert for API failures
+                let errorMsg = '';
+                
                 if (data.configurationError) {
-                    showError('⚠️ ' + data.error);
+                    errorMsg = '⚠️ Configuration Error\n\n' + data.error + '\n\nPlease contact the administrator.';
                 } else if (data.limitReached) {
-                    showError('⚠️ ' + data.error);
+                    errorMsg = '⚠️ Reset Limit Reached\n\n' + data.error;
                 } else if (data.apiError) {
-                    showError('❌ GenzAuth API Error: ' + data.error);
+                    errorMsg = '❌ HWID Reset Failed\n\nGenzAuth API Error: ' + data.error + '\n\nThe API request failed. Please try again or contact administrator.';
                 } else {
-                    showError(data.error || 'HWID reset failed. Please contact administrator.');
+                    errorMsg = '❌ HWID Reset Failed\n\n' + (data.error || 'Unknown error occurred') + '\n\nPlease contact administrator if this continues.';
                 }
+                
+                // Show both alert popup and error message on page
+                alert(errorMsg);
+                showError(data.error || 'HWID reset failed from API');
             }
         } catch (error) {
             console.error('Reset HWID error:', error);
-            showError('❌ Connection error. Please check your internet and try again.');
+            const errorMsg = '❌ Connection Error\n\nFailed to connect to the server.\n\nPlease check your internet connection and try again.';
+            alert(errorMsg);
+            showError('Connection error. Please check your internet and try again.');
         } finally {
             resetButton.disabled = false;
             resetButton.textContent = '🔄 RESET HWID';
