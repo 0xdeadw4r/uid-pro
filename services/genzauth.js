@@ -16,9 +16,9 @@ async function getSellerKey() {
     }
 }
 
-async function makeRequest(type, additionalParams = {}) {
+async function makeRequest(type, additionalParams = {}, customSellerKey = null) {
     try {
-        const SELLER_KEY = await getSellerKey();
+        const SELLER_KEY = customSellerKey || await getSellerKey();
         
         const params = new URLSearchParams({
             sellerkey: SELLER_KEY,
@@ -151,8 +151,8 @@ async function extendUser(username, days) {
     return makeRequest('extenduser', { user: username, days: days.toString() });
 }
 
-async function resetHwid(username) {
-    return makeRequest('resethwid', { user: username });
+async function resetHwid(username, customSellerKey = null) {
+    return makeRequest('resethwid', { user: username }, customSellerKey);
 }
 
 async function fetchAllLicenses() {

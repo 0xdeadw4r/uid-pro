@@ -218,6 +218,21 @@ router.get('/api/info', isClient, async (req, res) => {
             }
         }
 
+        // Check if GenzAuth is configured (product-specific or global)
+        let hasGenzAuth = false;
+        if (product && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
+            hasGenzAuth = true;
+        } else {
+            // Check for global seller key
+            try {
+                const ApiConfig = require('../models/ApiConfig');
+                const config = await ApiConfig.findOne({ configKey: 'main_config' });
+                hasGenzAuth = !!(config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY);
+            } catch (err) {
+                hasGenzAuth = !!process.env.GENZAUTH_SELLER_KEY;
+            }
+        }
+
         res.json({
             success: true,
             client: {
@@ -238,7 +253,7 @@ router.get('/api/info', isClient, async (req, res) => {
                     allowHwidReset: product.allowHwidReset,
                     maxFreeHwidResets: product.maxFreeHwidResets || 5,
                     hwidResetPrice: product.hwidResetPrice || 0,
-                    genzAuthSellerApi: product.genzAuthSellerApi
+                    hasGenzAuth: hasGenzAuth
                 } : null
             }
         });
@@ -361,17 +376,49 @@ router.post('/api/reset-hwid', isClient, async (req, res) => {
             });
         }
 
-        // Perform HWID reset via GenzAuth if configured
-        if (client.assignedUsername && product.genzAuthSellerApi) {
-            try {
-                const result = await genzauth.resetHWID(client.assignedUsername);
-                if (!result.success) {
-                    return res.status(500).json({ error: result.error || 'Failed to reset HWID' });
-                }
-            } catch (error) {
-                console.error('GenzAuth HWID reset error:', error);
-                return res.status(500).json({ error: 'Failed to reset HWID through authentication service' });
+        // Check if client has assigned username for HWID reset
+        if (!client.assignedUsername) {
+            return res.status(400).json({ 
+                error: 'No assigned username configured for HWID reset. Please contact administrator.' 
+            });
+        }
+
+        // Perform HWID reset via GenzAuth (use product-specific key or fall back to global)
+        try {
+            const productSellerKey = product.genzauthSellerKey && product.genzauthSellerKey.trim() 
+                ? product.genzauthSellerKey.trim() 
+                : null;
+            
+            console.log(`🔄 Resetting HWID for user: ${client.assignedUsername}`);
+            if (productSellerKey) {
+                console.log(`   Using product-specific GenzAuth seller key`);
+            } else {
+                console.log(`   Using global GenzAuth seller key (fallback)`);
             }
+            
+            const result = await genzauth.resetHwid(client.assignedUsername, productSellerKey);
+            
+            // Handle TEST mode / configuration missing
+            if (result.isTestMode) {
+                console.error(`❌ GenzAuth not configured - neither product nor global seller key available`);
+                return res.status(503).json({ 
+                    error: 'GenzAuth API is not configured. Please contact the administrator to set up the seller key.',
+                    configurationError: true
+                });
+            }
+            
+            // Handle other failures
+            if (!result.success) {
+                console.error(`❌ HWID reset failed: ${result.error || result.message}`);
+                return res.status(500).json({ 
+                    error: result.error || result.message || 'Failed to reset HWID through GenzAuth API' 
+                });
+            }
+            
+            console.log(`✅ HWID reset successful for: ${client.assignedUsername}`);
+        } catch (error) {
+            console.error('GenzAuth HWID reset error:', error);
+            return res.status(500).json({ error: 'Failed to reset HWID through authentication service' });
         }
 
         // Update client
