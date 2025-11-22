@@ -764,7 +764,6 @@
             <a href="/packages" id="packagesLink" class="nav-hidden">Packages</a>
             <a href="/aimkill-packages" id="aimkillLink" class="nav-hidden">Aimkill</a>
             <a href="/admin" id="adminLink" class="nav-hidden">Admin</a>
-            <a href="/chat" id="chatLink">💬 Chat</a>
             <a href="/buy-credits">Credits</a>
             <a href="/invoices">Invoices</a>
             <a href="/settings">Settings</a>
@@ -1594,7 +1593,10 @@
                         clientDiv.style.padding = '1rem';
                         clientDiv.style.cursor = 'pointer';
                         clientDiv.style.borderBottom = '1px solid #333';
+                        clientDiv.style.transition = 'background 0.2s';
                         clientDiv.textContent = client.username;
+                        clientDiv.onmouseover = () => clientDiv.style.background = '#2a2a2a';
+                        clientDiv.onmouseout = () => clientDiv.style.background = 'transparent';
                         clientDiv.onclick = () => selectClient(client.username);
                         userList.appendChild(clientDiv);
                     });
@@ -1636,7 +1638,7 @@
         function displayAdminMessage(msg, isSent) {
             const container = document.getElementById('adminChatMessages');
             const messageDiv = document.createElement('div');
-            messageDiv.style.padding = '0.75rem';
+            messageDiv.style.padding = '0.75rem 1rem';
             messageDiv.style.marginBottom = '0.5rem';
             messageDiv.style.borderRadius = '8px';
             messageDiv.style.maxWidth = '70%';
@@ -1673,7 +1675,7 @@
             adminSocket.emit('chat_message', messageData);
             input.value = '';
         }
-    
+    </script>
     <script>
         function switchTab(tabName, btn) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
