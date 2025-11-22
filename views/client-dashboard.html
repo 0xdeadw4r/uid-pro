@@ -478,12 +478,7 @@
                 <div class="username" id="headerUsername">Loading...</div>
                 <div class="product-type" id="headerProductType">Loading...</div>
             </div>
-            <!-- Navigation links with chat added -->
-            <div class="nav-links">
-                <a href="/client/dashboard">Dashboard</a>
-                <a href="/chat">💬 Chat</a>
-                <button class="btn-logout" onclick="logout()">Logout</button>
-            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
         </div>
     </div>
 
@@ -650,13 +645,13 @@
         <div id="chatTab" class="tab-content">
             <h2>💬 Chat with Support</h2>
             <div class="chat-container">
-                <div class="chat-header">Client Chat</div>
+                <div class="chat-header">Support Chat</div>
                 <div class="chat-messages" id="chatMessages">
-                    <!-- Messages will be loaded here -->
+                    <p style="text-align: center; color: #666; padding: 1rem;">Connecting to chat...</p>
                 </div>
                 <div class="chat-input-area">
-                    <input type="text" id="chatMessageInput" placeholder="Type your message...">
-                    <button class="btn-send" onclick="sendMessage()">Send</button>
+                    <input type="text" id="chatMessageInput" placeholder="Type your message..." disabled>
+                    <button class="btn-send" onclick="sendMessage()" disabled>Send</button>
                 </div>
             </div>
         </div>
@@ -672,12 +667,26 @@
 
         // Initialize Socket.IO connection for the client
         function initializeClientChat() {
+            if (clientSocket && clientSocket.connected) {
+                console.log('Chat already connected');
+                return;
+            }
+
             clientSocket = io();
 
             clientSocket.on('connect', () => {
                 console.log('Connected to chat server');
+                document.getElementById('chatMessages').innerHTML = '<p style="text-align: center; color: #10B981; padding: 1rem;">Connected to support chat</p>';
+                
                 if (currentClientUser) {
-                    clientSocket.emit('user_connected', { userId: currentClientUser.id, username: currentClientUser.username, userType: 'client' });
+                    clientSocket.emit('join-chat', { 
+                        username: currentClientUser.username, 
+                        userType: 'client' 
+                    });
+                    
+                    // Enable input
+                    document.getElementById('chatMessageInput').disabled = false;
+                    document.querySelector('.btn-send').disabled = false;
                 }
             });
 
@@ -685,53 +694,48 @@
                 console.log('Disconnected from chat server');
                 document.getElementById('chatMessageInput').disabled = true;
                 document.querySelector('.btn-send').disabled = true;
+                
+                const messagesContainer = document.getElementById('chatMessages');
+                messagesContainer.innerHTML = '<p style="text-align: center; color: #EF4444; padding: 1rem;">Disconnected. Reconnecting...</p>';
             });
 
             clientSocket.on('chat_message', (msg) => {
-                displayMessage(msg);
+                displayMessage(msg, false);
             });
 
             clientSocket.on('admin_message', (msg) => {
-                displayMessage(msg);
+                displayMessage(msg, false);
             });
 
             clientSocket.on('error', (err) => {
                 console.error('Chat server error:', err);
-                showAlert('chatAlert', 'Connection error: ' + err, 'error');
-            });
-
-            clientSocket.on('message_sent_ack', () => {
-                isClientSending = false;
-                document.getElementById('chatMessageInput').disabled = false;
-                document.querySelector('.btn-send').disabled = false;
             });
         }
 
-        function displayMessage(msg) {
+        function displayMessage(msg, isSent) {
             const messagesContainer = document.getElementById('chatMessages');
             if (!messagesContainer) return;
+
+            // Clear connection message if present
+            if (messagesContainer.querySelector('p')) {
+                messagesContainer.innerHTML = '';
+            }
 
             const messageElement = document.createElement('div');
             messageElement.classList.add('message');
 
-            const isSentByCurrentUser = msg.senderId === (currentClientUser ? currentClientUser.id : null);
+            const isSentByMe = isSent || (currentClientUser && msg.senderName === currentClientUser.username);
 
-            if (isSentByCurrentUser) {
+            if (isSentByMe) {
                 messageElement.classList.add('sent');
+                messageElement.innerHTML = `<span class="sender">You</span>${msg.text || msg.message}`;
             } else {
                 messageElement.classList.add('received');
+                const senderLabel = msg.senderType === 'admin' ? 'Support' : msg.senderName || 'Admin';
+                messageElement.innerHTML = `<span class="sender">${senderLabel}</span>${msg.text || msg.message}`;
             }
 
-            let senderInfo = '';
-            if (msg.senderName) {
-                senderInfo = `<span class="sender">${msg.senderName}${msg.senderType === 'admin' ? ' (Admin)' : ''}</span>`;
-            } else if (msg.senderId) {
-                senderInfo = `<span class="sender">User: ${msg.senderId.substring(0, 6)}</span>`;
-            }
-
-            messageElement.innerHTML = `${senderInfo}${msg.text}`;
             messagesContainer.appendChild(messageElement);
-
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
@@ -739,23 +743,24 @@
             const input = document.getElementById('chatMessageInput');
             const messageText = input.value.trim();
 
-            if (messageText && clientSocket && clientSocket.connected && currentClientUser && !isClientSending) {
-                isClientSending = true;
-                document.getElementById('chatMessageInput').disabled = true;
-                document.querySelector('.btn-send').disabled = true;
+            if (!messageText) return;
 
+            if (clientSocket && clientSocket.connected && currentClientUser) {
                 const messageData = {
                     text: messageText,
-                    senderId: currentClientUser.id,
+                    senderId: currentClientUser.username,
                     senderName: currentClientUser.username,
                     senderType: 'client'
                 };
+                
+                // Display message immediately
+                displayMessage(messageData, true);
+                
+                // Send to server
                 clientSocket.emit('chat_message', messageData);
                 input.value = '';
-            } else if (!clientSocket || !clientSocket.connected) {
-                alert('Chat is not connected. Please try again later.');
-            } else if (isClientSending) {
-                alert('Your previous message is still sending. Please wait.');
+            } else {
+                alert('Chat is not connected. Please refresh the page.');
             }
         }
 
@@ -1146,12 +1151,8 @@
                     loadGenzAuthExpiration();
                 }, 30000);
 
-                // Initialize chat connection only if the chat tab is active or will be activated
-                // We defer it to the showTab function to ensure we only connect when needed.
-                // However, if the page loads directly to the chat tab (e.g., /chat URL), it needs to connect.
-                if (window.location.hash === '#chat' || window.location.pathname === '/chat') {
-                    initializeClientChat();
-                }
+                // Always initialize chat on dashboard load
+            initializeClientChat();
 
             }, 500);
         });

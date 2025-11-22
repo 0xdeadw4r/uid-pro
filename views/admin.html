@@ -1537,10 +1537,143 @@
         </div>
     </div>
 
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/navigation.js"></script>
     <script src="/js/main.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        let adminSocket = null;
+        let selectedClient = null;
+
+        function initAdminChat() {
+            if (adminSocket && adminSocket.connected) {
+                console.log('Admin chat already connected');
+                return;
+            }
+
+            adminSocket = io();
+
+            adminSocket.on('connect', () => {
+                console.log('Admin connected to chat');
+                adminSocket.emit('join-chat', { username: 'admin', userType: 'admin' });
+                loadChatClients();
+            });
+
+            adminSocket.on('user-online', (data) => {
+                console.log('User online:', data.username);
+                loadChatClients();
+            });
+
+            adminSocket.on('user-offline', (data) => {
+                console.log('User offline:', data.username);
+                loadChatClients();
+            });
+
+            adminSocket.on('chat_message', (msg) => {
+                if (selectedClient && msg.senderName === selectedClient) {
+                    displayAdminMessage(msg, false);
+                }
+            });
+
+            adminSocket.on('disconnect', () => {
+                console.log('Admin disconnected from chat');
+            });
+        }
+
+        async function loadChatClients() {
+            try {
+                const response = await fetch('/api/chat/clients', { credentials: 'include' });
+                const data = await response.json();
+
+                const userList = document.getElementById('adminChatUserList');
+                userList.innerHTML = '';
+
+                if (data.success && data.clients && data.clients.length > 0) {
+                    data.clients.forEach(client => {
+                        const clientDiv = document.createElement('div');
+                        clientDiv.style.padding = '1rem';
+                        clientDiv.style.cursor = 'pointer';
+                        clientDiv.style.borderBottom = '1px solid #333';
+                        clientDiv.textContent = client.username;
+                        clientDiv.onclick = () => selectClient(client.username);
+                        userList.appendChild(clientDiv);
+                    });
+                } else {
+                    userList.innerHTML = '<p style="padding: 1rem; color: #666;">No clients online</p>';
+                }
+            } catch (error) {
+                console.error('Error loading clients:', error);
+            }
+        }
+
+        function selectClient(username) {
+            selectedClient = username;
+            document.getElementById('adminChatTitle').textContent = `Chat with ${username}`;
+            document.getElementById('adminChatMessages').innerHTML = '';
+            document.getElementById('adminChatInputArea').style.display = 'block';
+            loadChatHistory(username);
+        }
+
+        async function loadChatHistory(username) {
+            try {
+                const response = await fetch(`/api/chat/history?withUser=${username}`, { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success && data.messages) {
+                    data.messages.forEach(msg => {
+                        displayAdminMessage({
+                            text: msg.message,
+                            senderName: msg.senderUsername,
+                            senderType: msg.senderType
+                        }, false);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        function displayAdminMessage(msg, isSent) {
+            const container = document.getElementById('adminChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.style.padding = '0.75rem';
+            messageDiv.style.marginBottom = '0.5rem';
+            messageDiv.style.borderRadius = '8px';
+            messageDiv.style.maxWidth = '70%';
+
+            if (isSent || msg.senderType === 'admin') {
+                messageDiv.style.background = '#3B82F6';
+                messageDiv.style.color = 'white';
+                messageDiv.style.marginLeft = 'auto';
+            } else {
+                messageDiv.style.background = '#2a2a2a';
+                messageDiv.style.color = '#fff';
+            }
+
+            messageDiv.textContent = msg.text || msg.message;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function sendAdminMessage() {
+            const input = document.getElementById('adminChatInput');
+            const message = input.value.trim();
+
+            if (!message || !selectedClient) return;
+
+            const messageData = {
+                text: message,
+                senderId: 'admin',
+                senderName: 'admin',
+                senderType: 'admin',
+                receiverUsername: selectedClient
+            };
+
+            displayAdminMessage(messageData, true);
+            adminSocket.emit('chat_message', messageData);
+            input.value = '';
+        }
+    
     <script>
         function switchTab(tabName, btn) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));

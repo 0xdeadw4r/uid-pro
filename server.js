@@ -34,6 +34,8 @@ const io = socketIo(server);
 const ChatMessage = require('./models/ChatMessage');
 
 // Socket.IO chat handlers
+const connectedUsers = new Map(); // Track connected users by username
+
 io.on('connection', (socket) => {
   console.log('User connected to chat:', socket.id);
 
@@ -42,65 +44,98 @@ io.on('connection', (socket) => {
     socket.username = username;
     socket.userType = userType;
     
+    // Store socket reference
+    connectedUsers.set(username, socket);
+    
     console.log(`${username} (${userType}) joined chat`);
     
-    // Notify others that user is online
-    socket.broadcast.emit('user-online', { username });
+    // Notify all admins that a user is online
+    connectedUsers.forEach((userSocket, user) => {
+      if (userSocket.userType === 'admin') {
+        userSocket.emit('user-online', { username, userType });
+      }
+    });
   });
 
-  socket.on('send-message', async (data) => {
+  socket.on('chat_message', async (data) => {
     try {
-      const { senderUsername, senderType, receiverUsername, message } = data;
+      const { text, senderId, senderName, senderType } = data;
+      
+      console.log(`Chat message from ${senderName} (${senderType}): ${text}`);
+      
+      // Determine receiver based on sender type
+      let receiverUsername = null;
+      if (senderType === 'client') {
+        // Client sending to admin - find first available admin
+        const adminSocket = Array.from(connectedUsers.values()).find(s => s.userType === 'admin');
+        receiverUsername = adminSocket ? adminSocket.username : 'admin';
+      } else {
+        // Admin sending to specific client
+        receiverUsername = data.receiverUsername || senderId;
+      }
       
       // Save message to database
       const chatMessage = await ChatMessage.create({
-        senderUsername,
-        senderType,
-        receiverUsername,
-        message,
+        senderUsername: senderName || socket.username,
+        senderType: senderType,
+        receiverUsername: receiverUsername,
+        message: text,
         isRead: false
       });
 
       // Emit to sender (confirmation)
-      socket.emit('message-sent', chatMessage);
-      
-      // Emit to receiver (if online)
-      io.sockets.sockets.forEach((s) => {
-        if (s.username === receiverUsername) {
-          s.emit('new-message', chatMessage);
-        }
+      socket.emit('chat_message', {
+        text: text,
+        senderId: senderId,
+        senderName: senderName,
+        senderType: senderType,
+        timestamp: chatMessage.timestamp
       });
+      
+      // Emit to receiver if online
+      if (senderType === 'client') {
+        // Send to all admins
+        connectedUsers.forEach((userSocket, user) => {
+          if (userSocket.userType === 'admin' && userSocket.id !== socket.id) {
+            userSocket.emit('chat_message', {
+              text: text,
+              senderId: senderId,
+              senderName: senderName,
+              senderType: senderType,
+              timestamp: chatMessage.timestamp
+            });
+          }
+        });
+      } else {
+        // Send to specific client
+        const clientSocket = connectedUsers.get(receiverUsername);
+        if (clientSocket && clientSocket.id !== socket.id) {
+          clientSocket.emit('admin_message', {
+            text: text,
+            senderId: socket.username,
+            senderName: socket.username,
+            senderType: 'admin',
+            timestamp: chatMessage.timestamp
+          });
+        }
+      }
     } catch (error) {
       console.error('Send message error:', error);
       socket.emit('error', { message: 'Failed to send message' });
     }
   });
 
-  socket.on('typing', (data) => {
-    const { receiverUsername } = data;
-    io.sockets.sockets.forEach((s) => {
-      if (s.username === receiverUsername) {
-        s.emit('user-typing', { username: socket.username });
-      }
-    });
-  });
-
-  socket.on('mark-read', async (data) => {
-    try {
-      const { messageIds } = data;
-      await ChatMessage.updateMany(
-        { _id: { $in: messageIds } },
-        { $set: { isRead: true, readAt: new Date() } }
-      );
-    } catch (error) {
-      console.error('Mark read error:', error);
-    }
-  });
-
   socket.on('disconnect', () => {
     if (socket.username) {
       console.log(`${socket.username} disconnected from chat`);
-      socket.broadcast.emit('user-offline', { username: socket.username });
+      connectedUsers.delete(socket.username);
+      
+      // Notify admins
+      connectedUsers.forEach((userSocket, user) => {
+        if (userSocket.userType === 'admin') {
+          userSocket.emit('user-offline', { username: socket.username });
+        }
+      });
     }
   });
 });
@@ -809,6 +844,42 @@ app.post('/api/login', async (req, res) => {
           error: 'Device/Browser lock detected. Your account is locked to a different device or browser. This can happen after browser updates. Contact admin to reset your device lock.',
           networkLocked: true
         });
+
+
+// Chat API endpoints
+app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const Client = require('./models/Client');
+    const clients = await Client.find({ isActive: true })
+      .select('username productKey')
+      .sort({ username: 1 });
+    
+    res.json({ success: true, clients });
+  } catch (error) {
+    console.error('Get chat clients error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch clients' });
+  }
+});
+
+app.get('/api/chat/history', requireAuth, async (req, res) => {
+  try {
+    const { withUser } = req.query;
+    const currentUser = req.session.user.username;
+    
+    const messages = await ChatMessage.find({
+      $or: [
+        { senderUsername: currentUser, receiverUsername: withUser },
+        { senderUsername: withUser, receiverUsername: currentUser }
+      ]
+    }).sort({ timestamp: 1 }).limit(100);
+    
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error('Get chat history error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
+  }
+});
+
       }
     }
 
