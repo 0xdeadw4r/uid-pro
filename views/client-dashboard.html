@@ -669,6 +669,11 @@
         function initializeClientChat() {
             if (clientSocket && clientSocket.connected) {
                 console.log('Chat already connected');
+                // Re-enable input even if already connected
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) input.disabled = false;
+                if (sendBtn) sendBtn.disabled = false;
                 return;
             }
 
@@ -676,27 +681,41 @@
 
             clientSocket.on('connect', () => {
                 console.log('Connected to chat server');
-                document.getElementById('chatMessages').innerHTML = '<p style="text-align: center; color: #10B981; padding: 1rem;">Connected to support chat</p>';
+                const messagesContainer = document.getElementById('chatMessages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: #10B981; padding: 1rem;">Connected to support chat. Type your message below.</p>';
+                }
                 
                 if (currentClientUser) {
                     clientSocket.emit('join-chat', { 
                         username: currentClientUser.username, 
                         userType: 'client' 
                     });
-                    
-                    // Enable input
-                    document.getElementById('chatMessageInput').disabled = false;
-                    document.querySelector('.btn-send').disabled = false;
+                }
+                
+                // Enable input immediately
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) {
+                    input.disabled = false;
+                    input.placeholder = 'Type your message to support...';
+                }
+                if (sendBtn) {
+                    sendBtn.disabled = false;
                 }
             });
 
             clientSocket.on('disconnect', () => {
                 console.log('Disconnected from chat server');
-                document.getElementById('chatMessageInput').disabled = true;
-                document.querySelector('.btn-send').disabled = true;
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) input.disabled = true;
+                if (sendBtn) sendBtn.disabled = true;
                 
                 const messagesContainer = document.getElementById('chatMessages');
-                messagesContainer.innerHTML = '<p style="text-align: center; color: #EF4444; padding: 1rem;">Disconnected. Reconnecting...</p>';
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: #EF4444; padding: 1rem;">Disconnected. Reconnecting...</p>';
+                }
             });
 
             clientSocket.on('chat_message', (msg) => {
@@ -781,9 +800,17 @@
                 tabContent.classList.add('active');
             }
 
-            // Initialize chat connection if the chat tab is activated
-            if (tabName === 'chat' && clientSocket && !clientSocket.connected) {
-                initializeClientChat();
+            // Re-enable chat input when switching to chat tab
+            if (tabName === 'chat') {
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input && clientSocket && clientSocket.connected) {
+                    input.disabled = false;
+                    input.focus();
+                }
+                if (sendBtn && clientSocket && clientSocket.connected) {
+                    sendBtn.disabled = false;
+                }
             }
         }
 
@@ -1144,17 +1171,18 @@
                 sendButton.addEventListener('click', sendMessage);
             }
 
-            setTimeout(() => {
-                loadClientData();
+            // Load client data first, then initialize chat
+            loadClientData().then(() => {
                 loadGenzAuthExpiration();
                 expirationRefreshInterval = setInterval(() => {
                     loadGenzAuthExpiration();
                 }, 30000);
 
-                // Always initialize chat on dashboard load
-            initializeClientChat();
-
-            }, 500);
+                // Initialize chat after client data is loaded
+                setTimeout(() => {
+                    initializeClientChat();
+                }, 1000);
+            });
         });
 
     </script>

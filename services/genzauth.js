@@ -19,7 +19,7 @@ async function getSellerKey() {
 async function makeRequest(type, additionalParams = {}, customSellerKey = null) {
     try {
         const SELLER_KEY = customSellerKey || await getSellerKey();
-        
+
         const params = new URLSearchParams({
             sellerkey: SELLER_KEY,
             type,
@@ -40,9 +40,9 @@ async function makeRequest(type, additionalParams = {}, customSellerKey = null) 
         }
 
         const response = await axios.get(url, { timeout: 15000 });
-        
+
         console.log(`[GenzAuth API] Response Status: ${response.status}`);
-        
+
         if (response.data) {
             console.log(`[GenzAuth API] Response:`, response.data);
             return response.data;
@@ -65,7 +65,7 @@ async function makeRequest(type, additionalParams = {}, customSellerKey = null) 
 
 async function addLicense(expiry, amount = 1) {
     const SELLER_KEY = await getSellerKey();
-    
+
     if (!SELLER_KEY) {
         const testLicense = generateTestLicense();
         return {
@@ -84,7 +84,7 @@ async function addLicense(expiry, amount = 1) {
 
     if (result.success) {
         const key = result.data?.[0] || result.license || result.key || result.license_key || (result.licenses && result.licenses[0]);
-        
+
         if (!key) {
             console.error('❌ No key found in GenzAuth response:', result);
             return {
@@ -92,9 +92,9 @@ async function addLicense(expiry, amount = 1) {
                 error: 'No key returned from GenzAuth API'
             };
         }
-        
+
         console.log(`✅ GenzAuth license created: ${key}`);
-        
+
         return {
             success: true,
             key: key,
@@ -154,13 +154,13 @@ async function extendUser(username, days) {
 async function resetHwid(username, customSellerKey = null) {
     console.log(`[GenzAuth] Resetting HWID for user: ${username}`);
     const result = await makeRequest('resethwid', { user: username }, customSellerKey);
-    
+
     if (result.success) {
         console.log(`[GenzAuth] ✅ HWID reset successful for: ${username}`);
     } else {
         console.log(`[GenzAuth] ❌ HWID reset failed for: ${username} - ${result.error || result.message}`);
     }
-    
+
     return result;
 }
 
@@ -171,7 +171,7 @@ async function fetchAllLicenses() {
 async function getUserInfo(username, customSellerKey = null) {
     try {
         const SELLER_KEY = customSellerKey || await getSellerKey();
-        
+
         if (!SELLER_KEY) {
             console.log('⚠️ GenzAuth not configured - using TEST mode');
             return {
@@ -182,7 +182,7 @@ async function getUserInfo(username, customSellerKey = null) {
         }
 
         console.log(`[GenzAuth] Fetching user info for: ${username}`);
-        
+
         const params = new URLSearchParams({
             sellerkey: SELLER_KEY,
             type: 'fetchuser',
@@ -192,10 +192,10 @@ async function getUserInfo(username, customSellerKey = null) {
 
         const url = `${GENZAUTH_API_BASE}?${params.toString()}`;
         const response = await axios.get(url, { timeout: 15000 });
-        
+
         console.log(`[GenzAuth API] Response Status: ${response.status}`);
         console.log(`[GenzAuth API] Response Data:`, response.data);
-        
+
         if (response.data && response.data.success !== false) {
             console.log(`[GenzAuth] ✅ User info fetched for: ${username}`);
             return {
@@ -203,7 +203,7 @@ async function getUserInfo(username, customSellerKey = null) {
                 data: response.data
             };
         }
-        
+
         console.log(`[GenzAuth] ❌ Failed to fetch user info for: ${username}`);
         return {
             success: false,
@@ -240,6 +240,8 @@ async function deleteKey(key) {
 async function createMultipleKeys(days, quantity = 1) {
     try {
         console.log(`📝 Creating ${quantity} GenzAuth keys (${days}d each)`);
+
+        const SELLER_KEY = await getSellerKey(); // Moved SELLER_KEY definition here
 
         if (!SELLER_KEY) {
             const keys = [];
