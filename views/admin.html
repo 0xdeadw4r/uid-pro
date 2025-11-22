@@ -1516,6 +1516,48 @@
         <div id="chat-tab" class="tab-content">
             <div class="section">
                 <h2>Admin Chat</h2>
+                <div id="chatManagementMessage" class="message"></div>
+                
+                <!-- Chat Management Controls -->
+                <div class="form-section" style="margin-bottom: 2rem;">
+                    <h3>Chat Management</h3>
+                    <div id="chatStatsContainer" style="margin-bottom: 1rem;">
+                        <div class="stat-grid" style="margin-bottom: 1rem;">
+                            <div class="stat-card">
+                                <div class="stat-label">Total Messages</div>
+                                <div class="stat-value" id="chatTotalMessages">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Unread Messages</div>
+                                <div class="stat-value" id="chatUnreadMessages">0</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">Active Users</div>
+                                <div class="stat-value" id="chatActiveUsers">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                        <div class="form-group">
+                            <label>Delete Chat for Specific User</label>
+                            <input type="text" id="deleteChatUsername" placeholder="Enter username">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button class="warning-btn" onclick="deleteUserChat()" style="width: 100%;">
+                                🗑️ Delete User's Chat
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="secondary-btn" onclick="loadChatStats()">📊 Refresh Stats</button>
+                        <button class="danger-btn" onclick="deleteAllChats()">
+                            🗑️ Delete All Chat Messages
+                        </button>
+                    </div>
+                </div>
+                
                 <div class="chat-container">
                     <div class="chat-sidebar">
                         <div style="padding: 1rem; border-bottom: 1px solid #333; color: #fff; font-weight: 700; background: #222;">Clients</div>
@@ -1543,6 +1585,102 @@
     <script>
         let adminSocket = null;
         let selectedClient = null;
+
+        // Chat Management Functions
+        async function loadChatStats() {
+            try {
+                const response = await fetch('/api/admin/chat/stats', { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('chatTotalMessages').textContent = data.stats.totalMessages || 0;
+                    document.getElementById('chatUnreadMessages').textContent = data.stats.unreadMessages || 0;
+                    document.getElementById('chatActiveUsers').textContent = data.stats.uniqueUsers || 0;
+                }
+            } catch (error) {
+                console.error('Error loading chat stats:', error);
+            }
+        }
+
+        async function deleteUserChat() {
+            const username = document.getElementById('deleteChatUsername').value.trim();
+
+            if (!username) {
+                showMessage('Please enter a username', 'error', 'chatManagementMessage');
+                return;
+            }
+
+            if (!confirm(`Delete all chat messages for user "${username}"?\n\nThis action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/chat/delete-user-messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username }),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message || 'Chat messages deleted successfully', 'success', 'chatManagementMessage');
+                    document.getElementById('deleteChatUsername').value = '';
+                    loadChatStats();
+                    
+                    // Clear chat if viewing this user
+                    if (selectedClient === username) {
+                        document.getElementById('adminChatMessages').innerHTML = '';
+                        selectedClient = null;
+                        document.getElementById('adminChatTitle').textContent = 'Select a client to start chatting';
+                        document.getElementById('adminChatInputArea').style.display = 'none';
+                    }
+                } else {
+                    showMessage(data.error || 'Failed to delete messages', 'error', 'chatManagementMessage');
+                }
+            } catch (error) {
+                console.error('Delete user chat error:', error);
+                showMessage('Connection error', 'error', 'chatManagementMessage');
+            }
+        }
+
+        async function deleteAllChats() {
+            if (!confirm('⚠️ WARNING: Delete ALL chat messages?\n\nThis will permanently delete all chat history for all users.\n\nThis action CANNOT be undone!')) {
+                return;
+            }
+
+            if (!confirm('Are you absolutely sure? This will delete EVERYTHING in the chat history.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/admin/chat/delete-all-messages', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    credentials: 'include'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showMessage(data.message || 'All chat messages deleted', 'success', 'chatManagementMessage');
+                    loadChatStats();
+                    
+                    // Clear current chat view
+                    document.getElementById('adminChatMessages').innerHTML = '';
+                    selectedClient = null;
+                    document.getElementById('adminChatTitle').textContent = 'Select a client to start chatting';
+                    document.getElementById('adminChatInputArea').style.display = 'none';
+                } else {
+                    showMessage(data.error || 'Failed to delete messages', 'error', 'chatManagementMessage');
+                }
+            } catch (error) {
+                console.error('Delete all chats error:', error);
+                showMessage('Connection error', 'error', 'chatManagementMessage');
+            }
+        }
 
         function initAdminChat() {
             if (adminSocket && adminSocket.connected) {
@@ -1725,6 +1863,7 @@
             }
             if (tabName === 'chat') { // Initialize chat when tab is opened
                 initAdminChat();
+                loadChatStats();
             }
         }
 

@@ -844,45 +844,6 @@ app.post('/api/login', async (req, res) => {
           error: 'Device/Browser lock detected. Your account is locked to a different device or browser. This can happen after browser updates. Contact admin to reset your device lock.',
           networkLocked: true
         });
-
-
-// Chat API endpoints
-app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
-  try {
-    const Client = require('./models/Client');
-    const clients = await Client.find({ isActive: true })
-      .select('username productKey')
-      .sort({ username: 1 });
-
-    res.json({ success: true, clients });
-  } catch (error) {
-    console.error('Get chat clients error:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch clients' });
-  }
-});
-
-app.get('/api/chat/history', requireAuth, async (req, res) => {
-  try {
-    const { withUser } = req.query;
-    const currentUser = req.session.user.username;
-
-    const messages = await ChatMessage.find({
-      $or: [
-        { senderUsername: currentUser, receiverUsername: withUser },
-        { senderUsername: withUser, receiverUsername: currentUser }
-      ]
-    }).sort({ timestamp: -1 }).limit(50).exec();
-
-    // Reverse to show oldest first
-    messages.reverse();
-
-    res.json({ success: true, messages });
-  } catch (error) {
-    console.error('Get chat history error:', error);
-    res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
-  }
-});
-
       }
     }
 
@@ -3524,6 +3485,79 @@ app.get('/api/chat/history', requireAuth, async (req, res) => {
   } catch (error) {
     console.error('Get chat history error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
+  }
+});
+
+// Admin: Delete chat messages for specific user
+app.post('/api/admin/chat/delete-user-messages', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+
+    const result = await ChatMessage.deleteMany({
+      $or: [
+        { senderUsername: username },
+        { receiverUsername: username }
+      ]
+    });
+
+    await logActivity(req.session.user.username, 'admin-chat', `Deleted ${result.deletedCount} messages for user: ${username}`);
+
+    res.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted ${result.deletedCount} messages for ${username}`
+    });
+  } catch (error) {
+    console.error('Delete user chat messages error:', error);
+    res.status(500).json({ error: 'Failed to delete messages' });
+  }
+});
+
+// Admin: Delete all chat messages
+app.post('/api/admin/chat/delete-all-messages', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await ChatMessage.deleteMany({});
+
+    await logActivity(req.session.user.username, 'admin-chat', `Deleted all chat messages (${result.deletedCount} total)`);
+
+    res.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted all ${result.deletedCount} chat messages`
+    });
+  } catch (error) {
+    console.error('Delete all chat messages error:', error);
+    res.status(500).json({ error: 'Failed to delete messages' });
+  }
+});
+
+// Admin: Get chat statistics
+app.get('/api/admin/chat/stats', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const totalMessages = await ChatMessage.countDocuments({});
+    const unreadMessages = await ChatMessage.countDocuments({ isRead: false });
+
+    // Get unique users in chat
+    const senders = await ChatMessage.distinct('senderUsername');
+    const receivers = await ChatMessage.distinct('receiverUsername');
+    const uniqueUsers = [...new Set([...senders, ...receivers])];
+
+    res.json({
+      success: true,
+      stats: {
+        totalMessages,
+        unreadMessages,
+        uniqueUsers: uniqueUsers.length,
+        userList: uniqueUsers
+      }
+    });
+  } catch (error) {
+    console.error('Get chat stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch chat stats' });
   }
 });
 
