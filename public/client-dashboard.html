@@ -169,18 +169,18 @@
             font-size: 14px;
         }
 
-        .download-section, .reset-section {
+        .download-section, .reset-section, .setup-section {
             text-align: center;
             padding: 2rem 0;
         }
 
-        .download-icon {
+        .download-icon, .setup-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .btn-download, .btn-reset {
+        .btn-download, .btn-reset, .btn-setup {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
@@ -198,12 +198,12 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled) {
+        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled), .btn-setup:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-download:disabled, .btn-reset:disabled {
+        .btn-download:disabled, .btn-reset:disabled, .btn-setup:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
@@ -285,6 +285,67 @@
             letter-spacing: 1px;
         }
 
+        /* Input field styling for setup */
+        .setup-input-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+
+        .setup-input-group label {
+            display: block;
+            color: #999;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .setup-input-group input[type="text"] {
+            width: calc(100% - 2rem); /* Account for padding */
+            padding: 0.75rem 1rem;
+            background: #2a2a2a;
+            border: 1px solid #3a3a3a;
+            border-radius: 6px;
+            color: #FFFFFF;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .setup-input-group input[type="text"]:focus {
+            border-color: #FFFFFF;
+            outline: none;
+        }
+
+        .setup-input-group input[type="text"]::placeholder {
+            color: #555;
+        }
+
+        .setup-input-group .btn-save {
+            padding: 0.75rem 1.5rem;
+            background: #10B981;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 0.75rem;
+        }
+
+        .setup-input-group .btn-save:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .setup-input-group .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+
         @media (max-width: 768px) {
             .header {
                 flex-direction: column;
@@ -330,6 +391,7 @@
         <div class="tabs" id="tabsContainer">
             <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
             <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
+            <button class="tab" onclick="showTab('setup')">🎥 Setup Guide</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -423,6 +485,28 @@
                 </button>
             </div>
         </div>
+
+        <div id="setupTab" class="tab-content">
+            <h2>Setup Guide</h2>
+            <div id="setupAlert" class="alert"></div>
+
+            <div class="setup-section">
+                <div class="setup-icon">🎥</div>
+                <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
+                    Configure your setup video link below
+                </p>
+                <div class="setup-input-group">
+                    <label for="setupVideoLinkInput">Setup Video URL:</label>
+                    <input type="text" id="setupVideoLinkInput" placeholder="Enter video URL">
+                    <button class="btn-save" onclick="saveSetupVideoLink()" id="saveSetupButton">Save Link</button>
+                </div>
+            </div>
+
+            <div id="setupVideoPlayerContainer" class="info-card" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: #FFFFFF; font-size: 1.1rem;">Current Setup Video:</h3>
+                <div id="setupVideoPlayer"></div>
+            </div>
+        </div>
     </div>
 
     <script src="/js/main.js"></script>
@@ -442,6 +526,10 @@
             } else if (tabName === 'reset') {
                 tabs[1].classList.add('active');
                 document.getElementById('resetTab').classList.add('active');
+            } else if (tabName === 'setup') {
+                tabs[2].classList.add('active');
+                document.getElementById('setupTab').classList.add('active');
+                loadSetupVideoLink(); // Load the video link when the tab is shown
             }
         }
 
@@ -460,12 +548,18 @@
             if (document.getElementById('resetTab').classList.contains('active')) {
                 showAlert('resetAlert', message, 'error');
             }
+            if (document.getElementById('setupTab').classList.contains('active')) {
+                showAlert('setupAlert', message, 'error');
+            }
         }
 
         function showSuccess(message) {
             showAlert('downloadAlert', message, 'success');
             if (document.getElementById('resetTab').classList.contains('active')) {
                 showAlert('resetAlert', message, 'success');
+            }
+            if (document.getElementById('setupTab').classList.contains('active')) {
+                showAlert('setupAlert', message, 'success');
             }
         }
 
@@ -659,7 +753,7 @@
             } else {
                 // Show popup alert for API failures
                 let errorMsg = '';
-                
+
                 if (data.configurationError) {
                     errorMsg = '⚠️ Configuration Error\n\n' + data.error + '\n\nPlease contact the administrator.';
                 } else if (data.limitReached) {
@@ -669,7 +763,7 @@
                 } else {
                     errorMsg = '❌ HWID Reset Failed\n\n' + (data.error || 'Unknown error occurred') + '\n\nPlease contact administrator if this continues.';
                 }
-                
+
                 // Show both alert popup and error message on page
                 alert(errorMsg);
                 showError(data.error || 'HWID reset failed from API');
@@ -684,6 +778,98 @@
             resetButton.textContent = '🔄 RESET HWID';
         }
     }
+
+        async function loadSetupVideoLink() {
+            const setupVideoLinkInput = document.getElementById('setupVideoLinkInput');
+            const saveSetupButton = document.getElementById('saveSetupButton');
+            const setupVideoPlayerContainer = document.getElementById('setupVideoPlayerContainer');
+            const setupVideoPlayer = document.getElementById('setupVideoPlayer');
+
+            setupVideoLinkInput.disabled = true;
+            saveSetupButton.disabled = true;
+            saveSetupButton.textContent = 'Loading...';
+            setupVideoPlayer.innerHTML = '';
+            setupVideoPlayerContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/client/api/setup-video-link', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    const videoLink = data.videoLink;
+                    setupVideoLinkInput.value = videoLink || '';
+
+                    if (videoLink) {
+                        setupVideoPlayerContainer.style.display = 'block';
+                        // Simple way to embed video, you might want a more robust solution
+                        setupVideoPlayer.innerHTML = `<iframe width="100%" height="315" src="${videoLink.replace('watch?v=', 'embed/')}" frameborder="0" allowfullscreen></iframe>`;
+                    }
+                } else {
+                    showError(data.error || 'Failed to load setup video link');
+                }
+            } catch (error) {
+                console.error('Load setup video link error:', error);
+                showError('Failed to load setup video link. Please try again.');
+            } finally {
+                setupVideoLinkInput.disabled = false;
+                saveSetupButton.disabled = false;
+                saveSetupButton.textContent = 'Save Link';
+            }
+        }
+
+        async function saveSetupVideoLink() {
+            const setupVideoLinkInput = document.getElementById('setupVideoLinkInput');
+            const saveSetupButton = document.getElementById('saveSetupButton');
+            const videoLink = setupVideoLinkInput.value.trim();
+
+            if (!videoLink) {
+                showError('Please enter a valid video URL.');
+                return;
+            }
+
+            // Basic validation for YouTube links
+            if (!videoLink.match(/^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.?be)\/.+$/)) {
+                showError('Please enter a valid YouTube video URL.');
+                return;
+            }
+
+            saveSetupButton.disabled = true;
+            saveSetupButton.textContent = 'Saving...';
+
+            try {
+                const response = await fetch('/client/api/setup-video-link', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ videoLink: videoLink }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showSuccess('Setup video link updated successfully!');
+                    loadSetupVideoLink(); // Reload to display the updated video
+                } else {
+                    showError(data.error || 'Failed to update setup video link');
+                }
+            } catch (error) {
+                console.error('Save setup video link error:', error);
+                showError('Failed to update setup video link. Please try again.');
+            } finally {
+                saveSetupButton.disabled = false;
+                saveSetupButton.textContent = 'Save Link';
+            }
+        }
+
 
         async function logout() {
             try {

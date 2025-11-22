@@ -255,6 +255,7 @@ router.get('/api/info', isClient, async (req, res) => {
                 uidStatus: uidData ? uidData.status : null,
                 downloadLink: downloadLink || '',
                 hasDownloadLink: !!downloadLink,
+                setupVideoLink: product ? (product.setupVideoLink || '') : '',
                 lastLogin: client.lastLogin,
                 lastHwidReset: client.lastHwidReset,
                 hwidResetCount: client.hwidResetCount,
@@ -264,7 +265,8 @@ router.get('/api/info', isClient, async (req, res) => {
                     allowHwidReset: product.allowHwidReset,
                     maxFreeHwidResets: product.maxFreeHwidResets || 5,
                     hwidResetPrice: product.hwidResetPrice || 0,
-                    hasGenzAuth: hasGenzAuth
+                    hasGenzAuth: hasGenzAuth,
+                    setupVideoLink: product.setupVideoLink || ''
                 } : null
             }
         });
@@ -757,6 +759,32 @@ router.put('/admin/download-links', isAdminOrOwner, async (req, res) => {
     } catch (error) {
         console.error('Update global download links error:', error);
         res.status(500).json({ error: 'Failed to update download links' });
+    }
+});
+
+// Admin: Update setup video link for product
+router.put('/admin/setup-video-link/:productKey', isAdminOrOwner, async (req, res) => {
+    try {
+        const { productKey } = req.params;
+        const { setupVideoLink } = req.body;
+
+        const Product = require('../models/Product');
+
+        const product = await Product.findOne({ productKey });
+        if (!product) {
+            return res.status(404).json({ error: 'Product not found' });
+        }
+
+        product.setupVideoLink = setupVideoLink || '';
+        await product.save();
+
+        res.json({
+            success: true,
+            message: 'Setup video link updated successfully'
+        });
+    } catch (error) {
+        console.error('Update setup video link error:', error);
+        res.status(500).json({ error: 'Failed to update setup video link' });
     }
 });
 

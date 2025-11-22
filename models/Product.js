@@ -56,6 +56,11 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // Setup Video Link
+    setupVideoLink: {
+        type: String,
+        default: ''
+    },
     settings: {
         type: Map,
         of: mongoose.Schema.Types.Mixed,
