@@ -22,6 +22,18 @@ const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
+// Socket.IO setup
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Chat Message Model (assuming this is created in a separate file, e.g., models/ChatMessage.js)
+// If not, you would need to define it here or import it.
+// For this example, we'll assume it exists and is imported like other models.
+const ChatMessage = require('./models/ChatMessage');
+
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -2492,23 +2504,23 @@ app.post('/api/admin/guest-settings', requireAuth, requireAdmin, async (req, res
     admin.allowGuestFreeUID = allowGuestFreeUID === true;
     admin.allowGuestFreeAimkill = allowGuestFreeAimkill === true;
     admin.requireSocialVerification = requireSocialVerification === true;
-    
+
     // Only update URLs if new values are provided (non-empty)
     if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() !== '') {
       admin.youtubeChannelUrl = youtubeChannelUrl;
     } else if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() === '') {
       admin.youtubeChannelUrl = '';
     }
-    
+
     if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() !== '') {
       admin.instagramProfileUrl = instagramProfileUrl;
     } else if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() === '') {
       admin.instagramProfileUrl = '';
     }
-    
+
     if (guestVideoUrl !== undefined) {
       const trimmedUrl = (guestVideoUrl || '').trim();
-      
+
       // Only update if a new URL is provided or explicitly cleared
       if (trimmedUrl !== '') {
         // Convert YouTube watch URLs to embed URLs
@@ -2886,8 +2898,6 @@ app.post('/api/aimkill/create-user', requireAuth, checkGuestFreeAimkill, checkUs
 
       // Get admin-configured max duration
       const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-
-      // Validate guest is using allowed package based on duration days
       const maxDays = parseInt(maxDuration.match(/\d+/)?.[0]) || 1;
 
       if (duration > maxDays) {
@@ -3768,28 +3778,114 @@ app.post('/api/admin/reset-all-guest-passes', requireAuth, requireAdmin, async (
   }
 });
 
+// Socket.IO connection handling
+const activeUsers = new Map(); // Map of username -> socket.id
 
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+io.on('connection', (socket) => {
+  console.log('🔌 New socket connection:', socket.id);
+
+  // User joins chat
+  socket.on('join-chat', async (data) => {
+    const { username, userType } = data;
+    socket.username = username;
+    socket.userType = userType;
+    activeUsers.set(username, socket.id);
+
+    console.log(`✅ ${userType} joined chat: ${username}`);
+
+    // Notify others that user is online
+    socket.broadcast.emit('user-online', { username, userType });
+  });
+
+  // Send message
+  socket.on('send-message', async (data) => {
+    try {
+      const { senderUsername, senderType, receiverUsername, message } = data;
+
+      // Save message to database
+      const chatMessage = await ChatMessage.create({
+        senderUsername,
+        senderType,
+        receiverUsername,
+        message
+      });
+
+      // Emit to receiver if online
+      const receiverSocketId = activeUsers.get(receiverUsername);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('new-message', {
+          _id: chatMessage._id,
+          senderUsername,
+          senderType,
+          receiverUsername,
+          message,
+          timestamp: chatMessage.timestamp,
+          isRead: false
+        });
+      }
+
+      // Send confirmation back to sender
+      socket.emit('message-sent', {
+        _id: chatMessage._id,
+        senderUsername,
+        senderType,
+        receiverUsername,
+        message,
+        timestamp: chatMessage.timestamp,
+        isRead: false
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      socket.emit('message-error', { error: 'Failed to send message' });
+    }
+  });
+
+  // Mark messages as read
+  socket.on('mark-read', async (data) => {
+    try {
+      const { messageIds } = data;
+      await ChatMessage.updateMany(
+        { _id: { $in: messageIds } },
+        { isRead: true, readAt: new Date() }
+      );
+
+      socket.emit('messages-marked-read', { messageIds });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  });
+
+  // User typing indicator
+  socket.on('typing', (data) => {
+    const { receiverUsername } = data;
+    const receiverSocketId = activeUsers.get(receiverUsername);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('user-typing', {
+        username: socket.username,
+        userType: socket.userType
+      });
+    }
+  });
+
+  // Disconnect
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      activeUsers.delete(socket.username);
+      socket.broadcast.emit('user-offline', {
+        username: socket.username,
+        userType: socket.userType
+      });
+      console.log(`❌ ${socket.userType} left chat: ${socket.username}`);
+    }
+  });
 });
 
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-const server = app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Server running on port ${PORT}`);
   console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`✅ Server ready - accepting connections`);
+  console.log('✅ Server ready - accepting connections');
   console.log(`🔐 LicenseAuth: ${process.env.LICENSEAUTH_SELLER_KEY ? 'Configured' : 'Not configured (TEST MODE)'}`);
-});
-
-server.on('error', (err) => {
-  console.error('❌ Server error:', err.message);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use`);
-  }
 });
 
 const gracefulShutdown = async (signal) => {

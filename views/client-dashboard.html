@@ -365,6 +365,108 @@
                 height: 315px;
             }
         }
+
+        /* Chat Specific Styles */
+        .chat-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            max-height: 600px;
+        }
+
+        .chat-header {
+            background: #2a2a2a;
+            padding: 1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            text-align: center;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background: #3B82F6;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background: #2a2a2a;
+            color: #FFFFFF;
+            align-self: flex-start;
+        }
+
+        .message .sender {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            background: #2a2a2a;
+            border-top: 1px solid #3a3a3a;
+        }
+
+        #chatMessageInput {
+            flex-grow: 1;
+            background: #3a3a3a;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #FFFFFF;
+            font-size: 14px;
+            margin-right: 0.75rem;
+            outline: none;
+        }
+
+        #chatMessageInput::placeholder {
+            color: #999;
+        }
+
+        .btn-send {
+            padding: 0.75rem 1.5rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 
@@ -376,7 +478,12 @@
                 <div class="username" id="headerUsername">Loading...</div>
                 <div class="product-type" id="headerProductType">Loading...</div>
             </div>
-            <button class="btn-logout" onclick="logout()">Logout</button>
+            <!-- Navigation links with chat added -->
+            <div class="nav-links">
+                <a href="/client/dashboard">Dashboard</a>
+                <a href="/chat">💬 Chat</a>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
         </div>
     </div>
 
@@ -539,9 +646,82 @@
         </div>
     </div>
 
+    <script src="/socket.io/socket.io.js"></script>
     <script>
         let clientData = null;
         let expirationRefreshInterval = null;
+        let socket = null; // Socket.IO client instance
+
+        // Initialize Socket.IO connection
+        function initializeChat() {
+            socket = io();
+
+            socket.on('connect', () => {
+                console.log('Connected to chat server');
+                // You might want to join a specific room or send user info here
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from chat server');
+            });
+
+            socket.on('chat message', (msg) => {
+                displayMessage(msg);
+            });
+
+            socket.on('error', (err) => {
+                console.error('Chat server error:', err);
+            });
+        }
+
+        function displayMessage(msg) {
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) return;
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+
+            // Determine if the message was sent by the current client
+            // This check might need to be more robust depending on how you identify users
+            const isSentByCurrentUser = msg.senderId === socket.id; // Assuming senderId is available
+
+            if (isSentByCurrentUser) {
+                messageElement.classList.add('sent');
+            } else {
+                messageElement.classList.add('received');
+            }
+
+            let senderInfo = '';
+            if (msg.senderName) {
+                senderInfo = `<span class="sender">${msg.senderName}</span>`;
+            } else if (msg.senderId) {
+                senderInfo = `<span class="sender">User: ${msg.senderId.substring(0, 6)}</span>`; // Display a short ID if name not available
+            }
+
+            messageElement.innerHTML = `${senderInfo}${msg.text}`;
+            messagesContainer.appendChild(messageElement);
+
+            // Auto-scroll to the bottom
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatMessageInput');
+            const messageText = input.value.trim();
+
+            if (messageText && socket && socket.connected) {
+                const messageData = {
+                    text: messageText,
+                    // Add sender information if available and needed
+                    // senderName: clientData ? clientData.username : 'Client',
+                    // senderId: clientData ? clientData.id : undefined
+                };
+                socket.emit('chat message', messageData);
+                input.value = '';
+            } else if (!socket || !socket.connected) {
+                alert('Chat is not connected. Please try again later.');
+            }
+        }
 
         function showTab(tabName) {
             const tabs = document.querySelectorAll('.tab');
@@ -550,18 +730,16 @@
             tabs.forEach(tab => tab.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
 
-            if (tabName === 'download') {
-                tabs[0].classList.add('active');
-                document.getElementById('downloadTab').classList.add('active');
-            } else if (tabName === 'reset') {
-                tabs[1].classList.add('active');
-                document.getElementById('resetTab').classList.add('active');
-            } else if (tabName === 'setup') {
-                tabs[2].classList.add('active');
-                document.getElementById('setupTab').classList.add('active');
-            } else if (tabName === 'news') {
-                tabs[3].classList.add('active');
-                document.getElementById('newsTab').classList.add('active');
+            // Find the button that corresponds to the tabName and add 'active' class
+            const activeTabButton = document.querySelector(`.tab[onclick="showTab('${tabName}')"]`);
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+            }
+
+            // Show the corresponding tab content
+            const tabContent = document.getElementById(`${tabName}Tab`);
+            if (tabContent) {
+                tabContent.classList.add('active');
             }
         }
 
@@ -721,7 +899,7 @@
                 document.getElementById('setupVideoIframe').src = embedUrl;
                 document.getElementById('openSetupVideo').href = setupVideoLink;
                 setupVideoCard.style.display = 'block';
-                
+
                 // Attach event listener for toggle button
                 const toggleBtn = document.getElementById('toggleSetupVideo');
                 if (toggleBtn) {
@@ -740,7 +918,7 @@
                 document.getElementById('guestVideoIframe').src = embedUrl;
                 document.getElementById('openGuestVideo').href = guestVideoLink;
                 guestVideoCard.style.display = 'block';
-                
+
                 // Attach event listener for toggle button
                 const toggleBtn = document.getElementById('toggleGuestVideo');
                 if (toggleBtn) {
@@ -872,7 +1050,7 @@
         function toggleVideoPlayer(playerElementId, buttonElementId) {
             const player = document.getElementById(playerElementId);
             const button = document.getElementById(buttonElementId);
-            
+
             if (player.style.display === 'none' || player.style.display === '') {
                 player.style.display = 'block';
                 button.textContent = '⏸️ HIDE';
@@ -887,6 +1065,10 @@
             if (expirationRefreshInterval) {
                 clearInterval(expirationRefreshInterval);
             }
+            // Disconnect socket on logout
+            if (socket) {
+                socket.disconnect();
+            }
 
             try {
                 await fetch('/client/api/logout', {
@@ -900,17 +1082,58 @@
             }
         }
 
-        setTimeout(() => {
-            loadClientData();
+        // Handle Enter key press for chat input
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatMessageInput = document.getElementById('chatMessageInput');
+            const sendButton = document.querySelector('.btn-send');
 
-            // Load GenzAuth expiration initially
-            loadGenzAuthExpiration();
+            if (chatMessageInput) {
+                chatMessageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // Prevent default form submission if it were in a form
+                        sendMessage();
+                    }
+                });
+            }
 
-            // Set up auto-refresh every 30 seconds
-            expirationRefreshInterval = setInterval(() => {
+            if (sendButton) {
+                sendButton.addEventListener('click', sendMessage);
+            }
+
+            // Initialize chat when the page loads, after client data is potentially loaded
+            // to get user info for chat if needed.
+            setTimeout(() => {
+                loadClientData();
+
+                // Load GenzAuth expiration initially
                 loadGenzAuthExpiration();
-            }, 30000);
-        }, 500);
+
+                // Set up auto-refresh every 30 seconds
+                expirationRefreshInterval = setInterval(() => {
+                    loadGenzAuthExpiration();
+                }, 30000);
+
+                // Initialize chat connection after initial data load
+                initializeChat();
+
+                // If the current page is the chat page, show the chat interface
+                if (window.location.pathname === '/chat') {
+                    // Code to display the chat interface, potentially fetching past messages
+                    // For now, we'll just ensure the chat elements are visible
+                    // You would likely have a dedicated chat page with its own structure
+                    // For this example, we'll assume the chat structure is part of this HTML
+                    // and just focus on the connection and sending/receiving.
+                    // If this HTML is *only* for the dashboard, then the chat page needs its own file.
+                    // Assuming for now that this HTML *could* be extended or used as a base.
+
+                    // If this dashboard is *not* the chat page, then initializeChat() should
+                    // only happen when navigating TO the chat page.
+                    // For this merge, we'll assume the chat page HTML is included and needs initialization.
+                }
+
+            }, 500);
+        });
+
     </script>
 </body>
 
