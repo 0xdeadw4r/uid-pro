@@ -1621,7 +1621,12 @@
                 const response = await fetch(`/api/chat/history?withUser=${username}`, { credentials: 'include' });
                 const data = await response.json();
 
-                if (data.success && data.messages) {
+                const messagesContainer = document.getElementById('adminChatMessages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '';
+                }
+
+                if (data.success && data.messages && data.messages.length > 0) {
                     data.messages.forEach(msg => {
                         displayAdminMessage({
                             text: msg.message,
@@ -1629,6 +1634,10 @@
                             senderType: msg.senderType
                         }, false);
                     });
+                } else {
+                    if (messagesContainer) {
+                        messagesContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">No chat history. Start a conversation!</p>';
+                    }
                 }
             } catch (error) {
                 console.error('Error loading chat history:', error);

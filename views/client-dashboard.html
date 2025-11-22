@@ -703,6 +703,9 @@
                 if (sendBtn) {
                     sendBtn.disabled = false;
                 }
+
+                // Load chat history upon successful connection
+                loadChatHistory();
             });
 
             clientSocket.on('disconnect', () => {
@@ -1151,6 +1154,30 @@
             } catch (error) {
                 console.error('Logout error:', error);
                 window.location.href = '/login';
+            }
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch(`/client/api/chat/history?withUser=admin`, { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success && data.messages) {
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = '';
+
+                    data.messages.forEach(msg => {
+                        displayMessage({
+                            text: msg.message,
+                            senderName: msg.senderUsername,
+                            senderType: msg.senderType
+                        }, false);
+                    });
+                } else {
+                    console.log('No chat history found or error:', data);
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
             }
         }
 
