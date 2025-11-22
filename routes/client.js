@@ -811,6 +811,76 @@ router.delete('/admin/clients/:id', isAdminOrOwner, async (req, res) => {
     }
 });
 
+// Track file download
+router.post('/api/track-download', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+        
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+
+        const ClientActivity = require('../models/ClientActivity');
+        const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        const userAgent = req.headers['user-agent'] || '';
+
+        await ClientActivity.create({
+            clientUsername: client.username,
+            activityType: 'download',
+            description: 'Downloaded product files',
+            ipAddress: ip,
+            userAgent: userAgent,
+            metadata: {
+                productKey: client.productKey,
+                downloadLink: client.customDownloadLink || ''
+            },
+            success: true
+        });
+
+        res.json({ success: true, message: 'Download tracked' });
+    } catch (error) {
+        console.error('Track download error:', error);
+        res.status(500).json({ error: 'Failed to track download' });
+    }
+});
+
+// Purchase additional HWID reset
+router.post('/api/purchase-hwid-reset', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+
+        if (!client || !client.isActive) {
+            return res.status(404).json({ error: 'Client not found or inactive' });
+        }
+
+        const Product = require('../models/Product');
+        const product = await Product.findOne({ productKey: client.productKey });
+
+        if (!product || !product.allowHwidReset) {
+            return res.status(403).json({ error: 'HWID reset not available for your product' });
+        }
+
+        const resetPrice = product.hwidResetPrice || 0;
+
+        if (resetPrice <= 0) {
+            return res.status(400).json({ error: 'HWID resets are free for this product' });
+        }
+
+        // In a real implementation, integrate with payment gateway here
+        // For now, return payment details
+        res.json({
+            success: true,
+            price: resetPrice,
+            currency: 'USD',
+            message: `HWID reset costs $${resetPrice}. Contact administrator to complete purchase.`,
+            paymentRequired: true
+        });
+    } catch (error) {
+        console.error('Purchase HWID reset error:', error);
+        res.status(500).json({ error: 'Failed to process purchase' });
+    }
+});
+
 // Get Setup Video Link (for client dashboard)
 router.get('/api/setup-video-link', isClient, async (req, res) => {
     try {
@@ -830,6 +900,71 @@ router.get('/api/setup-video-link', isClient, async (req, res) => {
     } catch (error) {
         console.error('Get setup video link error:', error);
         res.status(500).json({ error: 'Failed to get setup video link' });
+    }
+});
+
+// Admin: Bulk extend client accounts
+router.post('/admin/bulk-extend', isAdminOrOwner, async (req, res) => {
+    try {
+        const { clientIds, extensionDays } = req.body;
+
+        if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
+            return res.status(400).json({ error: 'Client IDs array required' });
+        }
+
+        const days = parseInt(extensionDays) || 30;
+        const extensionMs = days * 24 * 60 * 60 * 1000;
+
+        let updated = 0;
+        for (const clientId of clientIds) {
+            const client = await Client.findById(clientId);
+            if (client) {
+                const currentExpiry = client.accountExpiresAt || new Date();
+                client.accountExpiresAt = new Date(currentExpiry.getTime() + extensionMs);
+                client.isExpired = false;
+                await client.save();
+                updated++;
+            }
+        }
+
+        res.json({
+            success: true,
+            message: `Extended ${updated} client accounts by ${days} days`,
+            updated
+        });
+    } catch (error) {
+        console.error('Bulk extend error:', error);
+        res.status(500).json({ error: 'Failed to bulk extend accounts' });
+    }
+});
+
+// Admin: Bulk reset HWID count
+router.post('/admin/bulk-reset-hwid-count', isAdminOrOwner, async (req, res) => {
+    try {
+        const { clientIds } = req.body;
+
+        if (!clientIds || !Array.isArray(clientIds) || clientIds.length === 0) {
+            return res.status(400).json({ error: 'Client IDs array required' });
+        }
+
+        const result = await Client.updateMany(
+            { _id: { $in: clientIds } },
+            { 
+                $set: { 
+                    hwidResetCount: 0,
+                    lastHwidReset: null
+                }
+            }
+        );
+
+        res.json({
+            success: true,
+            message: `Reset HWID count for ${result.modifiedCount} clients`,
+            updated: result.modifiedCount
+        });
+    } catch (error) {
+        console.error('Bulk reset HWID count error:', error);
+        res.status(500).json({ error: 'Failed to bulk reset HWID counts' });
     }
 });
 

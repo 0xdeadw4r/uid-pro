@@ -79,6 +79,34 @@ const clientSchema = new mongoose.Schema({
     notes: {
         type: String,
         default: ''
+    },
+
+    // Session Management
+    currentSessionId: {
+        type: String,
+        default: null
+    },
+    sessionExpiresAt: {
+        type: Date,
+        default: null
+    },
+    forceLogout: {
+        type: Boolean,
+        default: false
+    },
+
+    // Account Expiration
+    accountExpiresAt: {
+        type: Date,
+        default: null
+    },
+    isExpired: {
+        type: Boolean,
+        default: false
+    },
+    gracePeriodDays: {
+        type: Number,
+        default: 0
     }
 }, {
     timestamps: true
