@@ -501,23 +501,23 @@
 
         <!-- Social Media Verification Required -->
         <div id="socialVerificationRequired" class="guest-status-card" style="display: none;">
-            <h2>📱 Social Media Verification Required</h2>
+            <h2> Social Media Verification Required</h2>
             <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe
                 and follow our social media channels.</p>
             <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
                 <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
                     style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
-                    <span id="youtubeStatus">📺 Subscribe on YouTube</span>
+                    <span id="youtubeStatus"> Subscribe on YouTube</span>
                 </a>
                 <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
                     style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
-                    <span id="instagramStatus">📷 Follow on Instagram</span>
+                    <span id="instagramStatus"> Follow on Instagram</span>
                 </a>
             </div>
             <button id="notifyAdminBtn" class="btn-primary"
                 style="display: none; background: #10B981; color: #fff; margin-top: 1rem;"
                 onclick="notifyAdminSubscribed()">
-                ✅ I've Subscribed & Followed - Get Access
+                 I've Subscribed & Followed - Get Access✅
             </button>
             <div class="limitations-card" style="margin-top: 1.5rem;">
                 <h4>⚠️ Important</h4>
@@ -674,7 +674,7 @@
                 </div>
 
                 <div id="guestNoVideoSection" style="display: none; text-align: center; padding: 4rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">🎥</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></div>
                     <p style="color: #999; font-size: 14px;">
                         No setup video available yet. Please contact your administrator.
                     </p>
@@ -685,7 +685,7 @@
         <!-- News Tab -->
         <div id="news-tab" class="tab-content">
             <div class="create-form">
-                <h3>📰 Latest News & Announcements</h3>
+                <h3> Latest News & Announcements</h3>
                 <div id="newsContent">
                     <p style="color: #999; text-align: center; padding: 2rem;">
                         Loading news...
@@ -995,9 +995,9 @@
 
             // Update button text to show it was clicked
             if (platform === 'youtube') {
-                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
+                document.getElementById('youtubeStatus').innerHTML = ' YouTube Clicked ✅';
             } else if (platform === 'instagram') {
-                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
+                document.getElementById('instagramStatus').innerHTML = ' Instagram Clicked ✅';
             }
 
             // Check if both are clicked
@@ -1010,10 +1010,10 @@
             const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
 
             if (clicked.youtube) {
-                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
+                document.getElementById('youtubeStatus').innerHTML = ' YouTube Clicked ✅';
             }
             if (clicked.instagram) {
-                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
+                document.getElementById('instagramStatus').innerHTML = ' Instagram Clicked ✅';
             }
 
             if (clicked.youtube && clicked.instagram) {
@@ -1040,10 +1040,10 @@
                 if (response.ok) {
                     localStorage.removeItem('socialClicked');
                     if (data.verified) {
-                        alert('✅ Verification successful!\n\nYou are now verified and can create free keys. The page will refresh.');
+                        alert(' Verification successful!\n\nYou are now verified and can create free keys. The page will refresh.');
                         window.location.reload();
                     } else if (data.alreadyVerified) {
-                        alert('✅ You are already verified!');
+                        alert(' You are already verified! ✅');
                         window.location.reload();
                     } else {
                         alert('✅ ' + data.message);
@@ -1070,7 +1070,7 @@
             // Check if social verification is required and not completed
             const socialVerified = await checkSocialVerification();
             if (!socialVerified) {
-                alert('⚠️ Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
+                alert(' Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
                 return;
             }
 
