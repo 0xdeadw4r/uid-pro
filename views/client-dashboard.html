@@ -489,7 +489,7 @@
                 HWID</button>
             <button class="tab" onclick="showTab('setup')"> Setup Guide</button>
             <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;"> News</button>
-            <button class="tab" onclick="showTab('chat')"> 💬 Chat</button>
+            <button class="tab" onclick="showTab('chat')">  Chat</button>
         </div>
 
         <div id="downloadTab" class="tab-content active">
@@ -601,10 +601,10 @@
             <!-- Setup Video Card -->
             <div id="setupVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">📹 Setup Video</h3>
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;"> Setup Video</h3>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button id="toggleSetupVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;">▶️ PLAY</button>
-                        <a id="openSetupVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;">🔗 OPEN</a>
+                        <button id="toggleSetupVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;"> PLAY</button>
+                        <a id="openSetupVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;"> OPEN</a>
                     </div>
                 </div>
                 <div id="setupVideoPlayer" style="display: none; margin-top: 1rem;">
@@ -616,10 +616,10 @@
             <!-- Guest Video Card -->
             <div id="guestVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">🎬 Guest Video</h3>
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;"> Guest Video</h3>
                     <div style="display: flex; gap: 0.5rem;">
-                        <button id="toggleGuestVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;">▶️ PLAY</button>
-                        <a id="openGuestVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;">🔗 OPEN</a>
+                        <button id="toggleGuestVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;"> PLAY</button>
+                        <a id="openGuestVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;"> OPEN</a>
                     </div>
                 </div>
                 <div id="guestVideoPlayer" style="display: none; margin-top: 1rem;">
@@ -643,7 +643,7 @@
 
         <!-- Chat Tab Content -->
         <div id="chatTab" class="tab-content">
-            <h2>💬 Chat with Support</h2>
+            <h2> Chat with Support</h2>
             <div class="chat-container">
                 <div class="chat-header">Support Chat</div>
                 <div class="chat-messages" id="chatMessages">
@@ -1040,7 +1040,7 @@
 
             const resetButton = document.getElementById('resetButton');
             resetButton.disabled = true;
-            resetButton.textContent = '🔄 RESETTING...';
+            resetButton.textContent = 'RESETTING...';
 
             try {
                 const response = await fetch('/client/api/reset-hwid', {
@@ -1130,7 +1130,7 @@
                 button.textContent = ' HIDE';
             } else {
                 player.style.display = 'none';
-                button.textContent = '▶️ PLAY';
+                button.textContent = ' PLAY';
             }
         }
 
