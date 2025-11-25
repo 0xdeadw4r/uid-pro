@@ -3810,24 +3810,87 @@
             }
         }
 
+        let editingResellerId = null;
+
         function editReseller(reseller) {
-            const newCredits = prompt(`Edit Credits for ${reseller.username}:`, reseller.credits);
-            if (newCredits === null) return;
+            editingResellerId = reseller._id;
 
-            const newGenzauthKey = prompt(`Edit GenzAuth Seller Key for ${reseller.username}:`, reseller.genzauthSellerKey || '');
-            if (newGenzauthKey === null) return;
+            const editForm = `
+                <div id="resellerEditForm" style="background: rgba(0,0,0,0.5); border: 2px solid #3B82F6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
+                    <h4 style="margin: 0 0 1rem 0; color: #3B82F6;">Edit Reseller: ${reseller.username}</h4>
 
-            const productsString = reseller.assignedProducts.join(', ');
-            const newProducts = prompt(`Edit Assigned Products for ${reseller.username} (comma-separated product keys):`, productsString);
-            if (newProducts === null) return;
+                    <div class="form-group">
+                        <label>Credits</label>
+                        <input type="number" id="editResellerCredits" value="${reseller.credits}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    </div>
 
-            const assignedProducts = newProducts.split(',').map(p => p.trim()).filter(p => p);
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="editResellerEmail" value="${reseller.email || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                    </div>
 
-            updateReseller(reseller._id, {
-                credits: parseInt(newCredits) || 0,
-                genzauthSellerKey: newGenzauthKey,
-                assignedProducts: assignedProducts
-            });
+                    <div class="form-group">
+                        <label>GenzAuth Seller Key</label>
+                        <input type="password" id="editResellerGenzauthKey" placeholder="${reseller.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        <small style="color: #999; font-size: 11px;">Leave blank to keep current key</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Assigned Products</label>
+                        <select id="editResellerProducts" multiple style="min-height: 120px; width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            ${allProducts.map(p => `
+                                <option value="${p.productKey}" ${reseller.assignedProducts.includes(p.productKey) ? 'selected' : ''}>
+                                    ${p.displayName}
+                                </option>
+                            `).join('')}
+                        </select>
+                        <small style="color: #999; font-size: 11px; margin-top: 0.5rem; display: block;">
+                            Hold Ctrl (Windows) or Cmd (Mac) to select multiple products
+                        </small>
+                    </div>
+
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
+                        <button onclick="saveResellerEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
+                        <button onclick="cancelResellerEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
+                    </div>
+                </div>
+            `;
+
+            const container = document.getElementById('resellersListContainer');
+            const existingForm = document.getElementById('resellerEditForm');
+            if (existingForm) {
+                existingForm.remove();
+            }
+            container.insertAdjacentHTML('afterbegin', editForm);
+        }
+
+        async function saveResellerEdit() {
+            if (!editingResellerId) return;
+
+            const credits = parseInt(document.getElementById('editResellerCredits').value) || 0;
+            const email = document.getElementById('editResellerEmail').value.trim();
+            const genzauthKey = document.getElementById('editResellerGenzauthKey').value.trim();
+            const select = document.getElementById('editResellerProducts');
+            const assignedProducts = Array.from(select.selectedOptions).map(option => option.value);
+
+            const updates = {
+                credits,
+                email,
+                assignedProducts
+            };
+
+            if (genzauthKey) {
+                updates.genzauthSellerKey = genzauthKey;
+            }
+
+            await updateReseller(editingResellerId, updates);
+            editingResellerId = null;
+        }
+
+        function cancelResellerEdit() {
+            editingResellerId = null;
+            const form = document.getElementById('resellerEditForm');
+            if (form) form.remove();
         }
 
         async function updateReseller(resellerId, updates) {
@@ -3842,6 +3905,8 @@
 
                 if (data.success) {
                     showMessage('Reseller updated successfully!', 'success', 'resellersMessage');
+                    const form = document.getElementById('resellerEditForm');
+                    if (form) form.remove();
                     loadResellers();
                 } else {
                     showMessage(data.error || 'Failed to update reseller', 'error', 'resellersMessage');
