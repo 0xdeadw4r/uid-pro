@@ -229,6 +229,9 @@ app.use(passport.session());
 const clientRoutes = require('./routes/client');
 app.use('/client', clientRoutes);
 
+const resellerRoutes = require('./routes/reseller');
+app.use('/reseller', resellerRoutes);
+
 app.use(['/dashboard', '/packages', '/admin', '/settings', '/security', '/invoices'], checkNetworkFingerprint);
 
 async function initializeAdmin() {
