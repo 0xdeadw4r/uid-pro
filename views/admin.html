@@ -3700,18 +3700,17 @@
                 if (data.success) {
                     allProducts = data.products;
 
-                    const container = document.getElementById('newResellerProductsCheckboxes');
-                    container.innerHTML = '';
+                    const select = document.getElementById('resellerProductsSelect');
+                    if (select) {
+                        select.innerHTML = '';
 
-                    data.products.forEach(product => {
-                        const label = document.createElement('label');
-                        label.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; color: #999; cursor: pointer;';
-                        label.innerHTML = `
-                            <input type="checkbox" value="${product.productKey}" class="reseller-product-checkbox" style="cursor: pointer;">
-                            <span>${product.displayName}</span>
-                        `;
-                        container.appendChild(label);
-                    });
+                        data.products.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.productKey;
+                            option.textContent = product.displayName;
+                            select.appendChild(option);
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error loading products:', error);
