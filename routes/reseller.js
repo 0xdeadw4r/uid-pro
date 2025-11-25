@@ -399,7 +399,8 @@ router.delete('/api/admin/resellers/:id', isAdminOrOwner, async (req, res) => {
 });
 
 router.get('/portal', isReseller, (req, res) => {
-    res.sendFile(__dirname + '/../views/reseller-portal.html');
+    const path = require('path');
+    res.sendFile(path.join(__dirname, '..', 'views', 'reseller-portal.html'));
 });
 
 router.get('/login', (req, res) => {
