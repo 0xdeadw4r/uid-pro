@@ -791,6 +791,7 @@
             <button class="tab-btn" id="discordRestoreTab" onclick="switchTab('discord-restore', this)" style="display: none;">Discord Restore</button>
             <button class="tab-btn" onclick="switchTab('verified-users', this)">Verified Users</button>
             <button class="tab-btn" onclick="switchTab('clients', this)">Client Management</button>
+            <button class="tab-btn" onclick="switchTab('resellers', this)">Resellers</button>
             <button class="tab-btn" onclick="switchTab('settings', this)">Settings</button>
             <button class="tab-btn" onclick="switchTab('news-announcements', this)">News/Announcements</button>
             <button class="tab-btn" onclick="switchTab('chat', this)">Chat</button> <!-- Chat Tab -->
@@ -1512,6 +1513,64 @@
             </div>
         </div>
 
+        <!-- Resellers Tab -->
+        <div id="resellers-tab" class="tab-content">
+            <div class="section">
+                <h2>Reseller Management</h2>
+                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
+                    Manage reseller accounts who can create client accounts for assigned products.
+                </p>
+
+                <div id="resellersMessage" class="message"></div>
+
+                <!-- Create Reseller Form -->
+                <div class="form-section">
+                    <h3>Create New Reseller</h3>
+                    <form id="createResellerForm" onsubmit="createReseller(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Username</label>
+                                <input type="text" id="newResellerUsername" required placeholder="Enter username">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="newResellerPassword" required placeholder="Enter password">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Email (Optional)</label>
+                                <input type="email" id="newResellerEmail" placeholder="Enter email">
+                            </div>
+                            <div class="form-group">
+                                <label>Initial Credits</label>
+                                <input type="number" id="newResellerCredits" value="0" min="0">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>GenzAuth Seller API Key (Optional)</label>
+                            <input type="text" id="newResellerGenzauthKey" placeholder="Enter GenzAuth seller key">
+                        </div>
+                        <div class="form-group">
+                            <label>Assigned Products</label>
+                            <div id="newResellerProductsCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
+                                <!-- Will be populated dynamically -->
+                            </div>
+                        </div>
+                        <button type="submit" class="submit-btn">Create Reseller</button>
+                    </form>
+                </div>
+
+                <!-- Resellers List -->
+                <div class="form-section">
+                    <h3>Existing Resellers</h3>
+                    <div id="resellersListContainer">
+                        <p style="color: #999; text-align: center; padding: 2rem;">Loading resellers...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Chat Tab -->
         <div id="chat-tab" class="tab-content">
             <div class="section">
@@ -1864,6 +1923,10 @@
             if (tabName === 'chat') { // Initialize chat when tab is opened
                 initAdminChat();
                 loadChatStats();
+            }
+            if (tabName === 'resellers') {
+                loadResellers();
+                loadProductsForResellers();
             }
         }
 
@@ -3622,6 +3685,194 @@
                 loadClients();
             }
         };
+
+        // Reseller Management Functions
+        let allProducts = [];
+
+        async function loadProductsForResellers() {
+            try {
+                const response = await fetch('/api/admin/products');
+                const data = await response.json();
+                
+                if (data.success) {
+                    allProducts = data.products;
+                    
+                    const container = document.getElementById('newResellerProductsCheckboxes');
+                    container.innerHTML = '';
+                    
+                    data.products.forEach(product => {
+                        const label = document.createElement('label');
+                        label.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; color: #999; cursor: pointer;';
+                        label.innerHTML = `
+                            <input type="checkbox" value="${product.productKey}" class="reseller-product-checkbox" style="cursor: pointer;">
+                            <span>${product.displayName}</span>
+                        `;
+                        container.appendChild(label);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+            }
+        }
+
+        async function loadResellers() {
+            try {
+                const response = await fetch('/reseller/api/admin/resellers');
+                const data = await response.json();
+
+                const container = document.getElementById('resellersListContainer');
+
+                if (data.success && data.resellers.length > 0) {
+                    let html = '<table class="data-table" style="width: 100%;"><thead><tr>';
+                    html += '<th>Username</th><th>Email</th><th>Credits</th><th>Products</th><th>Clients Created</th><th>Status</th><th>Created</th><th>Actions</th>';
+                    html += '</tr></thead><tbody>';
+
+                    data.resellers.forEach(reseller => {
+                        const products = reseller.assignedProducts.length > 0 
+                            ? reseller.assignedProducts.join(', ') 
+                            : 'None';
+                        const statusColor = reseller.isActive ? '#10B981' : '#EF4444';
+                        const statusText = reseller.isActive ? 'Active' : 'Inactive';
+                        
+                        html += `
+                            <tr>
+                                <td><strong>${reseller.username}</strong></td>
+                                <td>${reseller.email || '-'}</td>
+                                <td><span style="color: #10B981; font-weight: 700;">${reseller.credits}</span></td>
+                                <td style="font-size: 11px;">${products}</td>
+                                <td>${reseller.totalClientsCreated || 0}</td>
+                                <td><span style="color: ${statusColor};">${statusText}</span></td>
+                                <td>${new Date(reseller.createdAt).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="edit-btn" onclick='editReseller(${JSON.stringify(reseller)})' style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
+                                    <button class="delete-btn" onclick="deleteReseller('${reseller._id}', '${reseller.username}')" style="padding: 0.5rem 1rem; background: #EF4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    html += '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No resellers found.</p>';
+                }
+            } catch (error) {
+                console.error('Error loading resellers:', error);
+                document.getElementById('resellersListContainer').innerHTML = '<p style="color: #EF4444; text-align: center; padding: 2rem;">Error loading resellers.</p>';
+            }
+        }
+
+        async function createReseller(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('newResellerUsername').value.trim();
+            const password = document.getElementById('newResellerPassword').value.trim();
+            const email = document.getElementById('newResellerEmail').value.trim();
+            const credits = parseInt(document.getElementById('newResellerCredits').value) || 0;
+            const genzauthSellerKey = document.getElementById('newResellerGenzauthKey').value.trim();
+
+            const selectedProducts = Array.from(document.querySelectorAll('.reseller-product-checkbox:checked'))
+                .map(cb => cb.value);
+
+            if (!username || !password) {
+                showMessage('Username and password are required', 'error', 'resellersMessage');
+                return;
+            }
+
+            try {
+                const response = await fetch('/reseller/api/admin/resellers', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        email,
+                        credits,
+                        genzauthSellerKey,
+                        assignedProducts: selectedProducts
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Reseller created successfully!', 'success', 'resellersMessage');
+                    document.getElementById('createResellerForm').reset();
+                    loadResellers();
+                } else {
+                    showMessage(data.error || 'Failed to create reseller', 'error', 'resellersMessage');
+                }
+            } catch (error) {
+                console.error('Error creating reseller:', error);
+                showMessage('An error occurred while creating reseller', 'error', 'resellersMessage');
+            }
+        }
+
+        function editReseller(reseller) {
+            const newCredits = prompt(`Edit Credits for ${reseller.username}:`, reseller.credits);
+            if (newCredits === null) return;
+
+            const newGenzauthKey = prompt(`Edit GenzAuth Seller Key for ${reseller.username}:`, reseller.genzauthSellerKey || '');
+            if (newGenzauthKey === null) return;
+
+            const productsString = reseller.assignedProducts.join(', ');
+            const newProducts = prompt(`Edit Assigned Products for ${reseller.username} (comma-separated product keys):`, productsString);
+            if (newProducts === null) return;
+
+            const assignedProducts = newProducts.split(',').map(p => p.trim()).filter(p => p);
+
+            updateReseller(reseller._id, {
+                credits: parseInt(newCredits) || 0,
+                genzauthSellerKey: newGenzauthKey,
+                assignedProducts: assignedProducts
+            });
+        }
+
+        async function updateReseller(resellerId, updates) {
+            try {
+                const response = await fetch(`/reseller/api/admin/resellers/${resellerId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Reseller updated successfully!', 'success', 'resellersMessage');
+                    loadResellers();
+                } else {
+                    showMessage(data.error || 'Failed to update reseller', 'error', 'resellersMessage');
+                }
+            } catch (error) {
+                console.error('Error updating reseller:', error);
+                showMessage('An error occurred while updating reseller', 'error', 'resellersMessage');
+            }
+        }
+
+        async function deleteReseller(resellerId, username) {
+            if (!confirm(`Are you sure you want to delete reseller "${username}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/reseller/api/admin/resellers/${resellerId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage('Reseller deleted successfully!', 'success', 'resellersMessage');
+                    loadResellers();
+                } else {
+                    showMessage(data.error || 'Failed to delete reseller', 'error', 'resellersMessage');
+                }
+            } catch (error) {
+                console.error('Error deleting reseller:', error);
+                showMessage('An error occurred while deleting reseller', 'error', 'resellersMessage');
+            }
+        }
     </script>
 </body>
 
