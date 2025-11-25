@@ -207,19 +207,25 @@ router.post('/api/create-client', isReseller, async (req, res) => {
                     ? reseller.genzauthSellerKey.trim() 
                     : null;
 
+                console.log(`   Checking reseller seller key: ${sellerKey ? '✅ Found' : '❌ Not found'}`);
+
                 if (!sellerKey && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
                     sellerKey = product.genzauthSellerKey.trim();
+                    console.log(`   Using product seller key: ✅ Found`);
                 }
 
                 if (!sellerKey) {
                     const ApiConfig = require('../models/ApiConfig');
                     const config = await ApiConfig.findOne({ configKey: 'main_config' });
                     sellerKey = config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY || null;
+                    console.log(`   Checking global seller key: ${sellerKey ? '✅ Found' : '❌ Not found'}`);
                 }
 
                 if (!sellerKey) {
-                    genzAuthError = 'GenzAuth seller key not configured';
+                    console.log(`   ❌ No GenzAuth seller key found at any level`);
+                    genzAuthError = 'GenzAuth seller key not configured - Please add it in Admin Panel → Products → Edit AIMKILL → GenzAuth Seller Key, or set it for this reseller';
                 } else {
+                    console.log(`   ✅ Using seller key: ${sellerKey.substring(0, 8)}...`);
                     console.log(`📝 Creating GenzAuth account for client: ${username}`);
                     console.log(`   Duration: ${duration} days`);
                     console.log(`   Product: ${product.displayName} (${productKey})`);

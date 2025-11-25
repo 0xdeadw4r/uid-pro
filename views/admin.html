@@ -1553,9 +1553,12 @@
                         </div>
                         <div class="form-group">
                             <label>Assigned Products</label>
-                            <div id="newResellerProductsCheckboxes" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; margin-top: 0.5rem;">
+                            <select id="resellerProductsSelect" multiple style="min-height: 120px; padding: 0.5rem;">
                                 <!-- Will be populated dynamically -->
-                            </div>
+                            </select>
+                            <small style="color: #999; font-size: 11px; margin-top: 0.5rem; display: block;">
+                                Hold Ctrl (Windows) or Cmd (Mac) to select multiple products
+                            </small>
                         </div>
                         <button type="submit" class="submit-btn">Create Reseller</button>
                     </form>
@@ -1576,7 +1579,7 @@
             <div class="section">
                 <h2>Admin Chat</h2>
                 <div id="chatManagementMessage" class="message"></div>
-                
+
                 <!-- Chat Management Controls -->
                 <div class="form-section" style="margin-bottom: 2rem;">
                     <h3>Chat Management</h3>
@@ -1596,7 +1599,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                         <div class="form-group">
                             <label>Delete Chat for Specific User</label>
@@ -1608,7 +1611,7 @@
                             </button>
                         </div>
                     </div>
-                    
+
                     <div class="button-group">
                         <button class="secondary-btn" onclick="loadChatStats()">📊 Refresh Stats</button>
                         <button class="danger-btn" onclick="deleteAllChats()">
@@ -1616,7 +1619,7 @@
                         </button>
                     </div>
                 </div>
-                
+
                 <div class="chat-container">
                     <div class="chat-sidebar">
                         <div style="padding: 1rem; border-bottom: 1px solid #333; color: #fff; font-weight: 700; background: #222;">Clients</div>
@@ -1687,7 +1690,7 @@
                     showMessage(data.message || 'Chat messages deleted successfully', 'success', 'chatManagementMessage');
                     document.getElementById('deleteChatUsername').value = '';
                     loadChatStats();
-                    
+
                     // Clear chat if viewing this user
                     if (selectedClient === username) {
                         document.getElementById('adminChatMessages').innerHTML = '';
@@ -1726,7 +1729,7 @@
                 if (response.ok) {
                     showMessage(data.message || 'All chat messages deleted', 'success', 'chatManagementMessage');
                     loadChatStats();
-                    
+
                     // Clear current chat view
                     document.getElementById('adminChatMessages').innerHTML = '';
                     selectedClient = null;
@@ -3693,13 +3696,13 @@
             try {
                 const response = await fetch('/api/admin/products');
                 const data = await response.json();
-                
+
                 if (data.success) {
                     allProducts = data.products;
-                    
+
                     const container = document.getElementById('newResellerProductsCheckboxes');
                     container.innerHTML = '';
-                    
+
                     data.products.forEach(product => {
                         const label = document.createElement('label');
                         label.style.cssText = 'display: flex; align-items: center; gap: 0.5rem; color: #999; cursor: pointer;';
@@ -3733,7 +3736,7 @@
                             : 'None';
                         const statusColor = reseller.isActive ? '#10B981' : '#EF4444';
                         const statusText = reseller.isActive ? 'Active' : 'Inactive';
-                        
+
                         html += `
                             <tr>
                                 <td><strong>${reseller.username}</strong></td>
@@ -3771,8 +3774,8 @@
             const credits = parseInt(document.getElementById('newResellerCredits').value) || 0;
             const genzauthSellerKey = document.getElementById('newResellerGenzauthKey').value.trim();
 
-            const selectedProducts = Array.from(document.querySelectorAll('.reseller-product-checkbox:checked'))
-                .map(cb => cb.value);
+            const select = document.getElementById('resellerProductsSelect');
+            const assignedProducts = Array.from(select.selectedOptions).map(option => option.value);
 
             if (!username || !password) {
                 showMessage('Username and password are required', 'error', 'resellersMessage');
@@ -3789,7 +3792,7 @@
                         email,
                         credits,
                         genzauthSellerKey,
-                        assignedProducts: selectedProducts
+                        assignedProducts
                     })
                 });
 
