@@ -165,21 +165,31 @@
             letter-spacing: 1px;
         }
 
-        .form-group input,
-        .form-group select {
+        /* Input and Select Styling with Hover and Focus */
+        input,
+        select {
             width: 100%;
             padding: 0.75rem;
-            background: #0a0a0a;
+            background: #1a1a1a;
             border: 1px solid #2a2a2a;
-            border-radius: 8px;
+            border-radius: 6px;
             color: #FFFFFF;
             font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .form-group input:focus,
-        .form-group select:focus {
+        input:focus,
+        select:focus {
             outline: none;
-            border-color: #FFFFFF;
+            border-color: #3B82F6;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+            transform: translateY(-2px);
+            background: #0a0a0a;
+        }
+
+        input:hover,
+        select:hover {
+            border-color: #444;
         }
 
         .btn-primary {
@@ -197,7 +207,12 @@
         }
 
         .btn-primary:hover {
-            background: #e5e5e5;
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.6);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-2px) scale(0.98);
         }
 
         .btn-primary:disabled {
@@ -316,37 +331,69 @@
 
         <div id="create-tab" class="tab-content active">
             <div id="alertContainer"></div>
-            
-            <div class="card">
-                <h2>Create New Client Account</h2>
-                <form id="createClientForm" onsubmit="createClient(event)">
-                    <div class="form-group">
-                        <label for="productSelect">Product</label>
-                        <select id="productSelect" required onchange="loadPackages()">
-                            <option value="">Select a product...</option>
-                        </select>
-                    </div>
 
-                    <div class="form-group">
-                        <label for="packageSelect">Select Package</label>
-                        <select id="packageSelect" required>
-                            <option value="">Select a package...</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="clientUsername">Client Username</label>
-                        <input type="text" id="clientUsername" required placeholder="Enter username...">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="clientPassword">Client Password</label>
-                        <input type="text" id="clientPassword" required placeholder="Enter password...">
-                    </div>
-
-                    <button type="submit" class="btn-primary" id="submitBtn">Create Client</button>
-                </form>
+            <!-- Create Client Form -->
+        <div class="section" style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden;">
+            <!-- Section Header with Gradient -->
+            <div style="background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); padding: 1.5rem 2rem; border-bottom: 2px solid #3B82F6; margin: -2rem -2rem 2rem -2rem;">
+                <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="font-size: 1.8rem;">👤</span> CREATE NEW CLIENT ACCOUNT
+                </h2>
+                <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 13px;">Fill in the details below to create a new client account</p>
             </div>
+
+            <div id="createClientMessage" class="message"></div>
+
+            <form id="createClientForm" onsubmit="createClient(event)" style="display: grid; gap: 1.5rem;">
+                <!-- Product Selection Card -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                    <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        <span style="display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 50%; text-align: center; line-height: 24px; margin-right: 0.5rem; font-size: 14px;">📦</span>
+                        PRODUCT
+                    </label>
+                    <select id="clientProduct" required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                        <option value="">Select a product...</option>
+                    </select>
+                </div>
+
+                <!-- Package Selection Card -->
+                <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                    <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        <span style="display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #10B981, #059669); border-radius: 50%; text-align: center; line-height: 24px; margin-right: 0.5rem; font-size: 14px;">⏱️</span>
+                        SELECT PACKAGE
+                    </label>
+                    <select id="clientPackage" required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                        <option value="">Select a package...</option>
+                    </select>
+                </div>
+
+                <!-- Credentials Grid -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                    <!-- Username Card -->
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                        <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            <span style="display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #F59E0B, #D97706); border-radius: 50%; text-align: center; line-height: 24px; margin-right: 0.5rem; font-size: 14px;">👤</span>
+                            CLIENT USERNAME
+                        </label>
+                        <input type="text" id="clientUsername" placeholder="Enter username..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
+                    </div>
+
+                    <!-- Password Card -->
+                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                        <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            <span style="display: inline-block; width: 24px; height: 24px; background: linear-gradient(135deg, #EF4444, #DC2626); border-radius: 50%; text-align: center; line-height: 24px; margin-right: 0.5rem; font-size: 14px;">🔒</span>
+                            CLIENT PASSWORD
+                        </label>
+                        <input type="password" id="clientPassword" placeholder="Enter password..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn-primary" style="margin-top: 1rem; padding: 1.25rem 2rem; font-size: 15px; font-weight: 800; letter-spacing: 2px; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; border-radius: 12px; color: #FFFFFF; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); text-transform: uppercase;">
+                    <span style="font-size: 1.2rem; margin-right: 0.5rem;">✨</span> CREATE CLIENT ACCOUNT
+                </button>
+            </form>
+        </div>
         </div>
 
         <div id="clients-tab" class="tab-content">
@@ -498,7 +545,7 @@
                     showAlert(`Client account created successfully! Username: ${username}`, 'success');
                     document.getElementById('createClientForm').reset();
                     loadPackages(); // Reset package dropdown
-                    
+
                     resellerData.credits = data.creditsRemaining;
                     document.getElementById('resellerCredits').textContent = `Credits: ${data.creditsRemaining}`;
                     document.getElementById('profileCredits').textContent = data.creditsRemaining;
@@ -516,7 +563,7 @@
 
         async function loadClients() {
             const container = document.getElementById('clientsTableContainer');
-            
+
             try {
                 const response = await fetch('/reseller/api/my-clients');
                 const data = await response.json();
