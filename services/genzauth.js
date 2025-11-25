@@ -127,12 +127,12 @@ async function fetchAllUsers() {
     return makeRequest('fetchallusers');
 }
 
-async function createUser(username, password, expiry) {
+async function createUser(username, password, expiry, customSellerKey = null) {
     return makeRequest('createuser', { 
         username, 
         password,
         expiry: expiry.toString()
-    });
+    }, customSellerKey);
 }
 
 async function banUser(username) {

@@ -279,40 +279,19 @@
         }
 
         .packages-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-top: 1rem;
+            display: none;
         }
 
         .package-card {
-            background: #0a0a0a;
-            padding: 1rem;
-            border-radius: 8px;
-            border: 1px solid #2a2a2a;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .package-card:hover {
-            border-color: #FFFFFF;
-        }
-
-        .package-card.selected {
-            border-color: #10B981;
-            background: rgba(16, 185, 129, 0.1);
+            display: none;
         }
 
         .package-name {
-            font-weight: 700;
-            color: #FFFFFF;
-            margin-bottom: 0.5rem;
+            display: none;
         }
 
         .package-credits {
-            color: #10B981;
-            font-size: 12px;
-            font-weight: 700;
+            display: none;
         }
     </style>
 </head>
@@ -348,11 +327,11 @@
                         </select>
                     </div>
 
-                    <div id="packagesContainer" style="display: none;">
-                        <div class="form-group">
-                            <label>Select Package</label>
-                            <div class="packages-grid" id="packagesGrid"></div>
-                        </div>
+                    <div class="form-group">
+                        <label for="packageSelect">Select Package</label>
+                        <select id="packageSelect" required>
+                            <option value="">Select a package...</option>
+                        </select>
                     </div>
 
                     <div class="form-group">
@@ -458,52 +437,41 @@
 
         function loadPackages() {
             const productKey = document.getElementById('productSelect').value;
-            const packagesContainer = document.getElementById('packagesContainer');
-            const packagesGrid = document.getElementById('packagesGrid');
+            const packageSelect = document.getElementById('packageSelect');
 
             if (!productKey) {
-                packagesContainer.style.display = 'none';
+                packageSelect.innerHTML = '<option value="">Select a package...</option>';
+                packageSelect.disabled = true;
                 return;
             }
 
             const product = productsData.find(p => p.productKey === productKey);
             if (!product || !product.packages) {
-                packagesContainer.style.display = 'none';
+                packageSelect.innerHTML = '<option value="">No packages available</option>';
+                packageSelect.disabled = true;
                 return;
             }
 
-            packagesContainer.style.display = 'block';
-            packagesGrid.innerHTML = '';
-            selectedPackage = null;
+            packageSelect.innerHTML = '<option value="">Select a package...</option>';
+            packageSelect.disabled = false;
 
             Object.entries(product.packages).forEach(([key, pkg]) => {
-                const card = document.createElement('div');
-                card.className = 'package-card';
-                card.innerHTML = `
-                    <div class="package-name">${pkg.display}</div>
-                    <div class="package-credits">${pkg.credits} Credits</div>
-                `;
-                card.onclick = () => selectPackage(key, card);
-                packagesGrid.appendChild(card);
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = `${pkg.display} - ${pkg.credits} Credits`;
+                packageSelect.appendChild(option);
             });
-        }
-
-        function selectPackage(packageKey, cardElement) {
-            document.querySelectorAll('.package-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            cardElement.classList.add('selected');
-            selectedPackage = packageKey;
         }
 
         async function createClient(event) {
             event.preventDefault();
 
             const productKey = document.getElementById('productSelect').value;
+            const packageKey = document.getElementById('packageSelect').value;
             const username = document.getElementById('clientUsername').value.trim();
             const password = document.getElementById('clientPassword').value.trim();
 
-            if (!selectedPackage) {
+            if (!packageKey) {
                 showAlert('Please select a package', 'error');
                 return;
             }
@@ -520,7 +488,7 @@
                         username,
                         password,
                         productKey,
-                        packageKey: selectedPackage
+                        packageKey: packageKey
                     })
                 });
 
@@ -529,8 +497,7 @@
                 if (data.success) {
                     showAlert(`Client account created successfully! Username: ${username}`, 'success');
                     document.getElementById('createClientForm').reset();
-                    document.getElementById('packagesContainer').style.display = 'none';
-                    selectedPackage = null;
+                    loadPackages(); // Reset package dropdown
                     
                     resellerData.credits = data.creditsRemaining;
                     document.getElementById('resellerCredits').textContent = `Credits: ${data.creditsRemaining}`;

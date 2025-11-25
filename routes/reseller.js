@@ -193,6 +193,54 @@ router.post('/api/create-client', isReseller, async (req, res) => {
             return res.status(400).json({ error: 'Username already exists' });
         }
 
+        let genzAuthCreated = false;
+        let genzAuthError = null;
+        let assignedUsername = null;
+
+        // Create GenzAuth account for Aimkill products
+        if (productKey === 'AIMKILL') {
+            try {
+                const duration = packageData.days || 1;
+                
+                // Get seller key: reseller-specific > product-specific > global
+                let sellerKey = reseller.genzauthSellerKey && reseller.genzauthSellerKey.trim() 
+                    ? reseller.genzauthSellerKey.trim() 
+                    : null;
+
+                if (!sellerKey && product.genzauthSellerKey && product.genzauthSellerKey.trim()) {
+                    sellerKey = product.genzauthSellerKey.trim();
+                }
+
+                if (!sellerKey) {
+                    const ApiConfig = require('../models/ApiConfig');
+                    const config = await ApiConfig.findOne({ configKey: 'main_config' });
+                    sellerKey = config?.genzauthSellerKey || process.env.GENZAUTH_SELLER_KEY || null;
+                }
+
+                if (!sellerKey) {
+                    genzAuthError = 'GenzAuth seller key not configured';
+                } else {
+                    console.log(`📝 Creating GenzAuth account for client: ${username}`);
+                    console.log(`   Duration: ${duration} days`);
+                    console.log(`   Product: ${product.displayName} (${productKey})`);
+
+                    const result = await genzauth.createUser(username, password, duration, sellerKey);
+
+                    if (result.success) {
+                        console.log(`✅ GenzAuth account created successfully: ${username}`);
+                        genzAuthCreated = true;
+                        assignedUsername = username;
+                    } else {
+                        console.error(`❌ GenzAuth creation failed: ${result.error || result.message}`);
+                        genzAuthError = result.error || result.message || 'Failed to create GenzAuth account';
+                    }
+                }
+            } catch (error) {
+                console.error('❌ GenzAuth API error:', error);
+                genzAuthError = error.message;
+            }
+        }
+
         const expiresAt = new Date();
         if (packageData.days) {
             expiresAt.setDate(expiresAt.getDate() + packageData.days);
@@ -204,6 +252,7 @@ router.post('/api/create-client', isReseller, async (req, res) => {
             username: username.toLowerCase(),
             password: password,
             productKey: productKey,
+            assignedUsername: assignedUsername,
             package: packageKey,
             packageName: packageData.display,
             expiresAt: expiresAt,
@@ -218,7 +267,7 @@ router.post('/api/create-client', isReseller, async (req, res) => {
         console.log(`✅ Reseller ${reseller.username} created client: ${username} for ${productKey} (${packageKey})`);
         console.log(`   Credits used: ${packageData.credits}, Remaining: ${reseller.credits}`);
 
-        res.json({
+        const response = {
             success: true,
             message: 'Client account created successfully',
             client: {
@@ -227,8 +276,15 @@ router.post('/api/create-client', isReseller, async (req, res) => {
                 package: newClient.packageName,
                 expiresAt: newClient.expiresAt
             },
-            creditsRemaining: reseller.credits
-        });
+            creditsRemaining: reseller.credits,
+            genzAuthCreated
+        };
+
+        if (genzAuthError) {
+            response.warning = `Client created but GenzAuth account failed: ${genzAuthError}`;
+        }
+
+        res.json(response);
     } catch (error) {
         console.error('Create client error:', error);
         res.status(500).json({ error: 'Failed to create client account' });
