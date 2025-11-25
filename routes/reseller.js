@@ -398,4 +398,15 @@ router.delete('/api/admin/resellers/:id', isAdminOrOwner, async (req, res) => {
     }
 });
 
+router.get('/portal', isReseller, (req, res) => {
+    res.sendFile(__dirname + '/../views/reseller-portal.html');
+});
+
+router.get('/login', (req, res) => {
+    if (req.session?.resellerId && req.session?.isReseller) {
+        return res.redirect('/reseller/portal');
+    }
+    res.sendFile(__dirname + '/../views/login.html');
+});
+
 module.exports = router;
