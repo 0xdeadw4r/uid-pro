@@ -27,9 +27,9 @@
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
     --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.8);
-    --transition-base: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --transition-bounce: 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    --transition-base: 0.15s ease-out;
+    --transition-smooth: 0.2s ease-out;
+    --transition-bounce: 0.25s ease-out;
 }
 
 html {
@@ -38,17 +38,15 @@ html {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    background: linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 50%, #0a0a0a 100%);
-    background-attachment: fixed;
+    background: #0a0a0a;
     color: var(--text-light);
     line-height: 1.6;
     font-size: 14px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
     min-height: 100vh;
     margin-left: 250px;
-    transition: margin-left var(--transition-smooth);
+    will-change: margin-left;
 }
 
 /* ===== VERTICAL SIDEBAR NAVIGATION - NETFLIX STYLE ===== */
@@ -58,15 +56,16 @@ nav {
     top: 0;
     width: 250px;
     height: 100vh;
-    background: linear-gradient(180deg, #000000 0%, #0a0a0a 100%);
+    background: #000000;
     border-right: 1px solid var(--border-dark);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     display: flex;
     flex-direction: column;
     padding: 1.5rem 0;
     z-index: 1000;
     overflow-y: auto;
-    backdrop-filter: blur(10px);
+    transform: translateZ(0);
+    -webkit-overflow-scrolling: touch;
 }
 
 .nav-brand {
@@ -126,17 +125,15 @@ nav h1 {
 
 .nav-links a:hover {
     color: var(--primary-white);
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
+    background: rgba(59, 130, 246, 0.1);
     border-left-color: var(--accent-blue);
-    transform: translateX(4px);
 }
 
 .nav-links a.active {
-    background: linear-gradient(90deg, rgba(59, 130, 246, 0.25) 0%, rgba(255, 255, 255, 0.1) 100%);
+    background: rgba(59, 130, 246, 0.2);
     color: var(--primary-white);
     border-left-color: var(--accent-blue);
     font-weight: 700;
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
 }
 
 .nav-links button {
@@ -232,21 +229,17 @@ nav h1 {
     max-width: 1400px;
     margin: 2rem auto;
     padding: 0 2rem;
-    animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     width: 100%;
 }
 
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(30px) scale(0.98);
-        filter: blur(4px);
+        transform: translate3d(0, 20px, 0);
     }
-
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
-        filter: blur(0);
+        transform: translate3d(0, 0, 0);
     }
 }
 
@@ -368,8 +361,8 @@ nav h1 {
 
 .package-card:hover {
     border-color: var(--accent-blue);
-    transform: translateY(-8px) scale(1.02);
-    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+    transform: translate3d(0, -4px, 0);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
 .package-card.popular {
@@ -440,9 +433,9 @@ nav h1 {
 }
 
 .package-card button:hover:not(:disabled) {
-    transform: translateY(-3px) scale(1.05);
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.3);
+    transform: translate3d(0, -2px, 0);
+    background: var(--accent-blue);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .package-card button:active:not(:disabled) {
@@ -485,8 +478,7 @@ input:focus,
 select:focus {
     outline: none;
     border-color: var(--primary-white);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
-    transform: translateY(-2px);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.15);
 }
 
 button[type="submit"] {
@@ -505,9 +497,9 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    transform: translateY(-3px) scale(1.02);
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.3);
+    transform: translate3d(0, -2px, 0);
+    background: var(--accent-blue);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 button[type="submit"]:active {
@@ -711,27 +703,15 @@ tr:last-child td {
 }
 
 .card:hover {
-    box-shadow: var(--shadow-xl);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
     border-color: var(--accent-blue);
-    transform: translateY(-4px);
-    background: linear-gradient(135deg, var(--surface-dark) 0%, var(--surface-alt) 100%);
+    transform: translate3d(0, -2px, 0);
 }
 
 .skeleton {
-    background: linear-gradient(90deg, #1a1a1a 25%, var(--primary-white) 50%, #1a1a1a 75%);
-    background-size: 200% 100%;
-    animation: shimmer 1.5s infinite;
+    background: #1a1a1a;
     border-radius: 8px;
-}
-
-@keyframes shimmer {
-    0% {
-        background-position: 200% 0;
-    }
-
-    100% {
-        background-position: -200% 0;
-    }
+    opacity: 0.6;
 }
 
 .loading-spinner {
@@ -774,9 +754,9 @@ tr:last-child td {
 }
 
 .btn:hover {
-    transform: translateY(-3px) scale(1.02);
-    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-blue-hover) 100%);
-    box-shadow: 0 8px 30px rgba(59, 130, 246, 0.5), 0 0 50px rgba(59, 130, 246, 0.3);
+    transform: translate3d(0, -2px, 0);
+    background: var(--accent-blue);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
 }
 
 .btn:active {

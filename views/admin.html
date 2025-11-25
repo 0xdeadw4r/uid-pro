@@ -65,7 +65,7 @@
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s ease-out;
             white-space: nowrap;
             position: relative;
         }
@@ -77,9 +77,9 @@
             left: 0;
             right: 0;
             height: 3px;
-            background: linear-gradient(90deg, #3B82F6, #FFFFFF);
+            background: #3B82F6;
             transform: scaleX(0);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.2s ease-out;
         }
 
         .tab-btn:hover {
@@ -165,18 +165,17 @@
         }
 
         .section {
-            background: linear-gradient(135deg, #1a1a1a 0%, #151515 100%);
+            background: #1a1a1a;
             border: 1px solid #2a2a2a;
             border-radius: 12px;
             padding: 2.5rem;
             margin-bottom: 2rem;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.15s ease-out;
         }
 
         .section:hover {
             border-color: #3a3a3a;
-            box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
         }
 
         .section h2 {
@@ -258,8 +257,7 @@
             outline: none;
             border-color: #3B82F6;
             background: #0f0f0f;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-            transform: translateY(-1px);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
         }
 
         .form-row {
@@ -379,10 +377,10 @@
         }
 
         .submit-btn:hover:not(:disabled) {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+            background: #3B82F6;
             color: #FFFFFF;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+            transform: translate3d(0, -1px, 0);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
         }
 
         .submit-btn:active:not(:disabled) {
