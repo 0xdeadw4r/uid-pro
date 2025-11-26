@@ -457,6 +457,12 @@
                         <input type="password" id="clientPassword" placeholder="Enter password..." required>
                     </div>
 
+                    <div class="form-group" id="uidField" style="display: none;">
+                        <label>UID (Numbers Only)</label>
+                        <input type="text" id="clientUid" placeholder="Enter UID for bypass..." pattern="[0-9]+" title="UID must contain only numbers">
+                        <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Required for UID Bypass product. Enter numbers only.</p>
+                    </div>
+
                     <button type="submit" class="btn-primary">Create Client Account</button>
                 </form>
             </div>
@@ -567,11 +573,25 @@
         function loadPackages() {
             const productKey = document.getElementById('clientProduct').value;
             const packageSelect = document.getElementById('clientPackage');
+            const uidField = document.getElementById('uidField');
+            const uidInput = document.getElementById('clientUid');
 
             if (!productKey) {
                 packageSelect.innerHTML = '<option value="">Select a package...</option>';
                 packageSelect.disabled = true;
+                uidField.style.display = 'none';
+                uidInput.required = false;
                 return;
+            }
+
+            // Show/hide UID field based on product
+            if (productKey === 'UID_BYPASS') {
+                uidField.style.display = 'block';
+                uidInput.required = true;
+            } else {
+                uidField.style.display = 'none';
+                uidInput.required = false;
+                uidInput.value = '';
             }
 
             const product = productsData.find(p => p.productKey === productKey);
@@ -606,6 +626,7 @@
             const packageKey = document.getElementById('clientPackage').value;
             const username = document.getElementById('clientUsername').value.trim();
             const password = document.getElementById('clientPassword').value.trim();
+            const uid = document.getElementById('clientUid').value.trim();
 
             if (!productKey) {
                 showAlert('Please select a product', 'error');
@@ -627,29 +648,50 @@
                 return;
             }
 
+            if (productKey === 'UID_BYPASS' && !uid) {
+                showAlert('Please enter a UID for UID Bypass product', 'error');
+                return;
+            }
+
+            if (productKey === 'UID_BYPASS' && !/^[0-9]+$/.test(uid)) {
+                showAlert('UID must contain only numbers', 'error');
+                return;
+            }
+
             const submitBtn = event.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating...';
 
             try {
+                const requestBody = {
+                    username,
+                    password,
+                    productKey,
+                    packageKey: packageKey
+                };
+
+                if (productKey === 'UID_BYPASS' && uid) {
+                    requestBody.assignedUid = uid;
+                }
+
                 const response = await fetch('/reseller/api/create-client', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username,
-                        password,
-                        productKey,
-                        packageKey: packageKey
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    showAlert(`Client account created successfully! Username: ${username}`, 'success');
+                    let successMsg = `Client account created successfully! Username: ${username}`;
+                    if (productKey === 'UID_BYPASS' && uid) {
+                        successMsg += ` | UID: ${uid}`;
+                    }
+                    showAlert(successMsg, 'success');
                     document.getElementById('createClientForm').reset();
                     document.getElementById('clientPackage').innerHTML = '<option value="">Select a package...</option>';
                     document.getElementById('clientPackage').disabled = true;
+                    document.getElementById('uidField').style.display = 'none';
 
                     resellerData.credits = data.creditsRemaining;
                     document.getElementById('resellerCredits').textContent = `Credits: ${data.creditsRemaining}`;
@@ -685,6 +727,7 @@
                                     <th>Username</th>
                                     <th>Product</th>
                                     <th>Package</th>
+                                    <th>UID</th>
                                     <th>Expires</th>
                                     <th>Status</th>
                                     <th>Created</th>
@@ -696,6 +739,7 @@
                                         <td>${client.username}</td>
                                         <td>${client.product?.displayName || client.productKey}</td>
                                         <td>${client.packageName || client.package}</td>
+                                        <td>${client.assignedUid || '-'}</td>
                                         <td>${new Date(client.expiresAt).toLocaleDateString()}</td>
                                         <td style="color: ${client.isActive ? '#10B981' : '#EF4444'};">
                                             ${client.isActive ? 'Active' : 'Inactive'}
