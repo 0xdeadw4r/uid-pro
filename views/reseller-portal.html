@@ -169,12 +169,13 @@
         input,
         select {
             width: 100%;
-            padding: 0.75rem;
-            background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 6px;
+            padding: 1rem;
+            background: #0a0a0a;
+            border: 2px solid #2a2a2a;
+            border-radius: 8px;
             color: #FFFFFF;
             font-size: 14px;
+            font-weight: 500;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -182,14 +183,24 @@
         select:focus {
             outline: none;
             border-color: #3B82F6;
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
-            transform: translateY(-2px);
-            background: #0a0a0a;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+            transform: translateY(-1px);
+            background: #000000;
         }
 
-        input:hover,
-        select:hover {
-            border-color: #444;
+        input:hover:not(:focus),
+        select:hover:not(:focus) {
+            border-color: #3a3a3a;
+            background: #000000;
+        }
+
+        input::placeholder {
+            color: #666;
+        }
+
+        select:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         .btn-primary {
@@ -278,19 +289,36 @@
         }
 
         .alert {
-            padding: 1rem;
+            padding: 1rem 1.25rem;
             border-radius: 8px;
             margin-bottom: 1rem;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 4px solid;
+            animation: slideInRight 0.3s ease-out;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
         .alert-success {
-            background: #10B981;
-            color: white;
+            background: rgba(16, 185, 129, 0.15);
+            border-color: #10B981;
+            color: #10B981;
         }
 
         .alert-error {
-            background: #EF4444;
-            color: white;
+            background: rgba(239, 68, 68, 0.15);
+            border-color: #EF4444;
+            color: #EF4444;
         }
 
         .packages-grid {
@@ -307,6 +335,47 @@
 
         .package-credits {
             display: none;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #2a2a2a;
+            border-top-color: #3B82F6;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .form-section-enhanced {
+            position: relative;
+        }
+
+        .form-section-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #3B82F6, #2563EB);
+            border-radius: 8px 0 0 8px;
         }
     </style>
 </head>
@@ -333,34 +402,35 @@
             <div id="alertContainer"></div>
 
             <!-- Create Client Form -->
-        <div class="section" style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden;">
+        <div class="section form-section-enhanced" style="background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%); border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
             <!-- Section Header with Gradient -->
             <div style="background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%); padding: 1.5rem 2rem; border-bottom: 2px solid #3B82F6; margin: -2rem -2rem 2rem -2rem;">
                 <h2 style="margin: 0; font-size: 1.5rem; font-weight: 800; color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px; display: flex; align-items: center; gap: 0.75rem;">
+                    <span style="width: 40px; height: 40px; background: linear-gradient(135deg, #3B82F6, #2563EB); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">👤</span>
                     CREATE NEW CLIENT ACCOUNT
                 </h2>
                 <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 13px;">Fill in the details below to create a new client account</p>
             </div>
 
-            <div id="createClientMessage" class="message"></div>
+            <div id="alertContainer" style="margin-bottom: 1rem;"></div>
 
             <form id="createClientForm" onsubmit="createClient(event)" style="display: grid; gap: 1.5rem;">
                 <!-- Product Selection Card -->
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
-                    <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                        PRODUCT
+                <div class="input-card" style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        <span style="color: #3B82F6;">📦</span> PRODUCT
                     </label>
-                    <select id="clientProduct" required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                    <select id="clientProduct" required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #2a2a2a; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
                         <option value="">Select a product...</option>
                     </select>
                 </div>
 
                 <!-- Package Selection Card -->
-                <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
-                    <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                        SELECT PACKAGE
+                <div class="input-card" style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                        <span style="color: #10B981;">💎</span> SELECT PACKAGE
                     </label>
-                    <select id="clientPackage" required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
+                    <select id="clientPackage" required disabled style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #2a2a2a; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s;">
                         <option value="">Select a package...</option>
                     </select>
                 </div>
@@ -368,26 +438,38 @@
                 <!-- Credentials Grid -->
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
                     <!-- Username Card -->
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
-                        <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                            CLIENT USERNAME
+                    <div class="input-card" style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            <span style="color: #F59E0B;">👤</span> CLIENT USERNAME
                         </label>
-                        <input type="text" id="clientUsername" placeholder="Enter username..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
+                        <input type="text" id="clientUsername" placeholder="Enter username..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #2a2a2a; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
                     </div>
 
                     <!-- Password Card -->
-                    <div style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
-                        <label style="display: block; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
-                            CLIENT PASSWORD
+                    <div class="input-card" style="background: rgba(0,0,0,0.4); border: 1px solid #2a2a2a; border-radius: 12px; padding: 1.5rem; transition: all 0.3s;">
+                        <label style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; color: #FFFFFF; font-weight: 700; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">
+                            <span style="color: #EF4444;">🔒</span> CLIENT PASSWORD
                         </label>
-                        <input type="password" id="clientPassword" placeholder="Enter password..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #333; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
+                        <input type="password" id="clientPassword" placeholder="Enter password..." required style="width: 100%; padding: 1rem; background: #0a0a0a; border: 2px solid #2a2a2a; border-radius: 8px; color: #FFFFFF; font-size: 14px; font-weight: 500; transition: all 0.3s;">
                     </div>
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn-primary" style="margin-top: 1rem; padding: 1.25rem 2rem; font-size: 15px; font-weight: 800; letter-spacing: 2px; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; border-radius: 12px; color: #FFFFFF; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); text-transform: uppercase;">
-                    CREATE CLIENT ACCOUNT
+                <button type="submit" class="btn-primary" style="margin-top: 1rem; padding: 1.25rem 2rem; font-size: 15px; font-weight: 800; letter-spacing: 2px; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; border-radius: 12px; color: #FFFFFF; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.4); text-transform: uppercase; position: relative; overflow: hidden;">
+                    <span style="position: relative; z-index: 1;">✨ CREATE CLIENT ACCOUNT</span>
+                    <span style="position: absolute; inset: 0; background: linear-gradient(135deg, #2563EB, #1D4ED8); opacity: 0; transition: opacity 0.3s;"></span>
                 </button>
+                
+                <style>
+                    .btn-primary:hover span:last-child {
+                        opacity: 1;
+                    }
+                    
+                    .input-card:hover {
+                        border-color: #3B82F6 !important;
+                        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.3);
+                    }
+                </style>
             </form>
         </div>
         </div>
@@ -443,14 +525,17 @@
                     document.getElementById('resellerUsername').textContent = resellerData.username;
                     document.getElementById('resellerCredits').textContent = `Credits: ${resellerData.credits}`;
 
-                    const productSelect = document.getElementById('productSelect');
-                    productSelect.innerHTML = '<option value="">Select a product...</option>';
-                    productsData.forEach(product => {
-                        const option = document.createElement('option');
-                        option.value = product.productKey;
-                        option.textContent = product.displayName;
-                        productSelect.appendChild(option);
-                    });
+                    // Populate product dropdown
+                    const productSelect = document.getElementById('clientProduct');
+                    if (productSelect) {
+                        productSelect.innerHTML = '<option value="">Select a product...</option>';
+                        productsData.forEach(product => {
+                            const option = document.createElement('option');
+                            option.value = product.productKey;
+                            option.textContent = product.displayName;
+                            productSelect.appendChild(option);
+                        });
+                    }
 
                     document.getElementById('profileCredits').textContent = resellerData.credits;
                     document.getElementById('profileClientsCreated').textContent = resellerData.totalClientsCreated || 0;
@@ -471,16 +556,18 @@
                             </ul>
                         </div>
                     `;
+                } else {
+                    showAlert(data.error || 'Failed to load profile', 'error');
                 }
             } catch (error) {
                 console.error('Error loading profile:', error);
-                showAlert('Failed to load profile', 'error');
+                showAlert('Failed to load profile. Please try logging in again.', 'error');
             }
         }
 
         function loadPackages() {
-            const productKey = document.getElementById('productSelect').value;
-            const packageSelect = document.getElementById('packageSelect');
+            const productKey = document.getElementById('clientProduct').value;
+            const packageSelect = document.getElementById('clientPackage');
 
             if (!productKey) {
                 packageSelect.innerHTML = '<option value="">Select a package...</option>';
@@ -506,20 +593,43 @@
             });
         }
 
+        // Add onchange event to product select
+        document.addEventListener('DOMContentLoaded', () => {
+            const productSelect = document.getElementById('clientProduct');
+            if (productSelect) {
+                productSelect.addEventListener('change', loadPackages);
+            }
+        });
+
         async function createClient(event) {
             event.preventDefault();
 
-            const productKey = document.getElementById('productSelect').value;
-            const packageKey = document.getElementById('packageSelect').value;
+            const productKey = document.getElementById('clientProduct').value;
+            const packageKey = document.getElementById('clientPackage').value;
             const username = document.getElementById('clientUsername').value.trim();
             const password = document.getElementById('clientPassword').value.trim();
+
+            if (!productKey) {
+                showAlert('Please select a product', 'error');
+                return;
+            }
 
             if (!packageKey) {
                 showAlert('Please select a package', 'error');
                 return;
             }
 
-            const submitBtn = document.getElementById('submitBtn');
+            if (!username) {
+                showAlert('Please enter a username', 'error');
+                return;
+            }
+
+            if (!password) {
+                showAlert('Please enter a password', 'error');
+                return;
+            }
+
+            const submitBtn = event.target.querySelector('button[type="submit"]');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Creating...';
 
@@ -538,13 +648,18 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    showAlert(`Client account created successfully! Username: ${username}`, 'success');
+                    showAlert(`✅ Client account created successfully! Username: ${username}`, 'success');
                     document.getElementById('createClientForm').reset();
-                    loadPackages(); // Reset package dropdown
+                    document.getElementById('clientPackage').innerHTML = '<option value="">Select a package...</option>';
+                    document.getElementById('clientPackage').disabled = true;
 
                     resellerData.credits = data.creditsRemaining;
                     document.getElementById('resellerCredits').textContent = `Credits: ${data.creditsRemaining}`;
                     document.getElementById('profileCredits').textContent = data.creditsRemaining;
+                    
+                    if (data.warning) {
+                        showAlert(`⚠️ ${data.warning}`, 'error');
+                    }
                 } else {
                     showAlert(data.error || 'Failed to create client', 'error');
                 }
@@ -553,7 +668,7 @@
                 showAlert('An error occurred. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Client';
+                submitBtn.textContent = 'CREATE CLIENT ACCOUNT';
             }
         }
 
