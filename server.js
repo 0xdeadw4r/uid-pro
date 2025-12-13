@@ -169,8 +169,88 @@ const connectDB = async () => {
 
 connectDB();
 
+// ===== AUTOMATIC EXPIRED UID CLEANUP SYSTEM =====
+async function cleanupExpiredUIDs() {
+  try {
+    const now = new Date();
+    const expiredUIDs = await UID.find({ expiresAt: { $lt: now } });
+    
+    if (expiredUIDs.length === 0) {
+      return { deleted: 0, errors: [] };
+    }
+    
+    console.log(`🧹 Found ${expiredUIDs.length} expired UIDs to cleanup`);
+    
+    let deletedCount = 0;
+    const errors = [];
+    
+    for (const uidRecord of expiredUIDs) {
+      try {
+        // Try to delete from external API first
+        if (process.env.BASE_URL && process.env.API_KEY) {
+          try {
+            const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=delete&uid=${uidRecord.uid}`;
+            await axios.post(apiUrl, {}, { timeout: 5000 });
+            console.log(`✅ Deleted expired UID ${uidRecord.uid} from API`);
+          } catch (apiError) {
+            // API deletion failed but continue with MongoDB cleanup
+            console.log(`⚠️ API deletion failed for ${uidRecord.uid}: ${apiError.message}`);
+          }
+        }
+        
+        // Delete from MongoDB
+        await UID.deleteOne({ _id: uidRecord._id });
+        deletedCount++;
+        console.log(`✅ Deleted expired UID ${uidRecord.uid} from database`);
+      } catch (err) {
+        errors.push({ uid: uidRecord.uid, error: err.message });
+        console.error(`❌ Failed to cleanup UID ${uidRecord.uid}: ${err.message}`);
+      }
+    }
+    
+    console.log(`🧹 Cleanup complete: ${deletedCount}/${expiredUIDs.length} expired UIDs removed`);
+    return { deleted: deletedCount, errors };
+  } catch (error) {
+    console.error('❌ Expired UID cleanup error:', error.message);
+    return { deleted: 0, errors: [{ error: error.message }] };
+  }
+}
+
+// Run cleanup every 5 minutes
+let cleanupInterval = null;
+let cleanupStarted = false;
+
+function startExpiredUIDCleanup() {
+  // Guard against multiple interval registrations on reconnect
+  if (cleanupStarted) {
+    console.log('🧹 Cleanup already scheduled, skipping duplicate registration');
+    return;
+  }
+  cleanupStarted = true;
+  
+  // Clear any existing interval (safety check)
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+  
+  // Run initial cleanup after 10 seconds to allow DB connection
+  setTimeout(async () => {
+    console.log('🧹 Running initial expired UID cleanup...');
+    await cleanupExpiredUIDs();
+  }, 10000);
+  
+  // Then run every 5 minutes
+  cleanupInterval = setInterval(async () => {
+    await cleanupExpiredUIDs();
+  }, 5 * 60 * 1000);
+  
+  console.log('✅ Automatic expired UID cleanup scheduled (every 5 minutes)');
+}
+
 mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connected');
+  startExpiredUIDCleanup();
 });
 
 mongoose.connection.on('error', (err) => {
@@ -1238,7 +1318,28 @@ app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, req
 
     const existingUID = await UID.findOne({ uid });
     if (existingUID) {
-      return res.status(400).json({ error: 'UID already exists' });
+      // Check if the existing UID is expired - if so, auto-delete it
+      const now = new Date();
+      if (existingUID.expiresAt < now) {
+        console.log(`🧹 Auto-deleting expired UID ${uid} before recreating`);
+        
+        // Try to delete from external API first
+        if (process.env.BASE_URL && process.env.API_KEY) {
+          try {
+            const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=delete&uid=${uid}`;
+            await axios.post(apiUrl, {}, { timeout: 5000 });
+            console.log(`✅ Auto-deleted expired UID ${uid} from API`);
+          } catch (apiError) {
+            console.log(`⚠️ API deletion failed for expired ${uid}: ${apiError.message}`);
+          }
+        }
+        
+        // Delete from MongoDB
+        await UID.deleteOne({ uid });
+        console.log(`✅ Auto-deleted expired UID ${uid} from database`);
+      } else {
+        return res.status(400).json({ error: 'UID already exists and is still active' });
+      }
     }
 
     const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=create&uid=${uid}&duration=${selectedPackage.hours}`;
@@ -1359,6 +1460,25 @@ app.post('/api/delete-uid', requireAuth, checkUserPaused, async (req, res) => {
     res.status(500).json({
       error: error.response?.data?.message || 'Failed to delete UID'
     });
+  }
+});
+
+// Admin endpoint to manually trigger expired UID cleanup
+app.post('/api/admin/cleanup-expired-uids', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await cleanupExpiredUIDs();
+    
+    await logActivity(req.session.user.username, 'admin', `Manually triggered expired UID cleanup: ${result.deleted} deleted`);
+    
+    res.json({
+      success: true,
+      message: `Cleanup complete: ${result.deleted} expired UIDs removed`,
+      deleted: result.deleted,
+      errors: result.errors
+    });
+  } catch (error) {
+    console.error('Manual cleanup error:', error);
+    res.status(500).json({ error: 'Failed to cleanup expired UIDs' });
   }
 });
 

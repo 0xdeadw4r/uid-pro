@@ -4,6 +4,21 @@
     box-sizing: border-box;
 }
 
+/* Performance optimizations */
+html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+img, video {
+    content-visibility: auto;
+}
+
+.card, .package-card, .admin-section, nav, .header {
+    contain: layout style paint;
+}
+
 :root {
     --primary-white: #FFFFFF;
     --white-hover: #F5F5F5;
@@ -27,9 +42,9 @@
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.6);
     --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.8);
-    --transition-base: 0.15s ease-out;
-    --transition-smooth: 0.2s ease-out;
-    --transition-bounce: 0.25s ease-out;
+    --transition-base: 0.1s ease-out;
+    --transition-smooth: 0.15s ease-out;
+    --transition-bounce: 0.2s ease-out;
 }
 
 html {
@@ -125,44 +140,22 @@ nav h1 {
     border-radius: 8px;
     font-weight: 600;
     font-size: 12px;
-    transition: all var(--transition-base);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border-left: 3px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-links a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: #FFFFFF;
-    transform: scaleY(0);
-    transition: transform var(--transition-base);
 }
 
 .nav-links a:hover {
     color: #FFFFFF;
     background: rgba(255, 255, 255, 0.1);
-    transform: translateX(4px);
-}
-
-.nav-links a:hover::before {
-    transform: scaleY(1);
+    border-left-color: #FFFFFF;
 }
 
 .nav-links a.active {
     background: rgba(255, 255, 255, 0.15);
     color: #FFFFFF;
     font-weight: 700;
-}
-
-.nav-links a.active::before {
-    transform: scaleY(1);
+    border-left-color: #FFFFFF;
 }
 
 .nav-links button {
@@ -174,35 +167,16 @@ nav h1 {
     cursor: pointer;
     font-weight: 600;
     font-size: 12px;
-    transition: all var(--transition-base);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     text-align: left;
     border-left: 3px solid transparent;
-    position: relative;
-    overflow: hidden;
-}
-
-.nav-links button::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: #FFFFFF;
-    transform: scaleY(0);
-    transition: transform var(--transition-base);
 }
 
 .nav-links button:hover {
     color: #FFFFFF;
     background: rgba(255, 255, 255, 0.1);
-    transform: translateX(4px);
-}
-
-.nav-links button:hover::before {
-    transform: scaleY(1);
+    border-left-color: #FFFFFF;
 }
 
 /* Navigation visibility control */
