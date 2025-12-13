@@ -22,6 +22,125 @@ const app = express();
 app.set('trust proxy', 1);
 const PORT = process.env.PORT || 5000;
 
+// Socket.IO setup
+const http = require('http');
+const socketIo = require('socket.io');
+const server = http.createServer(app);
+const io = socketIo(server);
+
+// Chat Message Model (assuming this is created in a separate file, e.g., models/ChatMessage.js)
+// If not, you would need to define it here or import it.
+// For this example, we'll assume it exists and is imported like other models.
+const ChatMessage = require('./models/ChatMessage');
+
+// Socket.IO chat handlers
+const connectedUsers = new Map(); // Track connected users by username
+
+io.on('connection', (socket) => {
+  console.log('User connected to chat:', socket.id);
+
+  socket.on('join-chat', async (data) => {
+    const { username, userType } = data;
+    socket.username = username;
+    socket.userType = userType;
+
+    // Store socket reference
+    connectedUsers.set(username, socket);
+
+    console.log(`${username} (${userType}) joined chat`);
+
+    // Notify all admins that a user is online
+    connectedUsers.forEach((userSocket, user) => {
+      if (userSocket.userType === 'admin') {
+        userSocket.emit('user-online', { username, userType });
+      }
+    });
+  });
+
+  socket.on('chat_message', async (data) => {
+    try {
+      const { text, senderId, senderName, senderType } = data;
+
+      console.log(`Chat message from ${senderName} (${senderType}): ${text}`);
+
+      // Determine receiver based on sender type
+      let receiverUsername = null;
+      if (senderType === 'client') {
+        // Client sending to admin - find first available admin
+        const adminSocket = Array.from(connectedUsers.values()).find(s => s.userType === 'admin');
+        receiverUsername = adminSocket ? adminSocket.username : 'admin';
+      } else {
+        // Admin sending to specific client
+        receiverUsername = data.receiverUsername || senderId;
+      }
+
+      // Save message to database
+      const chatMessage = await ChatMessage.create({
+        senderUsername: senderName || socket.username,
+        senderType: senderType,
+        receiverUsername: receiverUsername,
+        message: text,
+        isRead: false
+      });
+
+      // Emit to sender (confirmation)
+      socket.emit('chat_message', {
+        text: text,
+        senderId: senderId,
+        senderName: senderName,
+        senderType: senderType,
+        timestamp: chatMessage.timestamp
+      });
+
+      // Emit to receiver if online
+      if (senderType === 'client') {
+        // Send to all admins
+        connectedUsers.forEach((userSocket, user) => {
+          if (userSocket.userType === 'admin' && userSocket.id !== socket.id) {
+            userSocket.emit('chat_message', {
+              text: text,
+              senderId: senderId,
+              senderName: senderName,
+              senderType: senderType,
+              timestamp: chatMessage.timestamp
+            });
+          }
+        });
+      } else {
+        // Send to specific client
+        const clientSocket = connectedUsers.get(receiverUsername);
+        if (clientSocket && clientSocket.id !== socket.id) {
+          clientSocket.emit('admin_message', {
+            text: text,
+            senderId: socket.username,
+            senderName: socket.username,
+            senderType: 'admin',
+            timestamp: chatMessage.timestamp
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Send message error:', error);
+      socket.emit('error', { message: 'Failed to send message' });
+    }
+  });
+
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      console.log(`${socket.username} disconnected from chat`);
+      connectedUsers.delete(socket.username);
+
+      // Notify admins
+      connectedUsers.forEach((userSocket, user) => {
+        if (userSocket.userType === 'admin') {
+          userSocket.emit('user-offline', { username: socket.username });
+        }
+      });
+    }
+  });
+});
+
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -42,6 +161,7 @@ const connectDB = async () => {
     await migrateUsers();
     await initializeApiConfig();
     await initializePackages();
+    await initializeProducts();
   } catch (err) {
     console.error('❌ MongoDB connection error:', err.message);
   }
@@ -49,8 +169,88 @@ const connectDB = async () => {
 
 connectDB();
 
+// ===== AUTOMATIC EXPIRED UID CLEANUP SYSTEM =====
+async function cleanupExpiredUIDs() {
+  try {
+    const now = new Date();
+    const expiredUIDs = await UID.find({ expiresAt: { $lt: now } });
+    
+    if (expiredUIDs.length === 0) {
+      return { deleted: 0, errors: [] };
+    }
+    
+    console.log(`🧹 Found ${expiredUIDs.length} expired UIDs to cleanup`);
+    
+    let deletedCount = 0;
+    const errors = [];
+    
+    for (const uidRecord of expiredUIDs) {
+      try {
+        // Try to delete from external API first
+        if (process.env.BASE_URL && process.env.API_KEY) {
+          try {
+            const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=delete&uid=${uidRecord.uid}`;
+            await axios.post(apiUrl, {}, { timeout: 5000 });
+            console.log(`✅ Deleted expired UID ${uidRecord.uid} from API`);
+          } catch (apiError) {
+            // API deletion failed but continue with MongoDB cleanup
+            console.log(`⚠️ API deletion failed for ${uidRecord.uid}: ${apiError.message}`);
+          }
+        }
+        
+        // Delete from MongoDB
+        await UID.deleteOne({ _id: uidRecord._id });
+        deletedCount++;
+        console.log(`✅ Deleted expired UID ${uidRecord.uid} from database`);
+      } catch (err) {
+        errors.push({ uid: uidRecord.uid, error: err.message });
+        console.error(`❌ Failed to cleanup UID ${uidRecord.uid}: ${err.message}`);
+      }
+    }
+    
+    console.log(`🧹 Cleanup complete: ${deletedCount}/${expiredUIDs.length} expired UIDs removed`);
+    return { deleted: deletedCount, errors };
+  } catch (error) {
+    console.error('❌ Expired UID cleanup error:', error.message);
+    return { deleted: 0, errors: [{ error: error.message }] };
+  }
+}
+
+// Run cleanup every 5 minutes
+let cleanupInterval = null;
+let cleanupStarted = false;
+
+function startExpiredUIDCleanup() {
+  // Guard against multiple interval registrations on reconnect
+  if (cleanupStarted) {
+    console.log('🧹 Cleanup already scheduled, skipping duplicate registration');
+    return;
+  }
+  cleanupStarted = true;
+  
+  // Clear any existing interval (safety check)
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+  
+  // Run initial cleanup after 10 seconds to allow DB connection
+  setTimeout(async () => {
+    console.log('🧹 Running initial expired UID cleanup...');
+    await cleanupExpiredUIDs();
+  }, 10000);
+  
+  // Then run every 5 minutes
+  cleanupInterval = setInterval(async () => {
+    await cleanupExpiredUIDs();
+  }, 5 * 60 * 1000);
+  
+  console.log('✅ Automatic expired UID cleanup scheduled (every 5 minutes)');
+}
+
 mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connected');
+  startExpiredUIDCleanup();
 });
 
 mongoose.connection.on('error', (err) => {
@@ -71,6 +271,7 @@ const AimkillKey = require('./models/AimkillKey');
 const ApiKey = require('./models/ApiKey');
 const ApiConfig = require('./models/ApiConfig');
 const PackageConfig = require('./models/PackageConfig');
+const Product = require('./models/Product');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -88,23 +289,28 @@ app.use(session({
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.MONGODB_URI,
-    touchAfter: 24 * 3600,
-    mongoOptions: {
-      serverSelectionTimeoutMS: 10000,
-      socketTimeoutMS: 45000
-    }
+    touchAfter: 24 * 3600
   }),
   cookie: {
     secure: false,
     maxAge: 24 * 60 * 60 * 1000,
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    path: '/'
   },
-  proxy: true
+  name: 'connect.sid',
+  proxy: true,
+  rolling: true
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+const clientRoutes = require('./routes/client');
+app.use('/client', clientRoutes);
+
+const resellerRoutes = require('./routes/reseller');
+app.use('/reseller', resellerRoutes);
 
 app.use(['/dashboard', '/packages', '/admin', '/settings', '/security', '/invoices'], checkNetworkFingerprint);
 
@@ -196,6 +402,86 @@ async function initializePackages() {
     return config;
   } catch (error) {
     console.error('⚠️ Error initializing package config:', error.message);
+  }
+}
+
+async function initializeProducts() {
+  try {
+    const productCount = await Product.countDocuments({});
+
+    if (productCount === 0) {
+      // Create default products
+      await Product.create([
+        {
+          productKey: 'UID_BYPASS',
+          displayName: 'UID Bypass',
+          description: 'Create and manage UID bypass accounts',
+          isActive: true,
+          createdBy: 'system',
+          announcements: '',
+          packages: new Map(Object.entries({
+            '1day': { display: '1 Day', hours: 24, days: 1, credits: 1, price: 0.50 },
+            '3days': { display: '3 Days', hours: 72, days: 3, credits: 3, price: 1.30, popular: true },
+            '7days': { display: '7 Days', hours: 168, days: 7, credits: 5, price: 2.33 },
+            '14days': { display: '14 Days', hours: 336, days: 14, credits: 10, price: 3.50 },
+            '30days': { display: '30 Days', hours: 720, days: 30, credits: 15, price: 5.20 }
+          }))
+        },
+        {
+          productKey: 'AIMKILL',
+          displayName: 'Aimkill',
+          description: 'Create Aimkill user accounts',
+          isActive: true,
+          createdBy: 'system',
+          announcements: '',
+          packages: new Map(Object.entries({
+            '1day': { display: '1 Day', days: 1, credits: 3, price: 2.99 },
+            '3day': { display: '3 Days', days: 3, credits: 8, price: 7.99 },
+            '7day': { display: '7 Days', days: 7, credits: 15, price: 14.99 },
+            '15day': { display: '15 Days', days: 15, credits: 30, price: 29.99 },
+            '30day': { display: '30 Days', days: 30, credits: 50, price: 49.99 },
+            'lifetime': { display: 'Lifetime (1 Year)', days: 365, credits: 100, price: 99.99 }
+          }))
+        },
+        {
+          productKey: 'SILENT_AIM',
+          displayName: 'Silent Aim',
+          description: 'Silent Aim product for clients',
+          isActive: true,
+          createdBy: 'system',
+          announcements: '',
+          allowHwidReset: false,
+          downloadLink: '',
+          packages: new Map()
+        }
+      ]);
+      console.log('✅ Default products initialized');
+    } else {
+      // Ensure SILENT_AIM product exists and has announcements field
+      const silentAimExists = await Product.findOne({ productKey: 'SILENT_AIM' });
+      if (!silentAimExists) {
+        await Product.create({
+          productKey: 'SILENT_AIM',
+          displayName: 'Silent Aim',
+          description: 'Silent Aim product for clients',
+          isActive: true,
+          createdBy: 'system',
+          announcements: '',
+          allowHwidReset: false,
+          downloadLink: '',
+          packages: new Map()
+        });
+        console.log('✅ SILENT_AIM product created');
+      } else if (!silentAimExists.announcements) {
+        // Add announcements field if missing
+        silentAimExists.announcements = '';
+        await silentAimExists.save();
+        console.log('✅ SILENT_AIM product updated with announcements field');
+      }
+      console.log('✅ Products loaded from MongoDB');
+    }
+  } catch (error) {
+    console.error('⚠️ Error initializing products:', error.message);
   }
 }
 
@@ -536,6 +822,10 @@ app.get('/aimkill-packages', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'aimkill-packages.html'));
 });
 
+app.get('/chat', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'chat.html'));
+});
+
 app.post('/api/register', async (req, res) => {
   const { username, password, isGuest } = req.body;
   const ip = req.ip || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -573,7 +863,7 @@ app.post('/api/register', async (req, res) => {
 
     await logActivity(username, 'registration', guestStatus ? 'New guest account created' : 'New account created');
     await logLoginAttempt(username, true, ip);
-    await notifyAdminAction(username, guestStatus ? 'New Guest Registration' : 'New Registration', username);
+    await notifyAdminAction(username, guestStatus ? 'New Registration' : 'New Registration', username);
 
     res.json({
       success: true,
@@ -1028,7 +1318,28 @@ app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, req
 
     const existingUID = await UID.findOne({ uid });
     if (existingUID) {
-      return res.status(400).json({ error: 'UID already exists' });
+      // Check if the existing UID is expired - if so, auto-delete it
+      const now = new Date();
+      if (existingUID.expiresAt < now) {
+        console.log(`🧹 Auto-deleting expired UID ${uid} before recreating`);
+        
+        // Try to delete from external API first
+        if (process.env.BASE_URL && process.env.API_KEY) {
+          try {
+            const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=delete&uid=${uid}`;
+            await axios.post(apiUrl, {}, { timeout: 5000 });
+            console.log(`✅ Auto-deleted expired UID ${uid} from API`);
+          } catch (apiError) {
+            console.log(`⚠️ API deletion failed for expired ${uid}: ${apiError.message}`);
+          }
+        }
+        
+        // Delete from MongoDB
+        await UID.deleteOne({ uid });
+        console.log(`✅ Auto-deleted expired UID ${uid} from database`);
+      } else {
+        return res.status(400).json({ error: 'UID already exists and is still active' });
+      }
     }
 
     const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=create&uid=${uid}&duration=${selectedPackage.hours}`;
@@ -1149,6 +1460,25 @@ app.post('/api/delete-uid', requireAuth, checkUserPaused, async (req, res) => {
     res.status(500).json({
       error: error.response?.data?.message || 'Failed to delete UID'
     });
+  }
+});
+
+// Admin endpoint to manually trigger expired UID cleanup
+app.post('/api/admin/cleanup-expired-uids', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await cleanupExpiredUIDs();
+    
+    await logActivity(req.session.user.username, 'admin', `Manually triggered expired UID cleanup: ${result.deleted} deleted`);
+    
+    res.json({
+      success: true,
+      message: `Cleanup complete: ${result.deleted} expired UIDs removed`,
+      deleted: result.deleted,
+      errors: result.errors
+    });
+  } catch (error) {
+    console.error('Manual cleanup error:', error);
+    res.status(500).json({ error: 'Failed to cleanup expired UIDs' });
   }
 });
 
@@ -2371,7 +2701,8 @@ app.get('/api/guest-settings', async (req, res) => {
         guestPassMaxDuration: '1day',
         requireSocialVerification: false,
         youtubeChannelUrl: '',
-        instagramProfileUrl: ''
+        instagramProfileUrl: '',
+        guestVideoUrl: ''
       });
     }
 
@@ -2381,7 +2712,8 @@ app.get('/api/guest-settings', async (req, res) => {
       guestPassMaxDuration: adminUser.guestPassMaxDuration || '1day',
       requireSocialVerification: adminUser.requireSocialVerification === true,
       youtubeChannelUrl: adminUser.youtubeChannelUrl || '',
-      instagramProfileUrl: adminUser.instagramProfileUrl || ''
+      instagramProfileUrl: adminUser.instagramProfileUrl || '',
+      guestVideoUrl: adminUser.guestVideoUrl || ''
     });
   } catch (error) {
     res.json({
@@ -2390,7 +2722,8 @@ app.get('/api/guest-settings', async (req, res) => {
       guestPassMaxDuration: '1day',
       requireSocialVerification: false,
       youtubeChannelUrl: '',
-      instagramProfileUrl: ''
+      instagramProfileUrl: '',
+      guestVideoUrl: ''
     });
   }
 });
@@ -2398,15 +2731,50 @@ app.get('/api/guest-settings', async (req, res) => {
 // Admin update guest settings
 app.post('/api/admin/guest-settings', requireAuth, requireAdmin, async (req, res) => {
   try {
-    const { allowGuestFreeUID, allowGuestFreeAimkill, guestPassMaxDuration, requireSocialVerification, youtubeChannelUrl, instagramProfileUrl } = req.body;
+    const { allowGuestFreeUID, allowGuestFreeAimkill, guestPassMaxDuration, requireSocialVerification, youtubeChannelUrl, instagramProfileUrl, guestVideoUrl } = req.body;
 
     const admin = await User.findOne({ username: 'admin' });
 
     admin.allowGuestFreeUID = allowGuestFreeUID === true;
     admin.allowGuestFreeAimkill = allowGuestFreeAimkill === true;
     admin.requireSocialVerification = requireSocialVerification === true;
-    admin.youtubeChannelUrl = youtubeChannelUrl || '';
-    admin.instagramProfileUrl = instagramProfileUrl || '';
+
+    // Only update URLs if new values are provided (non-empty)
+    if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() !== '') {
+      admin.youtubeChannelUrl = youtubeChannelUrl;
+    } else if (youtubeChannelUrl !== undefined && youtubeChannelUrl.trim() === '') {
+      admin.youtubeChannelUrl = '';
+    }
+
+    if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() !== '') {
+      admin.instagramProfileUrl = instagramProfileUrl;
+    } else if (instagramProfileUrl !== undefined && instagramProfileUrl.trim() === '') {
+      admin.instagramProfileUrl = '';
+    }
+
+    if (guestVideoUrl !== undefined) {
+      const trimmedUrl = (guestVideoUrl || '').trim();
+
+      // Only update if a new URL is provided or explicitly cleared
+      if (trimmedUrl !== '') {
+        // Convert YouTube watch URLs to embed URLs
+        let processedUrl = trimmedUrl;
+        if (processedUrl.includes('youtube.com/watch?v=')) {
+          const videoId = processedUrl.split('v=')[1]?.split('&')[0];
+          if (videoId) {
+            processedUrl = `https://www.youtube.com/embed/${videoId}`;
+          }
+        } else if (processedUrl.includes('youtu.be/')) {
+          const videoId = processedUrl.split('youtu.be/')[1]?.split('?')[0];
+          if (videoId) {
+            processedUrl = `https://www.youtube.com/embed/${videoId}`;
+          }
+        }
+        admin.guestVideoUrl = processedUrl;
+      }
+      // If empty string sent and field already has a value, keep the existing value
+      // This allows other settings to be updated without erasing the video URL
+    }
 
     if (guestPassMaxDuration && ['1day', '3days', '7days', '15days', '30days'].includes(guestPassMaxDuration)) {
       admin.guestPassMaxDuration = guestPassMaxDuration;
@@ -2709,8 +3077,8 @@ app.post('/api/aimkill/create-user', requireAuth, checkGuestFreeAimkill, checkUs
 
     const cleanUsername = username.trim();
 
-    if (!cleanUsername.startsWith('LC')) {
-      return res.status(400).json({ error: 'Username must start with "LC"' });
+    if (!cleanUsername.startsWith('DC')) {
+      return res.status(400).json({ error: 'Username must start with "DC"' });
     }
 
     if (password.length < 6) {
@@ -2762,10 +3130,8 @@ app.post('/api/aimkill/create-user', requireAuth, checkGuestFreeAimkill, checkUs
         }
       }
 
-      // Get admin-configured max duration
+      // Get max duration from admin settings
       const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-
-      // Validate guest is using allowed package based on duration days
       const maxDays = parseInt(maxDuration.match(/\d+/)?.[0]) || 1;
 
       if (duration > maxDays) {
@@ -3208,6 +3574,116 @@ app.post('/api/admin/mass-delete-api-keys', requireAuth, requireAdmin, async (re
   }
 });
 
+// Chat API endpoints
+app.get('/api/chat/clients', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const Client = require('./models/Client');
+    const clients = await Client.find({ isActive: true })
+      .select('username productKey')
+      .sort({ username: 1 });
+
+    res.json({ success: true, clients });
+  } catch (error) {
+    console.error('Get chat clients error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch clients' });
+  }
+});
+
+app.get('/api/chat/history', requireAuth, async (req, res) => {
+  try {
+    const { withUser } = req.query;
+    const currentUser = req.session.user.username;
+
+    const messages = await ChatMessage.find({
+      $or: [
+        { senderUsername: currentUser, receiverUsername: withUser },
+        { senderUsername: withUser, receiverUsername: currentUser }
+      ]
+    }).sort({ timestamp: -1 }).limit(50).exec();
+
+    // Reverse to show oldest first
+    messages.reverse();
+
+    res.json({ success: true, messages });
+  } catch (error) {
+    console.error('Get chat history error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch chat history' });
+  }
+});
+
+// Admin: Delete chat messages for specific user
+app.post('/api/admin/chat/delete-user-messages', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ error: 'Username is required' });
+    }
+
+    const result = await ChatMessage.deleteMany({
+      $or: [
+        { senderUsername: username },
+        { receiverUsername: username }
+      ]
+    });
+
+    await logActivity(req.session.user.username, 'admin-chat', `Deleted ${result.deletedCount} messages for user: ${username}`);
+
+    res.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted ${result.deletedCount} messages for ${username}`
+    });
+  } catch (error) {
+    console.error('Delete user chat messages error:', error);
+    res.status(500).json({ error: 'Failed to delete messages' });
+  }
+});
+
+// Admin: Delete all chat messages
+app.post('/api/admin/chat/delete-all-messages', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const result = await ChatMessage.deleteMany({});
+
+    await logActivity(req.session.user.username, 'admin-chat', `Deleted all chat messages (${result.deletedCount} total)`);
+
+    res.json({
+      success: true,
+      deletedCount: result.deletedCount,
+      message: `Deleted all ${result.deletedCount} chat messages`
+    });
+  } catch (error) {
+    console.error('Delete all chat messages error:', error);
+    res.status(500).json({ error: 'Failed to delete messages' });
+  }
+});
+
+// Admin: Get chat statistics
+app.get('/api/admin/chat/stats', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const totalMessages = await ChatMessage.countDocuments({});
+    const unreadMessages = await ChatMessage.countDocuments({ isRead: false });
+
+    // Get unique users in chat
+    const senders = await ChatMessage.distinct('senderUsername');
+    const receivers = await ChatMessage.distinct('receiverUsername');
+    const uniqueUsers = [...new Set([...senders, ...receivers])];
+
+    res.json({
+      success: true,
+      stats: {
+        totalMessages,
+        unreadMessages,
+        uniqueUsers: uniqueUsers.length,
+        userList: uniqueUsers
+      }
+    });
+  } catch (error) {
+    console.error('Get chat stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch chat stats' });
+  }
+});
+
 app.post('/api/change-password', requireAuth, async (req, res) => {
   const { currentPassword, newPassword } = req.body;
   const username = req.session.user.username;
@@ -3377,6 +3853,165 @@ app.post('/api/admin/unverify-all-users', requireAuth, requireAdmin, async (req,
   }
 });
 
+// Product Management APIs
+app.get('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const products = await Product.find({}).sort({ createdAt: -1 });
+
+    const productsData = products.map(product => ({
+      productKey: product.productKey,
+      displayName: product.displayName,
+      description: product.description,
+      isActive: product.isActive,
+      packages: Object.fromEntries(product.packages),
+      announcements: product.announcements || '',
+      genzauthSellerKey: product.genzauthSellerKey || '',
+      allowHwidReset: product.allowHwidReset || false,
+      maxFreeHwidResets: product.maxFreeHwidResets || 5,
+      hwidResetPrice: product.hwidResetPrice || 0,
+      downloadLink: product.downloadLink || '',
+      setupVideoLink: product.setupVideoLink || '',
+      guestVideoLink: product.guestVideoLink || '',
+      settings: Object.fromEntries(product.settings || new Map()),
+      createdAt: product.createdAt
+    }));
+
+    res.json({ success: true, products: productsData });
+  } catch (error) {
+    console.error('Get products error:', error);
+    res.status(500).json({ error: 'Failed to fetch products' });
+  }
+});
+
+app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey, displayName, description, packages, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink } = req.body;
+
+    if (!productKey || !displayName) {
+      return res.status(400).json({ error: 'Product key and display name are required' });
+    }
+
+    // Validate video links if provided
+    const urlPattern = /^https?:\/\/.+/i;
+    if (setupVideoLink && setupVideoLink.trim() && !urlPattern.test(setupVideoLink.trim())) {
+      return res.status(400).json({ error: 'Setup video link must be a valid URL starting with http:// or https://' });
+    }
+    if (guestVideoLink && guestVideoLink.trim() && !urlPattern.test(guestVideoLink.trim())) {
+      return res.status(400).json({ error: 'Guest video link must be a valid URL starting with http:// or https://' });
+    }
+
+    const existingProduct = await Product.findOne({ productKey });
+    if (existingProduct) {
+      return res.status(400).json({ error: 'Product with this key already exists' });
+    }
+
+    const packagesMap = new Map(Object.entries(packages || {}));
+
+    const product = await Product.create({
+      productKey: productKey.toUpperCase().replace(/\s+/g, '_'),
+      displayName,
+      description: description || '',
+      packages: packagesMap,
+      announcements: announcements || '',
+      genzauthSellerKey: genzauthSellerKey || '',
+      allowHwidReset: allowHwidReset || false,
+      maxFreeHwidResets: maxFreeHwidResets || 5,
+      hwidResetPrice: hwidResetPrice || 0,
+      downloadLink: downloadLink || '',
+      setupVideoLink: setupVideoLink || '',
+      guestVideoLink: guestVideoLink || '',
+      createdBy: req.session.user.username,
+      isActive: true
+    });
+
+    await logActivity(req.session.user.username, 'product-create', `Created new product: ${displayName}`);
+
+    res.json({
+      success: true,
+      message: 'Product created successfully',
+      product: {
+        productKey: product.productKey,
+        displayName: product.displayName,
+        description: product.description,
+        announcements: product.announcements,
+        genzauthSellerKey: product.genzauthSellerKey ? '***configured***' : '',
+        allowHwidReset: product.allowHwidReset,
+        downloadLink: product.downloadLink
+      }
+    });
+  } catch (error) {
+    console.error('Create product error:', error);
+    res.status(500).json({ error: 'Failed to create product' });
+  }
+});
+
+app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey } = req.params;
+    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink } = req.body;
+
+    const product = await Product.findOne({ productKey });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    // Validate video links if provided
+    const urlPattern = /^https?:\/\/.+/i;
+    if (setupVideoLink !== undefined && setupVideoLink.trim() && !urlPattern.test(setupVideoLink.trim())) {
+      return res.status(400).json({ error: 'Setup video link must be a valid URL starting with http:// or https://' });
+    }
+    if (guestVideoLink !== undefined && guestVideoLink.trim() && !urlPattern.test(guestVideoLink.trim())) {
+      return res.status(400).json({ error: 'Guest video link must be a valid URL starting with http:// or https://' });
+    }
+
+    if (displayName) product.displayName = displayName;
+    if (description !== undefined) product.description = description;
+    if (isActive !== undefined) product.isActive = isActive;
+    if (packages) product.packages = new Map(Object.entries(packages));
+    if (announcements !== undefined) product.announcements = announcements;
+    if (genzauthSellerKey !== undefined) product.genzauthSellerKey = genzauthSellerKey;
+    if (allowHwidReset !== undefined) product.allowHwidReset = allowHwidReset;
+    if (maxFreeHwidResets !== undefined) product.maxFreeHwidResets = maxFreeHwidResets;
+    if (hwidResetPrice !== undefined) product.hwidResetPrice = hwidResetPrice;
+    if (downloadLink !== undefined) product.downloadLink = downloadLink;
+    if (setupVideoLink !== undefined) product.setupVideoLink = setupVideoLink;
+    if (guestVideoLink !== undefined) product.guestVideoLink = guestVideoLink;
+
+    await product.save();
+
+    await logActivity(req.session.user.username, 'product-update', `Updated product: ${productKey}`);
+
+    res.json({
+      success: true,
+      message: 'Product updated successfully'
+    });
+  } catch (error) {
+    console.error('Update product error:', error);
+    res.status(500).json({ error: 'Failed to update product' });
+  }
+});
+
+app.delete('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { productKey } = req.params;
+
+    const product = await Product.findOneAndDelete({ productKey });
+    if (!product) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    await logActivity(req.session.user.username, 'product-delete', `Deleted product: ${productKey}`);
+
+    res.json({
+      success: true,
+      message: 'Product deleted successfully'
+    });
+  } catch (error) {
+    console.error('Delete product error:', error);
+    res.status(500).json({ error: 'Failed to delete product' });
+  }
+});
+
 // Get guest pass data for admin panel
 app.get('/api/admin/guest-passes', requireAuth, requireAdmin, async (req, res) => {
   try {
@@ -3487,28 +4122,114 @@ app.post('/api/admin/reset-all-guest-passes', requireAuth, requireAdmin, async (
   }
 });
 
+// Socket.IO connection handling
+const activeUsers = new Map(); // Map of username -> socket.id
 
-app.use((req, res) => {
-  res.status(404).json({ error: 'Route not found' });
+io.on('connection', (socket) => {
+  console.log('🔌 New socket connection:', socket.id);
+
+  // User joins chat
+  socket.on('join-chat', async (data) => {
+    const { username, userType } = data;
+    socket.username = username;
+    socket.userType = userType;
+    activeUsers.set(username, socket.id);
+
+    console.log(`✅ ${userType} joined chat: ${username}`);
+
+    // Notify others that user is online
+    socket.broadcast.emit('user-online', { username, userType });
+  });
+
+  // Send message
+  socket.on('send-message', async (data) => {
+    try {
+      const { senderUsername, senderType, receiverUsername, message } = data;
+
+      // Save message to database
+      const chatMessage = await ChatMessage.create({
+        senderUsername,
+        senderType,
+        receiverUsername,
+        message
+      });
+
+      // Emit to receiver if online
+      const receiverSocketId = activeUsers.get(receiverUsername);
+      if (receiverSocketId) {
+        io.to(receiverSocketId).emit('new-message', {
+          _id: chatMessage._id,
+          senderUsername,
+          senderType,
+          receiverUsername,
+          message,
+          timestamp: chatMessage.timestamp,
+          isRead: false
+        });
+      }
+
+      // Send confirmation back to sender
+      socket.emit('message-sent', {
+        _id: chatMessage._id,
+        senderUsername,
+        senderType,
+        receiverUsername,
+        message,
+        timestamp: chatMessage.timestamp,
+        isRead: false
+      });
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      socket.emit('message-error', { error: 'Failed to send message' });
+    }
+  });
+
+  // Mark messages as read
+  socket.on('mark-read', async (data) => {
+    try {
+      const { messageIds } = data;
+      await ChatMessage.updateMany(
+        { _id: { $in: messageIds } },
+        { isRead: true, readAt: new Date() }
+      );
+
+      socket.emit('messages-marked-read', { messageIds });
+    } catch (error) {
+      console.error('Error marking messages as read:', error);
+    }
+  });
+
+  // User typing indicator
+  socket.on('typing', (data) => {
+    const { receiverUsername } = data;
+    const receiverSocketId = activeUsers.get(receiverUsername);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit('user-typing', {
+        username: socket.username,
+        userType: socket.userType
+      });
+    }
+  });
+
+  // Disconnect
+  socket.on('disconnect', () => {
+    if (socket.username) {
+      activeUsers.delete(socket.username);
+      socket.broadcast.emit('user-offline', {
+        username: socket.username,
+        userType: socket.userType
+      });
+      console.log(`❌ ${socket.userType} left chat: ${socket.username}`);
+    }
+  });
 });
 
-app.use((err, req, res, next) => {
-  console.error('Server error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-const server = app.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🌐 Server running on port ${PORT}`);
   console.log(`🚀 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`✅ Server ready - accepting connections`);
+  console.log('✅ Server ready - accepting connections');
   console.log(`🔐 LicenseAuth: ${process.env.LICENSEAUTH_SELLER_KEY ? 'Configured' : 'Not configured (TEST MODE)'}`);
-});
-
-server.on('error', (err) => {
-  console.error('❌ Server error:', err.message);
-  if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use`);
-  }
 });
 
 const gracefulShutdown = async (signal) => {

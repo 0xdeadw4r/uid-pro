@@ -1,6 +1,11 @@
 // Fetch user info
 async function fetchUser() {
     try {
+        // Check if this is a client dashboard page
+        if (window.location.pathname === '/client/dashboard' || window.location.pathname.startsWith('/client/')) {
+            return; // Client dashboard has its own data loading
+        }
+
         const response = await fetch('/api/user', {
             credentials: 'include'
         });
@@ -150,7 +155,9 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
     }
 });
 
-// Load User Info on page load
-if (window.location.pathname !== '/login' && window.location.pathname !== '/register') {
+// Load User Info on page load (skip for client portal pages)
+if (window.location.pathname !== '/login' && 
+    window.location.pathname !== '/register' && 
+    !window.location.pathname.startsWith('/client/')) {
     document.addEventListener('DOMContentLoaded', fetchUser);
 }

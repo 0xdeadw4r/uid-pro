@@ -16,10 +16,10 @@ async function getSellerKey() {
     }
 }
 
-async function makeRequest(type, additionalParams = {}) {
+async function makeRequest(type, additionalParams = {}, customSellerKey = null) {
     try {
-        const SELLER_KEY = await getSellerKey();
-        
+        const SELLER_KEY = customSellerKey || await getSellerKey();
+
         const params = new URLSearchParams({
             sellerkey: SELLER_KEY,
             type,
@@ -40,9 +40,9 @@ async function makeRequest(type, additionalParams = {}) {
         }
 
         const response = await axios.get(url, { timeout: 15000 });
-        
+
         console.log(`[GenzAuth API] Response Status: ${response.status}`);
-        
+
         if (response.data) {
             console.log(`[GenzAuth API] Response:`, response.data);
             return response.data;
@@ -65,7 +65,7 @@ async function makeRequest(type, additionalParams = {}) {
 
 async function addLicense(expiry, amount = 1) {
     const SELLER_KEY = await getSellerKey();
-    
+
     if (!SELLER_KEY) {
         const testLicense = generateTestLicense();
         return {
@@ -84,7 +84,7 @@ async function addLicense(expiry, amount = 1) {
 
     if (result.success) {
         const key = result.data?.[0] || result.license || result.key || result.license_key || (result.licenses && result.licenses[0]);
-        
+
         if (!key) {
             console.error('❌ No key found in GenzAuth response:', result);
             return {
@@ -92,9 +92,9 @@ async function addLicense(expiry, amount = 1) {
                 error: 'No key returned from GenzAuth API'
             };
         }
-        
+
         console.log(`✅ GenzAuth license created: ${key}`);
-        
+
         return {
             success: true,
             key: key,
@@ -127,12 +127,12 @@ async function fetchAllUsers() {
     return makeRequest('fetchallusers');
 }
 
-async function createUser(username, password, expiry) {
+async function createUser(username, password, expiry, customSellerKey = null) {
     return makeRequest('createuser', { 
         username, 
         password,
         expiry: expiry.toString()
-    });
+    }, customSellerKey);
 }
 
 async function banUser(username) {
@@ -151,12 +151,72 @@ async function extendUser(username, days) {
     return makeRequest('extenduser', { user: username, days: days.toString() });
 }
 
-async function resetHwid(username) {
-    return makeRequest('resethwid', { user: username });
+async function resetHwid(username, customSellerKey = null) {
+    console.log(`[GenzAuth] Resetting HWID for user: ${username}`);
+    const result = await makeRequest('resethwid', { user: username }, customSellerKey);
+
+    if (result.success) {
+        console.log(`[GenzAuth] ✅ HWID reset successful for: ${username}`);
+    } else {
+        console.log(`[GenzAuth] ❌ HWID reset failed for: ${username} - ${result.error || result.message}`);
+    }
+
+    return result;
 }
 
 async function fetchAllLicenses() {
     return makeRequest('fetchalllicenses');
+}
+
+async function getUserInfo(username, customSellerKey = null) {
+    try {
+        const SELLER_KEY = customSellerKey || await getSellerKey();
+
+        if (!SELLER_KEY) {
+            console.log('⚠️ GenzAuth not configured - using TEST mode');
+            return {
+                success: false,
+                error: 'TEST mode - GenzAuth not configured',
+                isTestMode: true
+            };
+        }
+
+        console.log(`[GenzAuth] Fetching user info for: ${username}`);
+
+        const params = new URLSearchParams({
+            sellerkey: SELLER_KEY,
+            type: 'fetchuser',
+            user: username,
+            format: 'json'
+        });
+
+        const url = `${GENZAUTH_API_BASE}?${params.toString()}`;
+        const response = await axios.get(url, { timeout: 15000 });
+
+        console.log(`[GenzAuth API] Response Status: ${response.status}`);
+        console.log(`[GenzAuth API] Response Data:`, response.data);
+
+        if (response.data && response.data.success !== false) {
+            console.log(`[GenzAuth] ✅ User info fetched for: ${username}`);
+            return {
+                success: true,
+                data: response.data
+            };
+        }
+
+        console.log(`[GenzAuth] ❌ Failed to fetch user info for: ${username}`);
+        return {
+            success: false,
+            error: response.data?.message || 'Failed to fetch user info'
+        };
+    } catch (error) {
+        console.error(`[GenzAuth] Error fetching user info:`, error.message);
+        return {
+            success: false,
+            error: error.message,
+            isTestMode: false
+        };
+    }
 }
 
 function generateTestLicense(prefix = 'TEST') {
@@ -180,6 +240,8 @@ async function deleteKey(key) {
 async function createMultipleKeys(days, quantity = 1) {
     try {
         console.log(`📝 Creating ${quantity} GenzAuth keys (${days}d each)`);
+
+        const SELLER_KEY = await getSellerKey(); // Moved SELLER_KEY definition here
 
         if (!SELLER_KEY) {
             const keys = [];
@@ -265,5 +327,6 @@ module.exports = {
     deleteUser,
     extendUser,
     resetHwid,
-    fetchAllLicenses
+    fetchAllLicenses,
+    getUserInfo
 };

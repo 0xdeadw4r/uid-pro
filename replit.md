@@ -1,12 +1,13 @@
-# LUNOX CHEATS Manager
+# Dominus Corps Manager
 
 ## Overview
 
-LUNOX CHEATS Manager is a full-stack web application for managing UID (User ID) licenses and user accounts. The system provides a dashboard for users to purchase, create, and manage UIDs with different durations, track credits, and view invoices. It includes multi-tier admin functionality, Discord OAuth integration for authentication, payment processing via NOWPayments, and license key generation through GenzAuth and KeyAuth APIs.
+Dominus Corps Manager is a full-stack web application for managing UID (User ID) licenses and user accounts. The system provides a dashboard for users to purchase, create, and manage UIDs with different durations, track credits, and view invoices. It includes multi-tier admin functionality, Discord OAuth integration for authentication, payment processing via NOWPayments, and license key generation through GenzAuth and KeyAuth APIs.
 
-The application serves two distinct user types:
+The application serves three distinct user types:
 - **UID_MANAGER accounts**: Traditional UID bypass management
-- **AIMKILL accounts**: User account creation system with username/password (usernames must start with "LC")
+- **AIMKILL accounts**: User account creation system with username/password (usernames must start with "DC")
+- **RESELLER accounts**: Authorized resellers who can create client accounts for assigned products using credits
 
 ## User Preferences
 
@@ -74,6 +75,18 @@ Free guest accounts have limited one-time access:
   - Set maximum duration for guest passes (1day to 30days)
 - Applies to both UID creation and Aimkill key/account creation endpoints
 
+### Guest Video Management
+Admins can configure a setup video that appears for all guests:
+- **Admin Configuration**: Set video URL in Settings → Guest Configuration tab
+- **Video URL Persistence**: URL is preserved across other settings updates (won't be erased when changing other guest settings)
+- **YouTube Support**: Automatically converts YouTube watch URLs (`youtube.com/watch?v=`) and short URLs (`youtu.be/`) to embed format
+- **External Videos**: Supports any embeddable video link (YouTube, Vimeo, etc.)
+- **Guest Display**: Video appears in guest dashboard Setup tab
+- **Database Storage**: Video URL stored in admin user document (`guestVideoUrl` field in User model)
+- **API Endpoints**: 
+  - GET `/api/guest-settings` returns the configured video URL
+  - POST `/api/admin/guest-settings` saves the video URL with automatic YouTube conversion
+
 ### UID Management
 UIDs are time-bound licenses with:
 - Automatic expiration tracking
@@ -92,7 +105,7 @@ UIDs are time-bound licenses with:
 ### Aimkill User Account System
 **GenzAuth API Integration** for user account management:
 - Username/password account creation
-- Usernames must start with "LC" prefix (enforced on frontend and backend)
+- Usernames must start with "DC" prefix (enforced on frontend and backend)
 - Dual-database architecture: Accounts created in both GenzAuth API and local MongoDB
 - Transaction-like behavior: If API creation fails, MongoDB creation is prevented
 - Credit-based system: Users spend credits to create accounts
@@ -100,18 +113,52 @@ UIDs are time-bound licenses with:
 
 **Account Creation Flow**:
 1. User selects duration package on `/aimkill-packages` page
-2. Enters desired username (must start with "LC") and password
+2. Enters desired username (must start with "DC") and password
 3. System validates credentials and checks credit balance
 4. Creates account in GenzAuth API first
 5. If API creation succeeds, creates account in local MongoDB
 6. Deducts credits from user's balance
 7. Logs activity for audit trail
 
+### Reseller System
+**Reseller Account Management** for authorized partners:
+- **Credit-Based System**: Resellers use credits to create client accounts
+- **Product Assignment**: Admins assign specific products to each reseller
+- **GenzAuth API Key**: Each reseller can have their own GenzAuth seller key for product-specific API access
+- **Client Creation**: Resellers create client accounts with username/password for their assigned products
+- **Credit Deduction**: Credits are automatically deducted when resellers create clients
+- **Admin Control**: Full CRUD operations in Admin Panel → Resellers tab
+- **Tracking**: Total clients created per reseller, login history, and usage statistics
+
+**Reseller Portal** (`/reseller/portal`):
+- Separate authentication system from main users
+- Create client accounts for assigned products
+- View all created clients
+- Check credit balance and usage statistics
+- Product/package selection based on assignments
+
+**Admin Management Features**:
+- Create resellers with initial credits and product assignments
+- Edit reseller credits, GenzAuth keys, and assigned products
+- View reseller statistics (total clients created, last login)
+- Enable/disable reseller accounts
+- Delete resellers (with confirmation)
+
+**Reseller Model** (`models/Reseller.js`):
+- Username and bcrypt-hashed password
+- Email (optional)
+- Credit balance
+- GenzAuth seller key (optional, per-reseller)
+- Assigned products array (product keys)
+- Total clients created counter
+- Active/inactive status
+- Created by and timestamps
+
 ### License Key Generation
 **KeyAuth (LicenseAuth)**: Secondary service for legacy license keys
-- Custom key mask format: `LNX-*****-*****`
+- Custom key mask format: `DOM-*****-*****`
 - Expiry-based license creation
-- Branded LUNOX keys
+- Branded N1X/Dominus keys
 
 ### Data Models
 
@@ -146,6 +193,17 @@ UIDs are time-bound licenses with:
 - Success/failure tracking
 - IP address logging
 - Security monitoring capabilities
+
+**Reseller Model** (`models/Reseller.js`):
+- Username and password credentials (bcrypt hashed)
+- Email address (optional)
+- Credit balance for creating clients
+- GenzAuth seller key (optional, per-reseller)
+- Assigned products array (product keys)
+- Total clients created tracking
+- Active/inactive status flag
+- Creator tracking and timestamps
+- Last login timestamp
 
 ### Discord Integration
 

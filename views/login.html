@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒 - Login</title>
+    <title>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 - Login</title>
     <style>
         * {
             margin: 0;
@@ -83,6 +83,39 @@
         .login-form-container {
             width: 100%;
             max-width: 450px;
+        }
+
+        .login-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 12px 20px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+            display: block;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .login-tab:hover {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .login-tab.active {
+            color: #FFFFFF;
+            border-bottom-color: #FFFFFF;
         }
 
         .login-form-header {
@@ -308,7 +341,7 @@
         <div class="login-left">
             <div class="video-background"></div>
             <div class="bg-brand">
-                <div class="bg-brand-logo">𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒</div>
+                <div class="bg-brand-logo">𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</div>
                 <div class="bg-brand-text">CHEATS</div>
             </div>
         </div>
@@ -316,14 +349,22 @@
         <!-- Right Side -->
         <div class="login-right">
             <div class="login-form-container">
+                <div class="login-tabs">
+                    <button class="login-tab active" onclick="switchLoginType('admin')">Admin / User</button>
+                    <button class="login-tab" onclick="switchLoginType('client')">Client Portal</button>
+                    <button class="login-tab" onclick="switchLoginType('reseller')">Reseller</button>
+                </div>
+                
                 <div class="login-form-header">
                     <h1>Sign In</h1>
-                    <p>Enter your credentials to continue</p>
+                    <p id="loginSubtext">Enter your credentials to continue</p>
                 </div>
 
                 <div id="error" class="error"></div>
 
                 <form id="loginForm">
+                    <input type="hidden" id="loginType" value="admin">
+                    
                     <div class="form-group">
                         <input type="text" id="username" placeholder="Username" required autofocus
                             autocomplete="username">
@@ -358,7 +399,7 @@
         </div>
     </div>
 
-    <!-- ORIGINAL SCRIPT - NO CHANGES -->
+    <!-- MERGED LOGIN SCRIPT - ADMIN & CLIENT -->
     <script>
         const form = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
@@ -367,6 +408,55 @@
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
         const twoFactorInput = document.getElementById('twoFactorCode');
+        const loginTypeInput = document.getElementById('loginType');
+        const loginSubtext = document.getElementById('loginSubtext');
+
+        // Auto-select tab based on URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabParam = urlParams.get('tab');
+        if (tabParam) {
+            loginTypeInput.value = tabParam;
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.textContent.toLowerCase().includes(tabParam)) {
+                    tab.classList.add('active');
+                }
+            });
+            if (tabParam === 'client') {
+                loginSubtext.textContent = 'Client Portal Access';
+                twoFAField.style.display = 'none';
+            } else if (tabParam === 'reseller') {
+                loginSubtext.textContent = 'Reseller Portal Access';
+                twoFAField.style.display = 'none';
+            }
+        }
+
+        function switchLoginType(type) {
+            loginTypeInput.value = type;
+            
+            // Update active tab
+            document.querySelectorAll('.login-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Update subtext
+            if (type === 'client') {
+                loginSubtext.textContent = 'Client Portal Access';
+                twoFAField.style.display = 'none';
+            } else if (type === 'reseller') {
+                loginSubtext.textContent = 'Reseller Portal Access';
+                twoFAField.style.display = 'none';
+            } else {
+                loginSubtext.textContent = 'Enter your credentials to continue';
+            }
+            
+            // Clear form
+            usernameInput.value = '';
+            passwordInput.value = '';
+            if (twoFactorInput) twoFactorInput.value = '';
+            errorDiv.classList.remove('show');
+        }
 
         function showError(msg) {
             errorDiv.textContent = msg;
@@ -384,6 +474,7 @@
             const username = usernameInput.value.trim();
             const password = passwordInput.value;
             const token = twoFactorInput?.value || null;
+            const loginType = loginTypeInput.value;
 
             if (!username || !password) {
                 showError('Please enter your credentials');
@@ -394,7 +485,15 @@
             loginBtn.textContent = 'SIGNING IN...';
 
             try {
-                const response = await fetch('/api/login', {
+                // Different endpoints for admin vs client vs reseller
+                let endpoint = '/api/login';
+                if (loginType === 'client') {
+                    endpoint = '/client/api/login';
+                } else if (loginType === 'reseller') {
+                    endpoint = '/reseller/api/login';
+                }
+                
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ username, password, token }),
@@ -403,7 +502,8 @@
 
                 const data = await response.json();
 
-                if (data.requires2FA) {
+                // Handle 2FA for admin login only
+                if (loginType === 'admin' && data.requires2FA) {
                     twoFAField.style.display = 'block';
                     twoFactorInput.focus();
                     loginBtn.textContent = 'VERIFY CODE';
@@ -413,7 +513,14 @@
 
                 if (response.ok && data.success) {
                     loginBtn.textContent = 'REDIRECTING...';
-                    setTimeout(() => window.location.href = '/dashboard', 600);
+                    // Redirect based on login type
+                    let redirectUrl = '/dashboard';
+                    if (loginType === 'client') {
+                        redirectUrl = '/client/dashboard';
+                    } else if (loginType === 'reseller') {
+                        redirectUrl = '/reseller/portal';
+                    }
+                    setTimeout(() => window.location.href = redirectUrl, 600);
                 } else {
                     showError(data.error || 'Login failed');
                     loginBtn.textContent = 'SIGN IN';

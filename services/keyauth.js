@@ -7,16 +7,16 @@ console.log('🔑 LicenseAuth Service Initialized');
 console.log('Seller Key Status:', SELLER_KEY ? '✅ Configured' : '❌ Not configured - TEST mode enabled');
 
 /**
- * Create a new license key via LicenseAuth API with LUNOX prefix
- * Format: LNX-XXXXX-XXXXX (e.g., LNX-AB12C-DE34F)
+ * Create a new license key via LicenseAuth API with N1X prefix
+ * Format: DOM-XXXXX-XXXXX (e.g., DOM-AB12C-DE34F)
  * @param {number} days - Duration in days
  * @param {number} level - License level (default 1)
  * @returns {Promise<Object>} - {success: boolean, key: string, message: string}
  */
 async function createKey(days, level = 1) {
     try {
-        // LUNOX branded short mask format
-        const n1xMask = 'LNX-*****-*****';
+        // N1X branded short mask format
+        const n1xMask = 'DOM-*****-*****';
 
         if (!SELLER_KEY) {
             console.log('⚠️ LicenseAuth not configured - using TEST mode');
@@ -29,7 +29,7 @@ async function createKey(days, level = 1) {
             };
         }
 
-        console.log(`🔐 Creating LicenseAuth key: duration=${days}d, level=${level}, mask=LNX-XXXXX-XXXXX`);
+        console.log(`🔐 Creating LicenseAuth key: duration=${days}d, level=${level}, mask=DOM-XXXXX-XXXXX`);
 
         const params = new URLSearchParams({
             sellerkey: SELLER_KEY,
@@ -39,7 +39,7 @@ async function createKey(days, level = 1) {
             level: level.toString(),
             amount: '1',
             character: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-            note: `LUNOX Key ${days}d via LUNOX CHEATS`,
+            note: `Dominus Key ${days}d via Dominus Corps`,
             format: 'json'
         });
 
@@ -73,7 +73,7 @@ async function createKey(days, level = 1) {
     } catch (error) {
         console.error('❌ LicenseAuth Connection Error:', error.message);
 
-        console.log('⚠️ Falling back to TEST mode with LUNOX prefix');
+        console.log('⚠️ Falling back to TEST mode with N1X prefix');
         const testKey = generateN1XKey();
 
         return {
@@ -88,14 +88,14 @@ async function createKey(days, level = 1) {
 }
 
 /**
- * Generate LUNOX branded key locally for testing
- * Format: LNX-XXXXX-XXXXX (e.g., LNX-AB12C-DE34F)
+ * Generate N1X branded key locally for testing
+ * Format: DOM-XXXXX-XXXXX (e.g., DOM-AB12C-DE34F)
  */
 function generateN1XKey() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const segment1 = Array(5).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
     const segment2 = Array(5).fill(0).map(() => chars[Math.floor(Math.random() * chars.length)]).join('');
-    return `LNX-${segment1}-${segment2}`;
+    return `DOM-${segment1}-${segment2}`;
 }
 
 /**
@@ -347,14 +347,14 @@ async function resetKey(key, days) {
 }
 
 /**
- * Create multiple keys at once with LUNOX prefix
+ * Create multiple keys at once with N1X prefix
  * @param {number} days - Duration in days
  * @param {number} quantity - Number of keys to create
  * @returns {Promise<Array>} - Array of created keys
  */
 async function createMultipleKeys(days, quantity = 1) {
     try {
-        console.log(`📝 Creating ${quantity} LicenseAuth keys (${days}d each, LUNOX prefix)`);
+        console.log(`📝 Creating ${quantity} LicenseAuth keys (${days}d each, N1X prefix)`);
 
         const keys = [];
         const failedAttempts = [];

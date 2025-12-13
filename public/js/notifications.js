@@ -29,10 +29,10 @@ class Toast {
     toast.className = `toast toast-${type}`;
 
     const icons = {
-      success: '✓',
-      error: '✕',
-      warning: '⚠',
-      info: 'ℹ'
+      success: '',
+      error: '',
+      warning: '',
+      info: ''
     };
 
     const colors = {
@@ -62,7 +62,6 @@ class Toast {
     `;
 
     toast.innerHTML = `
-      <span style="font-size: 18px; font-weight: bold;">${icons[type]}</span>
       <span style="flex: 1;">${message}</span>
       <button onclick="this.parentElement.remove()" style="
         background: none;
