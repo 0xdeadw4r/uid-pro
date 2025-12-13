@@ -1,42 +1,32 @@
 // Initialize navigation based on user account type
 async function initializeNavigation() {
     try {
-        // Check sessionStorage first to avoid repeated API calls
-        let user = null;
-        const cachedUser = sessionStorage.getItem('navUser');
-        
-        if (cachedUser) {
-            user = JSON.parse(cachedUser);
-        } else {
-            const response = await fetch('/api/user', { credentials: 'include' });
-            if (!response.ok) return;
-            user = await response.json();
-            // Cache for 5 minutes
-            sessionStorage.setItem('navUser', JSON.stringify(user));
-            setTimeout(() => sessionStorage.removeItem('navUser'), 5 * 60 * 1000);
-        }
-        
-        if (!user) return;
-        
-        const packagesLink = document.getElementById('packagesLink');
-        const aimkillLink = document.getElementById('aimkillLink');
-        const adminLink = document.getElementById('adminLink');
+        const response = await fetch('/api/user', { credentials: 'include' });
+        if (response.ok) {
+            const user = await response.json();
+            
+            const packagesLink = document.getElementById('packagesLink');
+            const aimkillLink = document.getElementById('aimkillLink');
+            const adminLink = document.getElementById('adminLink');
 
-        // Hide all optional links first
-        if (packagesLink) packagesLink.classList.add('nav-hidden');
-        if (aimkillLink) aimkillLink.classList.add('nav-hidden');
-        if (adminLink) adminLink.classList.add('nav-hidden');
+            // Hide all optional links first
+            if (packagesLink) packagesLink.classList.add('nav-hidden');
+            if (aimkillLink) aimkillLink.classList.add('nav-hidden');
+            if (adminLink) adminLink.classList.add('nav-hidden');
 
-        // Show links based on account type
-        if (user.accountType === 'AIMKILL') {
-            if (aimkillLink) aimkillLink.classList.remove('nav-hidden');
-        } else {
-            if (packagesLink) packagesLink.classList.remove('nav-hidden');
-        }
+            // Show links based on account type
+            if (user.accountType === 'AIMKILL') {
+                // Aimkill users see only aimkill packages
+                if (aimkillLink) aimkillLink.classList.remove('nav-hidden');
+            } else {
+                // UID Manager users see packages
+                if (packagesLink) packagesLink.classList.remove('nav-hidden');
+            }
 
-        // Show admin link for admins, super admins, and owners
-        if (user.isAdmin || user.isSuperAdmin || user.isOwner) {
-            if (adminLink) adminLink.classList.remove('nav-hidden');
+            // Show admin link for admins, super admins, and owners
+            if (user.isAdmin || user.isSuperAdmin || user.isOwner) {
+                if (adminLink) adminLink.classList.remove('nav-hidden');
+            }
         }
     } catch (error) {
         console.error('Failed to load navigation:', error);
@@ -45,6 +35,7 @@ async function initializeNavigation() {
 
 // Navigation active state
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize navigation visibility
     initializeNavigation();
 
     const currentPath = window.location.pathname;
@@ -67,6 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             navLinks.classList.toggle('active');
         });
 
+        // Close menu on link click
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
                 toggle.classList.remove('active');
@@ -76,13 +68,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Fast page transition - instant visual feedback
+// Show page loader on navigation
 document.addEventListener('click', (e) => {
     const link = e.target.closest('a');
     if (link && link.getAttribute('href') && !link.getAttribute('href').startsWith('#')) {
         const href = link.getAttribute('href');
         if (!href.startsWith('http') && !href.startsWith('javascript')) {
-            link.style.opacity = '0.6';
+            const loader = document.createElement('div');
+            loader.className = 'page-loader active';
+            document.body.appendChild(loader);
+
+            setTimeout(() => {
+                loader.remove();
+            }, 2000);
         }
+    }
+});
+
+// Hide loader when page loads
+window.addEventListener('load', () => {
+    const loader = document.querySelector('.page-loader');
+    if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => loader.remove(), 300);
     }
 });

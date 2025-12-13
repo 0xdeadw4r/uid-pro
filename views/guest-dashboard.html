@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Guest Pass - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <title>Guest Pass - 𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         body {
@@ -471,9 +471,9 @@
 <body>
     <nav>
         <a href="/dashboard" class="nav-brand">
-            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
+            <img src="/images/logo.webp" alt="𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒 Logo" class="nav-logo">
             <h1>
-                𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬
+                𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒
                 <span class="guest-badge">GUEST</span>
             </h1>
         </a>
@@ -491,33 +491,27 @@
     <div class="container">
         <!-- Discord Verification Required -->
         <div id="discordRequired" class="guest-status-card" style="display: none;">
-            <h2> Discord Verification Required 🔒</h2>
+            <h2>🔒 Discord Verification Required</h2>
             <p style="color: #999; margin: 1rem 0;">To use guest features, please verify your Discord account first.</p>
-            <a href="/auth/discord" class="btn-primary"
-                style="text-decoration: none; display: inline-block; margin-top: 1rem;">
+            <a href="/auth/discord" class="btn-primary" style="text-decoration: none; display: inline-block; margin-top: 1rem;">
                 Verify with Discord
             </a>
         </div>
 
         <!-- Social Media Verification Required -->
         <div id="socialVerificationRequired" class="guest-status-card" style="display: none;">
-            <h2> Social Media Verification Required</h2>
-            <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe
-                and follow our social media channels.</p>
+            <h2>📱 Social Media Verification Required</h2>
+            <p style="color: #999; margin: 1rem 0;">To create free keys, you must click BOTH buttons below to subscribe and follow our social media channels.</p>
             <div style="margin: 1.5rem 0; display: flex; gap: 1rem; flex-wrap: wrap;">
-                <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
-                    style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
-                    <span id="youtubeStatus"> Subscribe on YouTube</span>
+                <a id="youtubeLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #FF0000; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);">
+                    <span id="youtubeStatus">📺 Subscribe on YouTube</span>
                 </a>
-                <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary"
-                    style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
-                    <span id="instagramStatus"> Follow on Instagram</span>
+                <a id="instagramLink" href="#" target="_blank" rel="noopener noreferrer" class="btn-primary" style="flex: 1; min-width: 200px; text-decoration: none; background: #E4405F; padding: 1rem 1.5rem; border-radius: 8px; font-weight: 700; text-align: center; transition: all 0.2s; box-shadow: 0 4px 15px rgba(228, 64, 95, 0.3);">
+                    <span id="instagramStatus">📷 Follow on Instagram</span>
                 </a>
             </div>
-            <button id="notifyAdminBtn" class="btn-primary"
-                style="display: none; background: #10B981; color: #fff; margin-top: 1rem;"
-                onclick="notifyAdminSubscribed()">
-                 I've Subscribed & Followed - Get Access✅
+            <button id="notifyAdminBtn" class="btn-primary" style="display: none; background: #10B981; color: #fff; margin-top: 1rem;" onclick="notifyAdminSubscribed()">
+                ✅ I've Subscribed & Followed - Get Access
             </button>
             <div class="limitations-card" style="margin-top: 1.5rem;">
                 <h4>⚠️ Important</h4>
@@ -546,20 +540,13 @@
         <!-- Tabs -->
         <div class="tabs" id="tabsContainer" style="display: flex;">
             <button class="tab-btn active" data-tab="uid" onclick="switchTab('uid', this)">
-                Create UID
+                 Create UID
             </button>
             <button class="tab-btn" data-tab="aimkill" onclick="switchTab('aimkill', this)">
-                Create Account
+                 Create Account
             </button>
             <button class="tab-btn" data-tab="keys" onclick="switchTab('keys', this)">
-                Your Account
-            </button>
-            <button class="tab-btn" data-tab="setup" onclick="switchTab('setup', this)">
-                 Setup Guide
-            </button>
-            <button class="tab-btn" data-tab="news" onclick="switchTab('news', this)" id="newsTabButton"
-                style="display: none;">
-                📰 News
+                 Your Account
             </button>
         </div>
 
@@ -608,13 +595,11 @@
                 <form id="createAimkillForm">
                     <div class="form-group">
                         <label>Username</label>
-                        <input type="text" id="aimkillUsername" placeholder="Must start with DC (e.g., DCuser123)"
-                            required pattern="DC.*" minlength="3">
+                        <input type="text" id="aimkillUsername" placeholder="Must start with LC (e.g., LCuser123)" required pattern="LC.*" minlength="3">
                     </div>
                     <div class="form-group">
                         <label>Password</label>
-                        <input type="password" id="aimkillPassword" placeholder="Minimum 6 characters" required
-                            minlength="6">
+                        <input type="password" id="aimkillPassword" placeholder="Minimum 6 characters" required minlength="6">
                     </div>
                     <div class="form-group">
                         <label>Duration Package</label>
@@ -629,8 +614,8 @@
                     <h4>Guest Aimkill Limitations</h4>
                     <ul>
                         <li>Only 1 free account allowed per guest</li>
-                        <li>Username must start with "DC"</li>
-                        <li>Free Account valid for given time period only</li>
+                        <li>Username must start with "LC"</li>
+                        <li>Account valid for 1 day only</li>
                         <li>Contact admin to upgrade for more accounts</li>
                     </ul>
                 </div>
@@ -652,47 +637,6 @@
                 </div>
             </div>
         </div>
-
-        <!-- Setup Tab -->
-        <div id="setup-tab" class="tab-content">
-            <div class="create-form">
-                <h3> Setup Guide</h3>
-                <div id="guestSetupVideoSection" style="text-align: center; padding: 2rem 0;">
-                    <div style="margin-bottom: 2rem;">
-                        <p style="color: #999; font-size: 13px; margin-bottom: 1rem;">
-                            Watch the setup guide video to get started
-                        </p>
-                    </div>
-                    <div id="guestVideoContainer" style="max-width: 800px; margin: 0 auto;">
-                        <div id="guestVideoFrame"
-                            style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; background: #1a1a1a;">
-                            <iframe id="guestSetupVideoIframe"
-                                style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;"
-                                allowfullscreen></iframe>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="guestNoVideoSection" style="display: none; text-align: center; padding: 4rem 2rem;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></div>
-                    <p style="color: #999; font-size: 14px;">
-                        No setup video available yet. Please contact your administrator.
-                    </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- News Tab -->
-        <div id="news-tab" class="tab-content">
-            <div class="create-form">
-                <h3> Latest News & Announcements</h3>
-                <div id="newsContent">
-                    <p style="color: #999; text-align: center; padding: 2rem;">
-                        Loading news...
-                    </p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="/js/theme.js"></script>
@@ -703,8 +647,6 @@
             document.getElementById('uid-tab').classList.remove('active');
             document.getElementById('aimkill-tab').classList.remove('active');
             document.getElementById('keys-tab').classList.remove('active');
-            document.getElementById('setup-tab').classList.remove('active');
-            document.getElementById('news-tab').classList.remove('active'); // Remove active class from news tab
             const socialTab = document.getElementById('social-tab');
             if (socialTab) socialTab.classList.remove('active');
 
@@ -712,37 +654,6 @@
 
             document.getElementById(tabName + '-tab').classList.add('active');
             btn.classList.add('active');
-
-            // Load news content when the news tab is activated
-            if (tabName === 'news') {
-                loadNewsContent();
-            }
-        }
-
-        function displayGuestSetupVideo(videoUrl) {
-            const videoSection = document.getElementById('guestSetupVideoSection');
-            const noVideoSection = document.getElementById('guestNoVideoSection');
-            const iframe = document.getElementById('guestSetupVideoIframe');
-
-            if (!videoUrl || videoUrl.trim() === '') {
-                videoSection.style.display = 'none';
-                noVideoSection.style.display = 'block';
-                return;
-            }
-
-            // Convert YouTube URL to embed format if needed
-            let embedUrl = videoUrl;
-            if (videoUrl.includes('youtube.com/watch?v=')) {
-                const videoId = videoUrl.split('v=')[1].split('&')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}`;
-            } else if (videoUrl.includes('youtu.be/')) {
-                const videoId = videoUrl.split('youtu.be/')[1].split('?')[0];
-                embedUrl = `https://www.youtube.com/embed/${videoId}`;
-            }
-
-            iframe.src = embedUrl;
-            videoSection.style.display = 'block';
-            noVideoSection.style.display = 'none';
         }
 
         function copyToClipboard(text) {
@@ -870,13 +781,6 @@
                     }
                 }
 
-                // Show news tab if enabled in settings
-                if (settings.enableNewsTab) {
-                    document.getElementById('newsTabButton').style.display = 'block';
-                } else {
-                    document.getElementById('newsTabButton').style.display = 'none';
-                }
-
                 loadStoredKeys();
             } catch (error) {
                 console.error('Load dashboard error:', error);
@@ -956,21 +860,21 @@
                 // Set social media URLs with proper validation
                 const youtubeLink = document.getElementById('youtubeLink');
                 const instagramLink = document.getElementById('instagramLink');
-
+                
                 if (youtubeLink && settings.youtubeChannelUrl) {
                     youtubeLink.href = settings.youtubeChannelUrl;
-
+                    
                     // Add click event listener
-                    youtubeLink.addEventListener('click', function () {
+                    youtubeLink.addEventListener('click', function() {
                         trackClick('youtube');
                     });
                 }
-
+                
                 if (instagramLink && settings.instagramProfileUrl) {
                     instagramLink.href = settings.instagramProfileUrl;
-
+                    
                     // Add click event listener
-                    instagramLink.addEventListener('click', function () {
+                    instagramLink.addEventListener('click', function() {
                         trackClick('instagram');
                     });
                 }
@@ -992,14 +896,14 @@
             const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
             clicked[platform] = true;
             localStorage.setItem('socialClicked', JSON.stringify(clicked));
-
+            
             // Update button text to show it was clicked
             if (platform === 'youtube') {
-                document.getElementById('youtubeStatus').innerHTML = ' YouTube Clicked ✅';
+                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
             } else if (platform === 'instagram') {
-                document.getElementById('instagramStatus').innerHTML = ' Instagram Clicked ✅';
+                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
             }
-
+            
             // Check if both are clicked
             if (clicked.youtube && clicked.instagram) {
                 document.getElementById('notifyAdminBtn').style.display = 'block';
@@ -1008,14 +912,14 @@
 
         function checkSocialClicks() {
             const clicked = JSON.parse(localStorage.getItem('socialClicked') || '{}');
-
+            
             if (clicked.youtube) {
-                document.getElementById('youtubeStatus').innerHTML = ' YouTube Clicked ✅';
+                document.getElementById('youtubeStatus').innerHTML = '✅ YouTube Clicked';
             }
             if (clicked.instagram) {
-                document.getElementById('instagramStatus').innerHTML = ' Instagram Clicked ✅';
+                document.getElementById('instagramStatus').innerHTML = '✅ Instagram Clicked';
             }
-
+            
             if (clicked.youtube && clicked.instagram) {
                 document.getElementById('notifyAdminBtn').style.display = 'block';
             }
@@ -1024,26 +928,26 @@
         async function notifyAdminSubscribed() {
             const btn = document.getElementById('notifyAdminBtn');
             const originalText = btn.textContent;
-
+            
             try {
                 btn.disabled = true;
                 btn.textContent = 'Verifying...';
-
+                
                 const response = await fetch('/api/guest/notify-subscribed', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include'
                 });
-
+                
                 const data = await response.json();
-
+                
                 if (response.ok) {
                     localStorage.removeItem('socialClicked');
                     if (data.verified) {
-                        alert(' Verification successful!\n\nYou are now verified and can create free keys. The page will refresh.');
+                        alert('✅ Verification successful!\n\nYou are now verified and can create free keys. The page will refresh.');
                         window.location.reload();
                     } else if (data.alreadyVerified) {
-                        alert(' You are already verified! ✅');
+                        alert('✅ You are already verified!');
                         window.location.reload();
                     } else {
                         alert('✅ ' + data.message);
@@ -1070,7 +974,7 @@
             // Check if social verification is required and not completed
             const socialVerified = await checkSocialVerification();
             if (!socialVerified) {
-                alert(' Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
+                alert('⚠️ Social media verification required!\n\nYou must subscribe to our YouTube and follow our Instagram, then contact admin for verification before creating keys.');
                 return;
             }
 
@@ -1131,8 +1035,8 @@
             const packageId = document.getElementById('aimkillPackageSelect').value;
             const createBtn = document.getElementById('createAimkillBtn');
 
-            if (!username.startsWith('DC')) {
-                alert('Username must start with "DC"');
+            if (!username.startsWith('LC')) {
+                alert('Username must start with "LC"');
                 return;
             }
 
@@ -1251,65 +1155,15 @@
                     }
                 }
 
-                // Show news tab if enabled in settings
-                if (settings.enableNewsTab) {
-                    document.getElementById('newsTabButton').style.display = 'block';
-                } else {
-                    document.getElementById('newsTabButton').style.display = 'none';
-                }
-
                 loadStoredKeys();
 
                 // Initialize social verification check
                 await checkSocialVerification();
-
-                // Load setup video from guest settings
-                try {
-                    if (settings.guestVideoUrl && settings.guestVideoUrl.trim()) {
-                        displayGuestSetupVideo(settings.guestVideoUrl);
-                    } else {
-                        displayGuestSetupVideo('');
-                    }
-                } catch (error) {
-                    console.error('Error loading setup video:', error);
-                    displayGuestSetupVideo('');
-                }
             } catch (error) {
                 console.error('Load dashboard error:', error);
             }
         }
 
-        async function loadNewsContent() {
-            const newsContentDiv = document.getElementById('newsContent');
-            try {
-                const response = await fetch('/api/news/guest', { credentials: 'include' });
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const data = await response.json();
-
-                if (data.success && data.announcements && data.announcements.length > 0) {
-                    let html = '';
-                    data.announcements.forEach(announcement => {
-                        html += `
-                            <div class="news-item" style="margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 1px solid #333;">
-                                <h4 style="color: #FFFFFF; margin-bottom: 0.75rem;">${announcement.title}</h4>
-                                <p style="color: #999; font-size: 13px; line-height: 1.7;">${announcement.content.replace(/\n/g, '<br>')}</p>
-                                <small style="color: #666; font-size: 11px;">Published on: ${new Date(announcement.createdAt).toLocaleDateString()}</small>
-                            </div>
-                        `;
-                    });
-                    newsContentDiv.innerHTML = html;
-                } else {
-                    newsContentDiv.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No news or announcements available at the moment.</p>';
-                }
-            } catch (error) {
-                console.error('Error loading news:', error);
-                newsContentDiv.innerHTML = '<p style="color: #FCA5A5; text-align: center; padding: 2rem;">Failed to load news. Please try again later.</p>';
-            }
-        }
-
-        // Initial load
         loadGuestDashboard();
     </script>
 </body>

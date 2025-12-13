@@ -164,10 +164,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
-    guestVideoUrl: {
-        type: String,
-        default: ''
-    },
 
     // Guest Social Media Verification
     youtubeSubscribed: {

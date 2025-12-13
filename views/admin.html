@@ -4,101 +4,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control Panel - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
+    <title>Admin Control Panel - 𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒</title>
     <link rel="stylesheet" href="/css/style.css">
     <style>
         .admin-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 0;
-            background: #0a0a0a;
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
         }
 
         .admin-header {
-            background: linear-gradient(135deg, #1a1a1a 0%, #0f0f0f 100%);
-            border-bottom: 2px solid #2a2a2a;
-            padding: 2rem 2.5rem;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
         }
 
         .admin-header h1 {
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: 2.5rem;
+            font-weight: 700;
             color: #FFFFFF;
             margin: 0;
             text-transform: uppercase;
-            letter-spacing: 3px;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            letter-spacing: 2px;
         }
 
         .admin-header p {
             color: #999;
             margin: 0.5rem 0 0 0;
-            font-size: 13px;
-            letter-spacing: 0.5px;
+            font-size: 14px;
         }
 
         .tabs {
             display: flex;
-            gap: 0;
-            background: #1a1a1a;
-            border-bottom: 2px solid #2a2a2a;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
             overflow-x: auto;
-            padding: 0 2rem;
-            position: sticky;
-            top: 88px;
-            z-index: 99;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
         }
 
         .tab-btn {
-            padding: 1rem 1.8rem;
+            padding: 0.75rem 1.5rem;
             background: transparent;
             border: none;
-            border-bottom: 3px solid transparent;
+            border-bottom: 2px solid transparent;
             color: #999;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 11px;
+            font-weight: 700;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.15s ease-out;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
             white-space: nowrap;
-            position: relative;
-        }
-
-        .tab-btn::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #3B82F6;
-            transform: scaleX(0);
-            transition: transform 0.2s ease-out;
         }
 
         .tab-btn:hover {
             color: #FFFFFF;
-            background: rgba(255, 255, 255, 0.05);
-        }
-
-        .tab-btn:hover::before {
-            transform: scaleX(1);
         }
 
         .tab-btn.active {
             color: #FFFFFF;
-            background: rgba(255, 255, 255, 0.08);
-            font-weight: 700;
-        }
-
-        .tab-btn.active::before {
-            transform: scaleX(1);
+            border-bottom-color: #FFFFFF;
         }
 
         .subtabs {
@@ -148,72 +112,40 @@
             display: block;
         }
 
-        .tab-content {
-            padding: 2.5rem;
-            animation: fadeIn 0.4s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .section {
             background: #1a1a1a;
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 2.5rem;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 2rem;
             margin-bottom: 2rem;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
-            transition: border-color 0.15s ease-out;
-        }
-
-        .section:hover {
-            border-color: #3a3a3a;
         }
 
         .section h2 {
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: #FFFFFF;
             margin: 0 0 1.5rem 0;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #2a2a2a;
+            letter-spacing: 1px;
         }
 
         .section h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: #e0e0e0;
-            margin: 2rem 0 1rem 0;
-            padding-left: 0.75rem;
-            border-left: 3px solid #3B82F6;
+            margin: 1.5rem 0 1rem 0;
         }
 
         .form-section {
-            background: rgba(0, 0, 0, 0.4);
-            border: 1px solid #2a2a2a;
-            border-radius: 10px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-section:hover {
-            background: rgba(0, 0, 0, 0.5);
-            border-color: #3a3a3a;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
 
         .form-group:last-child {
@@ -222,42 +154,33 @@
 
         .form-group label {
             display: block;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            color: #AAAAAA;
-            margin-bottom: 0.6rem;
+            color: #999;
+            margin-bottom: 0.5rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 0.5px;
         }
 
         .form-group input,
         .form-group select,
         .form-group textarea {
             width: 100%;
-            padding: 0.9rem 1rem;
-            background: #0a0a0a;
-            border: 1px solid #2a2a2a;
-            color: #FFFFFF;
-            border-radius: 8px;
-            font-size: 14px;
+            padding: 0.8rem;
+            background: #222;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
             box-sizing: border-box;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .form-group input::placeholder,
-        .form-group select::placeholder,
-        .form-group textarea::placeholder {
-            color: #666;
         }
 
         .form-group input:focus,
         .form-group select:focus,
         .form-group textarea:focus {
             outline: none;
-            border-color: #3B82F6;
-            background: #0f0f0f;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.12);
+            border-color: #FFFFFF;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
         }
 
         .form-row {
@@ -360,123 +283,103 @@
         }
 
         .submit-btn {
-            background: linear-gradient(135deg, #FFFFFF 0%, #F5F5F5 100%);
+            background: #FFFFFF;
             color: #000;
             border: none;
-            padding: 1.1rem 2rem;
-            border-radius: 8px;
+            padding: 1rem 2rem;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
             width: 100%;
             box-sizing: border-box;
-            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
         }
 
         .submit-btn:hover:not(:disabled) {
-            background: #3B82F6;
-            color: #FFFFFF;
-            transform: translate3d(0, -1px, 0);
-            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
-        }
-
-        .submit-btn:active:not(:disabled) {
-            transform: translateY(0);
+            background: #FFFFFF;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
         }
 
         .submit-btn:disabled {
-            background: #2a2a2a;
-            color: #666;
+            background: #666;
             cursor: not-allowed;
-            opacity: 0.5;
-            box-shadow: none;
+            opacity: 0.6;
         }
 
         .secondary-btn {
-            background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-            color: #FFFFFF;
+            background: #3B82F6;
+            color: #000;
             border: none;
-            padding: 0.85rem 1.6rem;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s;
         }
 
         .secondary-btn:hover {
-            background: linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+            background: #1D4ED8;
+            transform: translateY(-1px);
         }
 
         .danger-btn {
-            background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-            color: #FFFFFF;
+            background: #FFFFFF;
+            color: #000;
             border: none;
-            padding: 0.85rem 1.6rem;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s;
         }
 
         .danger-btn:hover {
-            background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+            background: #DC2626;
+            transform: translateY(-1px);
         }
 
         .warning-btn {
-            background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+            background: #F59E0B;
             color: #000;
             border: none;
-            padding: 0.85rem 1.6rem;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+            transition: all 0.2s;
         }
 
         .warning-btn:hover {
-            background: linear-gradient(135deg, #D97706 0%, #B45309 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+            background: #D97706;
+            transform: translateY(-1px);
         }
 
         .success-btn {
-            background: linear-gradient(135deg, #10B981 0%, #059669 100%);
-            color: #FFFFFF;
+            background: #FFFFFF;
+            color: #000;
             border: none;
-            padding: 0.85rem 1.6rem;
-            border-radius: 8px;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
             font-weight: 700;
             cursor: pointer;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
         }
 
         .success-btn:hover {
-            background: linear-gradient(135deg, #059669 0%, #047857 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+            background: #059669;
+            transform: translateY(-1px);
         }
 
         .table-container {
@@ -514,80 +417,52 @@
 
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 1.5rem;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(0, 0, 0, 0.3) 100%);
-            border: 1px solid #2a2a2a;
-            border-left: 4px solid #3B82F6;
-            padding: 2rem;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
-            border-left-color: #FFFFFF;
+            background: rgba(255, 255, 255, 0.05);
+            border-left: 3px solid #FFFFFF;
+            padding: 1.5rem;
+            border-radius: 6px;
         }
 
         .stat-label {
-            font-size: 10px;
-            color: #AAAAAA;
+            font-size: 11px;
+            color: #999;
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
         }
 
         .stat-value {
-            font-size: 2.5rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #FFFFFF;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
 
         .message {
-            padding: 1.2rem 1.5rem;
-            border-radius: 10px;
+            padding: 1rem;
+            border-radius: 6px;
             margin-bottom: 1.5rem;
             display: none;
             font-size: 13px;
-            font-weight: 500;
-            animation: slideDown 0.3s ease-out;
-        }
-
-        @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
         }
 
         .message.success {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(16, 185, 129, 0.1) 100%);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            border-left: 4px solid #10B981;
+            background: rgba(16, 185, 129, 0.15);
+            border-left: 3px solid #FFFFFF;
             color: #FFFFFF;
             display: block;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2);
         }
 
         .message.error {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(239, 68, 68, 0.1) 100%);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            border-left: 4px solid #EF4444;
-            color: #FFFFFF;
+            background: rgba(239, 68, 68, 0.15);
+            border-left: 3px solid #FFFFFF;
+            color: #FCA5A5;
             display: block;
-            box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
         }
 
         .button-group {
@@ -612,90 +487,6 @@
 
         .status-unverified {
             color: #999;
-        }
-
-        /* Chat Styles */
-        .chat-container {
-            display: flex;
-            height: 600px; /* Fixed height for chat */
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-        }
-
-        .chat-sidebar {
-            width: 300px;
-            border-right: 1px solid #333;
-            overflow-y: auto;
-        }
-
-        #adminChatUserList div:hover {
-            background: #222;
-        }
-
-        .chat-main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 1rem;
-            border-bottom: 1px solid #333;
-            color: #fff;
-            font-weight: 700;
-            background: #222;
-            border-top-right-radius: 8px;
-        }
-
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .chat-input-area {
-            padding: 1rem;
-            border-top: 1px solid #333;
-            background: #222;
-            border-bottom-right-radius: 8px;
-            display: none; /* Initially hidden */
-        }
-
-        .chat-input-area textarea {
-            width: 100%;
-            padding: 0.8rem;
-            background: #333;
-            border: 1px solid #444;
-            color: #e0e0e0;
-            border-radius: 6px;
-            font-size: 13px;
-            box-sizing: border-box;
-            resize: none;
-            min-height: 50px;
-        }
-
-        .chat-input-area button {
-            margin-top: 0.5rem;
-            background: #FFFFFF;
-            color: #000;
-            border: none;
-            padding: 0.75rem 1.5rem;
-            border-radius: 6px;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 13px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            transition: all 0.2s;
-        }
-
-        .chat-input-area button:hover {
-            background: #eee;
         }
 
         @media (max-width: 768px) {
@@ -809,30 +600,6 @@
             td {
                 padding: 0.75rem 0.5rem;
             }
-
-            .chat-container {
-                flex-direction: column;
-                height: auto;
-            }
-
-            .chat-sidebar {
-                width: 100%;
-                border-right: none;
-                border-bottom: 1px solid #333;
-                height: 200px;
-            }
-
-            .chat-main {
-                height: 400px;
-            }
-
-            .chat-messages {
-                padding: 1rem;
-            }
-
-            .chat-input-area textarea {
-                min-height: 40px;
-            }
         }
 
         @media (max-width: 480px) {
@@ -876,8 +643,8 @@
 <body>
     <nav>
         <a href="/dashboard" class="nav-brand">
-            <img src="/images/logo.webp" alt="𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬 Logo" class="nav-logo">
-            <h1>𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</h1>
+            <img src="/images/logo.webp" alt="𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒 Logo" class="nav-logo">
+            <h1>𝐋𝐔𝐍𝐎𝐗 𝐂𝐇𝐄𝐀𝐓𝐒</h1>
         </a>
         <button class="mobile-menu-toggle">
             <span></span>
@@ -912,14 +679,9 @@
             <button class="tab-btn" onclick="switchTab('uids', this)">UIDs</button>
             <button class="tab-btn" onclick="switchTab('api-keys', this)">API Keys</button>
             <button class="tab-btn" onclick="switchTab('packages', this)">Packages</button>
-            <button class="tab-btn" onclick="switchTab('products', this)">Product Management</button>
             <button class="tab-btn" id="discordRestoreTab" onclick="switchTab('discord-restore', this)" style="display: none;">Discord Restore</button>
             <button class="tab-btn" onclick="switchTab('verified-users', this)">Verified Users</button>
-            <button class="tab-btn" onclick="switchTab('clients', this)">Client Management</button>
-            <button class="tab-btn" onclick="switchTab('resellers', this)">Resellers</button>
             <button class="tab-btn" onclick="switchTab('settings', this)">Settings</button>
-            <button class="tab-btn" onclick="switchTab('news-announcements', this)">News/Announcements</button>
-            <button class="tab-btn" onclick="switchTab('chat', this)">Chat</button> <!-- Chat Tab -->
         </div>
 
         <!-- Dashboard Tab -->
@@ -1028,7 +790,7 @@
                             <div class="form-group">
                                 <label>Account Type</label>
                                 <select id="newAccountType">
-                                    <option value="UID_MANAGER">Dominus Manager</option>
+                                    <option value="UID_MANAGER">LUNOX Manager</option>
                                     <option value="AIMKILL">Aimkill</option>
                                 </select>
                             </div>
@@ -1101,7 +863,7 @@
             <div class="section">
                 <h2>API-Generated Keys</h2>
                 <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
-                    View and manage all API-generated user:pass pairs. These are stored separately from user accounts.
+                    View and manage all API-generated user:pass pairs. These are stored separately from actual user accounts.
                 </p>
                 <div class="button-group">
                     <button class="secondary-btn" onclick="loadApiKeys()">Refresh List</button>
@@ -1116,162 +878,6 @@
             </div>
         </div>
 
-        <!-- Packages Tab -->
-        <div id="packages-tab" class="tab-content">
-            <div class="section">
-                <h2>Package Management</h2>
-                <p style="color: #999; margin-bottom: 2rem;">Configure pricing, credits, and durations for packages</p>
-
-                <!-- Product Selection for Packages -->
-                <div class="form-section" style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3B82F6; margin-bottom: 2rem;">
-                    <h3 style="color: #3B82F6; margin-bottom: 1rem;">📦 Manage Packages by Product</h3>
-                    <div class="form-group">
-                        <label>Select Product</label>
-                        <select id="packageProductSelect" onchange="loadProductPackages()">
-                            <option value="">Select a product...</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Add New Package Form (Hidden by default, shown after product selection) -->
-                <div id="addPackageSection" class="form-section" style="background: rgba(255, 255, 255, 0.03); padding: 1.5rem; margin-bottom: 2rem; border-radius: 8px; display: none;">
-                    <h3 style="color: #fff; margin-bottom: 1rem;">➕ Add New Package for <span id="selectedProductName"></span></h3>
-                    <div class="form-group">
-                        <label>Package Key (e.g., "2day", "custom1")</label>
-                        <input type="text" id="newPackageKey" placeholder="unique-package-key"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="newPackageDisplay" placeholder="Custom Package Name"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                        <div class="form-group">
-                            <label>Days</label>
-                            <input type="number" id="newPackageDays" placeholder="7"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Hours (Optional)</label>
-                            <input type="number" id="newPackageHours" placeholder="e.g., 24 for hourly"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Credits Required</label>
-                            <input type="number" id="newPackageCredits" placeholder="10"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Price ($)</label>
-                            <input type="number" step="0.01" id="newPackagePrice" placeholder="19.99"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                    </div>
-                    <button class="success-btn" onclick="addNewProductPackage()" style="margin-top: 1rem; width: 100%;">Add Package</button>
-                </div>
-
-                <!-- Existing Packages List -->
-                <div id="product-packages-section" style="display: none;">
-                    <div id="productPackagesMessage" class="message"></div>
-                    <h3 style="color: #fff; margin-bottom: 1rem;">Existing Packages for <span id="currentProductName"></span></h3>
-                    <div id="productPackagesList"></div>
-                    <button class="submit-btn" onclick="saveProductPackages()" style="margin-top: 1.5rem;">Save All Product Packages</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Management Tab -->
-        <div id="products-tab" class="tab-content">
-            <h2>Product Management</h2>
-            <p style="color: #999; margin-bottom: 2rem;">Create and manage products (e.g., UID Bypass, Aimkill, etc.)</p>
-
-            <div class="message" id="productsMessage"></div>
-
-            <!-- Create New Product -->
-            <div class="form-section" style="margin-bottom: 2rem;">
-                <h3>Create New Product</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                    <div class="form-group">
-                        <label>Product Key (e.g., NEW_PRODUCT)</label>
-                        <input type="text" id="newProductKey" placeholder="NEW_PRODUCT"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-                    <div class="form-group">
-                        <label>Display Name</label>
-                        <input type="text" id="newProductDisplayName" placeholder="New Product"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label>Description</label>
-                    <textarea id="newProductDescription" placeholder="Product description" rows="2"
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>GenzAuth Seller Key (Optional)</label>
-                    <input type="password" id="newProductGenzauth" placeholder="Enter GenzAuth seller key for this product"
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                </div>
-                <div class="form-group">
-                    <label>Download Link (Optional)</label>
-                    <input type="url" id="newProductDownloadLink" placeholder="https://example.com/download"
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                </div>
-                <div class="form-group">
-                    <label>Setup Video Link (Optional - YouTube URL)</label>
-                    <input type="url" id="newProductSetupVideoLink" placeholder="https://youtube.com/watch?v=..."
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                </div>
-                <div class="form-group">
-                    <label>Guest Video Link (Optional - YouTube URL)</label>
-                    <input type="url" id="newProductGuestVideoLink" placeholder="https://youtube.com/watch?v=..."
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">Separate video for guests/non-authenticated users</p>
-                </div>
-                <!-- Announcements Field -->
-                <div class="form-group">
-                    <label>Announcements/News (Optional)</label>
-                    <textarea id="newProductAnnouncements" rows="4" placeholder="Enter news or announcements for this product. HTML is supported."
-                        style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;"></textarea>
-                    <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">HTML supported. Leave empty to hide announcements tab.</p>
-                </div>
-                <div class="settings-list" style="margin: 1rem 0;">
-                    <div class="setting-item">
-                        <div class="setting-control">
-                            <input type="checkbox" id="newProductAllowHwid" class="toggle-checkbox">
-                            <label for="newProductAllowHwid" class="toggle-label"></label>
-                        </div>
-                        <div class="setting-info">
-                            <label class="setting-title">Allow HWID Reset</label>
-                            <p class="setting-description">Enable HWID reset functionality for clients using this product</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0;">
-                    <div class="form-group">
-                        <label>Max Free HWID Resets</label>
-                        <input type="number" id="newProductMaxFreeResets" placeholder="5" value="5" min="0"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Number of free HWID resets allowed per client</p>
-                    </div>
-                    <div class="form-group">
-                        <label>HWID Reset Price (USD)</label>
-                        <input type="number" id="newProductResetPrice" placeholder="0.00" value="0" min="0" step="0.01"
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Price for additional resets after free limit</p>
-                    </div>
-                </div>
-                <button class="success-btn" onclick="createProduct()" style="width: 100%;">Create Product</button>
-            </div>
-
-            <!-- Existing Products -->
-            <div id="productsList">
-                <h3>Existing Products</h3>
-                <div id="productsContainer"></div>
-            </div>
-        </div>
-
         <!-- Discord Restore Tab -->
         <div id="discord-restore-tab" class="tab-content">
             <div class="section">
@@ -1279,8 +885,6 @@
                 <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
                     Restore verified Discord members to a new server using saved OAuth tokens.
                 </p>
-
-                <div id="restorationMessage" class="message"></div>
 
                 <div class="form-section">
                     <h3>Restoration Statistics</h3>
@@ -1395,118 +999,51 @@
             </div>
         </div>
 
-        <!-- Client Management Tab -->
-        <div id="clients-tab" class="tab-content">
+        <!-- Packages Tab -->
+        <div id="packages-tab" class="tab-content">
             <div class="section">
-                <h2>Client Management</h2>
-                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
-                    Manage client accounts with restricted access for file downloads and HWID resets
-                </p>
+                <h2>Package Management</h2>
+                <p style="color: #999; margin-bottom: 2rem;">Configure pricing, credits, and durations for Aimkill packages</p>
 
-                <!-- Create Client -->
-                <div class="form-section">
-                    <h3>Create New Client</h3>
-                    <div id="createClientMessage" class="message"></div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <!-- Add New Package Form -->
+                <div class="form-section" style="background: rgba(59, 130, 246, 0.1); border: 1px solid #3B82F6; margin-bottom: 2rem;">
+                    <h3 style="color: #3B82F6; margin-bottom: 1rem;">➕ Add New Custom Package</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
                         <div class="form-group">
-                            <label>Username</label>
-                            <input type="text" id="newClientUsername" placeholder="client_username">
+                            <label>Package Key (e.g., "2day", "custom1")</label>
+                            <input type="text" id="newPackageKey" placeholder="custompackage"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
                         <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" id="newClientPassword" placeholder="Secure password">
+                            <label>Display Name</label>
+                            <input type="text" id="newPackageDisplay" placeholder="Custom Package"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
                         <div class="form-group">
-                            <label>Product</label>
-                            <select id="newClientProduct">
-                                <option value="">Select a product...</option>
-                            </select>
+                            <label>Days</label>
+                            <input type="number" id="newPackageDays" placeholder="7"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Credits Required</label>
+                            <input type="number" id="newPackageCredits" placeholder="10"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        </div>
+                        <div class="form-group">
+                            <label>Price ($)</label>
+                            <input type="number" step="0.01" id="newPackagePrice" placeholder="19.99"
+                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
                     </div>
-
-                    <div class="form-group" id="aimkillUsernameField" style="margin-top: 1rem; display: none;">
-                        <label>Assigned Aimkill Username (Required for Aimkill clients)</label>
-                        <input type="text" id="newClientAssignedUsername" placeholder="aimkill_username">
-                        <p style="color: #999; font-size: 0.75rem; margin-top: 0.5rem;">
-                            This username will be used for HWID reset functionality.
-                        </p>
-                    </div>
-
-                    <div class="form-group" id="uidBypassUidField" style="margin-top: 1rem; display: none;">
-                        <label>Assigned UID (Optional for UID Bypass clients)</label>
-                        <input type="text" id="newClientAssignedUid" placeholder="Enter UID (numbers only)">
-                        <p style="color: #999; font-size: 0.75rem; margin-top: 0.5rem;">
-                            This UID will be assigned to the client for their bypass account.
-                        </p>
-                    </div>
-
-                    <div class="form-group" style="margin-top: 1rem;">
-                        <label>Notes (Optional)</label>
-                        <textarea id="newClientNotes" rows="2" placeholder="Additional notes about this client"></textarea>
-                    </div>
-
-                    <div style="margin-top: 1.5rem; padding: 1rem; background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 8px;">
-                        <label style="display: flex; align-items: center; cursor: pointer; color: #3B82F6;">
-                            <input type="checkbox" id="createGenzAuthAccount" style="margin-right: 0.5rem;" onchange="toggleGenzAuthFields()">
-                            <span style="font-weight: 700;">Create GenzAuth Account (Simultaneous Login)</span>
-                        </label>
-                        <p style="color: #999; font-size: 0.75rem; margin: 0.5rem 0 0 1.5rem;">
-                            Creates a username/password account in GenzAuth system for game access with same duration as client account.
-                        </p>
-
-                        <div id="genzAuthFieldsContainer" style="display: none; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(59, 130, 246, 0.2);">
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                                <div class="form-group">
-                                    <label>GenzAuth Username</label>
-                                    <input type="text" id="genzAuthUsername" placeholder="game_username">
-                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Username for game login</p>
-                                </div>
-                                <div class="form-group">
-                                    <label>GenzAuth Password</label>
-                                    <input type="password" id="genzAuthPassword" placeholder="Secure password">
-                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Password for game login</p>
-                                </div>
-                                <div class="form-group">
-                                    <label>Duration (Days)</label>
-                                    <input type="number" id="genzAuthDuration" placeholder="30" value="30" min="1">
-                                    <p style="color: #999; font-size: 0.75rem; margin-top: 0.25rem;">Account duration in days</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button class="success-btn" onclick="createClient()" style="margin-top: 1rem; width: 100%;">Create Client</button>
+                    <button class="success-btn" onclick="addNewAimkillPackage()" style="margin-top: 1rem; width: 100%;">Add Package</button>
                 </div>
 
-                <!-- Global Download Links -->
-                <div class="form-section">
-                    <h3>Global Download Links</h3>
-                    <p style="color: #999; margin-bottom: 1rem; font-size: 13px;">
-                        Set default download links for all clients by product type
-                    </p>
-                    <div id="downloadLinksMessage" class="message"></div>
-
-                    <div class="form-group">
-                        <label>Aimkill Download Link</label>
-                        <input type="url" id="aimkillDownloadLink" placeholder="https://example.com/aimkill-download">
-                    </div>
-                    <div class="form-group">
-                        <label>UID Bypass Download Link</label>
-                        <input type="url" id="uidBypassDownloadLink" placeholder="https://example.com/uid-bypass-download">
-                    </div>
-                    <div class="form-group">
-                        <label>Silent Aim Download Link</label>
-                        <input type="url" id="silentAimDownloadLink" placeholder="https://example.com/silent-aim-download">
-                    </div>
-                    <button class="submit-btn" onclick="updateGlobalDownloadLinks()" style="margin-top: 1rem;">Update Global Links</button>
-                </div>
-
-                <!-- Client List -->
-                <div class="form-section">
-                    <h3>All Clients</h3>
-                    <div id="clientsListMessage" class="message"></div>
-                    <div id="clientsList" style="margin-top: 1rem;"></div>
+                <!-- Aimkill Packages -->
+                <div id="aimkill-packages">
+                    <div id="aimkillPackagesMessage" class="message"></div>
+                    <h3 style="color: #fff; margin-bottom: 1rem;">Existing Packages</h3>
+                    <div id="aimkillPackagesList"></div>
+                    <button class="submit-btn" onclick="saveAimkillPackages()" style="margin-top: 1.5rem;">Save All Aimkill Packages</button>
                 </div>
             </div>
         </div>
@@ -1590,7 +1127,7 @@
                             <div class="setting-info" style="width: 100%;">
                                 <label class="setting-title">YouTube Channel URL</label>
                                 <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your YouTube channel URL for subscribers</p>
-                                <input type="url" id="youtubeChannelUrl" placeholder="https://youtube.com/@yourchannel"
+                                <input type="url" id="youtubeChannelUrl" placeholder="https://youtube.com/@yourchannel" 
                                     onchange="saveGuestSettings()"
                                     style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
                             </div>
@@ -1600,180 +1137,10 @@
                             <div class="setting-info" style="width: 100%;">
                                 <label class="setting-title">Instagram Profile URL</label>
                                 <p class="setting-description" style="margin-bottom: 0.5rem;">Enter your Instagram profile URL for followers</p>
-                                <input type="url" id="instagramProfileUrl" placeholder="https://instagram.com/yourprofile"
+                                <input type="url" id="instagramProfileUrl" placeholder="https://instagram.com/yourprofile" 
                                     onchange="saveGuestSettings()"
                                     style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
                             </div>
-                        </div>
-
-                        <div class="setting-item" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem; margin-top: 1rem;">
-                            <div class="setting-info" style="width: 100%;">
-                                <label class="setting-title">Guest Setup Video URL</label>
-                                <p class="setting-description" style="margin-bottom: 0.5rem;">YouTube or video URL for guest dashboard (optional)</p>
-                                <input type="url" id="guestVideoUrl" placeholder="https://youtube.com/watch?v=..."
-                                    onchange="saveGuestSettings()"
-                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-size: 14px; margin-top: 0.5rem;">
-                                <p style="color: #666; font-size: 11px; margin-top: 0.5rem;">This video will be displayed on the guest dashboard to help guests understand how to use the system</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- News/Announcements Tab -->
-        <div id="news-announcements-tab" class="tab-content">
-            <div class="section">
-                <h2>News & Announcements</h2>
-                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
-                    Manage global news and announcements visible to all users.
-                </p>
-
-                <div id="announcementsMessage" class="message"></div>
-
-                <div class="form-section">
-                    <h3>Global Announcements</h3>
-                    <div class="form-group">
-                        <label>Global Announcement Content (HTML Supported)</label>
-                        <textarea id="globalAnnouncements" rows="6" placeholder="Enter global announcements here..."
-                            style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;"></textarea>
-                        <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">This content will be displayed on the main dashboard for all users.</p>
-                    </div>
-                    <button class="submit-btn" onclick="saveGlobalAnnouncements()" style="width: auto;">Save Global Announcements</button>
-                </div>
-
-                <div class="form-section">
-                    <h3>Product-Specific Announcements</h3>
-                    <p style="color: #999; margin-bottom: 1rem; font-size: 13px;">
-                        View and manage announcements configured per product.
-                    </p>
-                    <div id="productAnnouncementsList">
-                        <p style="color: #999; text-align: center; padding: 2rem;">Loading product announcements...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Resellers Tab -->
-        <div id="resellers-tab" class="tab-content">
-            <div class="section">
-                <h2>Reseller Management</h2>
-                <p style="color: #999; margin-bottom: 1.5rem; font-size: 13px;">
-                    Manage reseller accounts who can create client accounts for assigned products.
-                </p>
-
-                <div id="resellersMessage" class="message"></div>
-
-                <!-- Create Reseller Form -->
-                <div class="form-section">
-                    <h3>Create New Reseller</h3>
-                    <form id="createResellerForm" onsubmit="createReseller(event)">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Username</label>
-                                <input type="text" id="newResellerUsername" required placeholder="Enter username">
-                            </div>
-                            <div class="form-group">
-                                <label>Password</label>
-                                <input type="password" id="newResellerPassword" required placeholder="Enter password">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Email (Optional)</label>
-                                <input type="email" id="newResellerEmail" placeholder="Enter email">
-                            </div>
-                            <div class="form-group">
-                                <label>Initial Credits</label>
-                                <input type="number" id="newResellerCredits" value="0" min="0">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>GenzAuth Seller API Key (Optional)</label>
-                            <input type="text" id="newResellerGenzauthKey" placeholder="Enter GenzAuth seller key">
-                        </div>
-                        <div class="form-group">
-                            <label>Assigned Products</label>
-                            <select id="resellerProductsSelect" multiple style="min-height: 120px; padding: 0.5rem;">
-                                <!-- Will be populated dynamically -->
-                            </select>
-                            <small style="color: #999; font-size: 11px; margin-top: 0.5rem; display: block;">
-                                Hold Ctrl (Windows) or Cmd (Mac) to select multiple products
-                            </small>
-                        </div>
-                        <button type="submit" class="submit-btn">Create Reseller</button>
-                    </form>
-                </div>
-
-                <!-- Resellers List -->
-                <div class="form-section">
-                    <h3>Existing Resellers</h3>
-                    <div id="resellersListContainer">
-                        <p style="color: #999; text-align: center; padding: 2rem;">Loading resellers...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Chat Tab -->
-        <div id="chat-tab" class="tab-content">
-            <div class="section">
-                <h2>Admin Chat</h2>
-                <div id="chatManagementMessage" class="message"></div>
-
-                <!-- Chat Management Controls -->
-                <div class="form-section" style="margin-bottom: 2rem;">
-                    <h3>Chat Management</h3>
-                    <div id="chatStatsContainer" style="margin-bottom: 1rem;">
-                        <div class="stat-grid" style="margin-bottom: 1rem;">
-                            <div class="stat-card">
-                                <div class="stat-label">Total Messages</div>
-                                <div class="stat-value" id="chatTotalMessages">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Unread Messages</div>
-                                <div class="stat-value" id="chatUnreadMessages">0</div>
-                            </div>
-                            <div class="stat-card">
-                                <div class="stat-label">Active Users</div>
-                                <div class="stat-value" id="chatActiveUsers">0</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                        <div class="form-group">
-                            <label>Delete Chat for Specific User</label>
-                            <input type="text" id="deleteChatUsername" placeholder="Enter username">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: flex-end;">
-                            <button class="warning-btn" onclick="deleteUserChat()" style="width: 100%;">
-                                🗑️ Delete User's Chat
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="button-group">
-                        <button class="secondary-btn" onclick="loadChatStats()">📊 Refresh Stats</button>
-                        <button class="danger-btn" onclick="deleteAllChats()">
-                            🗑️ Delete All Chat Messages
-                        </button>
-                    </div>
-                </div>
-
-                <div class="chat-container">
-                    <div class="chat-sidebar">
-                        <div style="padding: 1rem; border-bottom: 1px solid #333; color: #fff; font-weight: 700; background: #222;">Clients</div>
-                        <div id="adminChatUserList">
-                            <p style="padding: 1rem; color: #666;">Loading clients...</p>
-                        </div>
-                    </div>
-                    <div class="chat-main">
-                        <div class="chat-header" id="adminChatTitle">Select a client to start chatting</div>
-                        <div class="chat-messages" id="adminChatMessages"></div>
-                        <div class="chat-input-area" id="adminChatInputArea">
-                            <textarea id="adminChatInput" placeholder="Type your message..."></textarea>
-                            <button onclick="sendAdminMessage()">Send</button>
                         </div>
                     </div>
                 </div>
@@ -1781,251 +1148,9 @@
         </div>
     </div>
 
-    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="/js/theme.js"></script>
     <script src="/js/navigation.js"></script>
     <script src="/js/main.js"></script>
-    <script>
-        let adminSocket = null;
-        let selectedClient = null;
-
-        // Chat Management Functions
-        async function loadChatStats() {
-            try {
-                const response = await fetch('/api/admin/chat/stats', { credentials: 'include' });
-                const data = await response.json();
-
-                if (data.success) {
-                    document.getElementById('chatTotalMessages').textContent = data.stats.totalMessages || 0;
-                    document.getElementById('chatUnreadMessages').textContent = data.stats.unreadMessages || 0;
-                    document.getElementById('chatActiveUsers').textContent = data.stats.uniqueUsers || 0;
-                }
-            } catch (error) {
-                console.error('Error loading chat stats:', error);
-            }
-        }
-
-        async function deleteUserChat() {
-            const username = document.getElementById('deleteChatUsername').value.trim();
-
-            if (!username) {
-                showMessage('Please enter a username', 'error', 'chatManagementMessage');
-                return;
-            }
-
-            if (!confirm(`Delete all chat messages for user "${username}"?\n\nThis action cannot be undone.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/admin/chat/delete-user-messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username }),
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(data.message || 'Chat messages deleted successfully', 'success', 'chatManagementMessage');
-                    document.getElementById('deleteChatUsername').value = '';
-                    loadChatStats();
-
-                    // Clear chat if viewing this user
-                    if (selectedClient === username) {
-                        document.getElementById('adminChatMessages').innerHTML = '';
-                        selectedClient = null;
-                        document.getElementById('adminChatTitle').textContent = 'Select a client to start chatting';
-                        document.getElementById('adminChatInputArea').style.display = 'none';
-                    }
-                } else {
-                    showMessage(data.error || 'Failed to delete messages', 'error', 'chatManagementMessage');
-                }
-            } catch (error) {
-                console.error('Delete user chat error:', error);
-                showMessage('Connection error', 'error', 'chatManagementMessage');
-            }
-        }
-
-        async function deleteAllChats() {
-            if (!confirm('⚠️ WARNING: Delete ALL chat messages?\n\nThis will permanently delete all chat history for all users.\n\nThis action CANNOT be undone!')) {
-                return;
-            }
-
-            if (!confirm('Are you absolutely sure? This will delete EVERYTHING in the chat history.')) {
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/admin/chat/delete-all-messages', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({}),
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showMessage(data.message || 'All chat messages deleted', 'success', 'chatManagementMessage');
-                    loadChatStats();
-
-                    // Clear current chat view
-                    document.getElementById('adminChatMessages').innerHTML = '';
-                    selectedClient = null;
-                    document.getElementById('adminChatTitle').textContent = 'Select a client to start chatting';
-                    document.getElementById('adminChatInputArea').style.display = 'none';
-                } else {
-                    showMessage(data.error || 'Failed to delete messages', 'error', 'chatManagementMessage');
-                }
-            } catch (error) {
-                console.error('Delete all chats error:', error);
-                showMessage('Connection error', 'error', 'chatManagementMessage');
-            }
-        }
-
-        function initAdminChat() {
-            if (adminSocket && adminSocket.connected) {
-                console.log('Admin chat already connected');
-                return;
-            }
-
-            adminSocket = io();
-
-            adminSocket.on('connect', () => {
-                console.log('Admin connected to chat');
-                adminSocket.emit('join-chat', { username: 'admin', userType: 'admin' });
-                loadChatClients();
-            });
-
-            adminSocket.on('user-online', (data) => {
-                console.log('User online:', data.username);
-                loadChatClients();
-            });
-
-            adminSocket.on('user-offline', (data) => {
-                console.log('User offline:', data.username);
-                loadChatClients();
-            });
-
-            adminSocket.on('chat_message', (msg) => {
-                if (selectedClient && msg.senderName === selectedClient) {
-                    displayAdminMessage(msg, false);
-                }
-            });
-
-            adminSocket.on('disconnect', () => {
-                console.log('Admin disconnected from chat');
-            });
-        }
-
-        async function loadChatClients() {
-            try {
-                const response = await fetch('/api/chat/clients', { credentials: 'include' });
-                const data = await response.json();
-
-                const userList = document.getElementById('adminChatUserList');
-                userList.innerHTML = '';
-
-                if (data.success && data.clients && data.clients.length > 0) {
-                    data.clients.forEach(client => {
-                        const clientDiv = document.createElement('div');
-                        clientDiv.style.padding = '1rem';
-                        clientDiv.style.cursor = 'pointer';
-                        clientDiv.style.borderBottom = '1px solid #333';
-                        clientDiv.style.transition = 'background 0.2s';
-                        clientDiv.textContent = client.username;
-                        clientDiv.onmouseover = () => clientDiv.style.background = '#2a2a2a';
-                        clientDiv.onmouseout = () => clientDiv.style.background = 'transparent';
-                        clientDiv.onclick = () => selectClient(client.username);
-                        userList.appendChild(clientDiv);
-                    });
-                } else {
-                    userList.innerHTML = '<p style="padding: 1rem; color: #666;">No clients online</p>';
-                }
-            } catch (error) {
-                console.error('Error loading clients:', error);
-            }
-        }
-
-        function selectClient(username) {
-            selectedClient = username;
-            document.getElementById('adminChatTitle').textContent = `Chat with ${username}`;
-            document.getElementById('adminChatMessages').innerHTML = '';
-            document.getElementById('adminChatInputArea').style.display = 'block';
-            loadChatHistory(username);
-        }
-
-        async function loadChatHistory(username) {
-            try {
-                const response = await fetch(`/api/chat/history?withUser=${username}`, { credentials: 'include' });
-                const data = await response.json();
-
-                const messagesContainer = document.getElementById('adminChatMessages');
-                if (messagesContainer) {
-                    messagesContainer.innerHTML = '';
-                }
-
-                if (data.success && data.messages && data.messages.length > 0) {
-                    data.messages.forEach(msg => {
-                        displayAdminMessage({
-                            text: msg.message,
-                            senderName: msg.senderUsername,
-                            senderType: msg.senderType
-                        }, false);
-                    });
-                } else {
-                    if (messagesContainer) {
-                        messagesContainer.innerHTML = '<p style="text-align: center; color: #666; padding: 1rem;">No chat history. Start a conversation!</p>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading chat history:', error);
-            }
-        }
-
-        function displayAdminMessage(msg, isSent) {
-            const container = document.getElementById('adminChatMessages');
-            const messageDiv = document.createElement('div');
-            messageDiv.style.padding = '0.75rem 1rem';
-            messageDiv.style.marginBottom = '0.5rem';
-            messageDiv.style.borderRadius = '8px';
-            messageDiv.style.maxWidth = '70%';
-
-            if (isSent || msg.senderType === 'admin') {
-                messageDiv.style.background = '#3B82F6';
-                messageDiv.style.color = 'white';
-                messageDiv.style.marginLeft = 'auto';
-            } else {
-                messageDiv.style.background = '#2a2a2a';
-                messageDiv.style.color = '#fff';
-            }
-
-            messageDiv.textContent = msg.text || msg.message;
-            container.appendChild(messageDiv);
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendAdminMessage() {
-            const input = document.getElementById('adminChatInput');
-            const message = input.value.trim();
-
-            if (!message || !selectedClient) return;
-
-            const messageData = {
-                text: message,
-                senderId: 'admin',
-                senderName: 'admin',
-                senderType: 'admin',
-                receiverUsername: selectedClient
-            };
-
-            // Send to server (wait for server echo, don't display immediately)
-            adminSocket.emit('chat_message', messageData);
-            input.value = '';
-        }
-    </script>
     <script>
         function switchTab(tabName, btn) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -2050,27 +1175,10 @@
                 loadGenzAuthKey();
             }
             if (tabName === 'packages') {
-                loadPackages(); // Load product list for package selection
-            }
-            if (tabName === 'products') {
-                loadProducts();
-            } else if (tabName === 'genzauth') { // This seems like a duplicate condition for 'genzauth', might need review if 'genzauth' tab exists
-                loadGenzAuthConfig();
+                loadPackages();
             }
             if (tabName === 'verified-users') {
                 loadVerifiedUsers();
-            }
-            if (tabName === 'news-announcements') { // Load announcements when tab is opened
-                loadProductAnnouncements();
-                loadGlobalAnnouncements();
-            }
-            if (tabName === 'chat') { // Initialize chat when tab is opened
-                initAdminChat();
-                loadChatStats();
-            }
-            if (tabName === 'resellers') {
-                loadResellers();
-                loadProductsForResellers();
             }
         }
 
@@ -2084,10 +1192,6 @@
 
         function showMessage(message, type = 'success', targetId = 'memberMessage') {
             const msgDiv = document.getElementById(targetId);
-            if (!msgDiv) {
-                console.error(`Message element with ID "${targetId}" not found.`);
-                return;
-            }
             msgDiv.className = `message ${type}`;
             msgDiv.textContent = message;
             msgDiv.style.display = 'block';
@@ -2549,7 +1653,6 @@
                 document.getElementById('requireSocialVerification').checked = settings.requireSocialVerification || false;
                 document.getElementById('youtubeChannelUrl').value = settings.youtubeChannelUrl || '';
                 document.getElementById('instagramProfileUrl').value = settings.instagramProfileUrl || '';
-                document.getElementById('guestVideoUrl').value = settings.guestVideoUrl || '';
             } catch (error) {
                 console.error('Error loading settings:', error);
             }
@@ -2562,7 +1665,6 @@
             const requireSocial = document.getElementById('requireSocialVerification').checked;
             const youtubeUrl = document.getElementById('youtubeChannelUrl').value.trim();
             const instagramUrl = document.getElementById('instagramProfileUrl').value.trim();
-            const guestVideoUrl = document.getElementById('guestVideoUrl').value.trim();
 
             try {
                 const response = await fetch('/api/admin/guest-settings', {
@@ -2574,8 +1676,7 @@
                         guestPassMaxDuration: maxDuration,
                         requireSocialVerification: requireSocial,
                         youtubeChannelUrl: youtubeUrl,
-                        instagramProfileUrl: instagramUrl,
-                        guestVideoUrl: guestVideoUrl
+                        instagramProfileUrl: instagramUrl
                     }),
                     credentials: 'include'
                 });
@@ -2759,7 +1860,7 @@
                 const data = await response.json();
 
                 if (!data.success) {
-                    document.getElementById('verifiedUsersTableContainer').innerHTML =
+                    document.getElementById('verifiedUsersTableContainer').innerHTML = 
                         '<p style="color: #999;">Error loading verified users</p>';
                     return;
                 }
@@ -2768,9 +1869,9 @@
 
                 // Update stats
                 document.getElementById('totalVerifiedUsers').textContent = users.length;
-                document.getElementById('totalVerifiedGuests').textContent =
+                document.getElementById('totalVerifiedGuests').textContent = 
                     users.filter(u => u.isGuest).length;
-                document.getElementById('totalVerifiedRegular').textContent =
+                document.getElementById('totalVerifiedRegular').textContent = 
                     users.filter(u => !u.isGuest).length;
 
                 let html = `
@@ -2793,16 +1894,16 @@
                     html += '<tr><td colspan="6" style="text-align: center; color: #999;">No verified users found</td></tr>';
                 } else {
                     users.forEach(user => {
-                        const userType = user.isGuest ?
-                            '<span class="badge-warning">Guest</span>' :
+                        const userType = user.isGuest ? 
+                            '<span class="badge-warning">Guest</span>' : 
                             '<span class="badge-success">Regular</span>';
-                        const verifiedDate = user.discordVerifiedAt ?
-                            new Date(user.discordVerifiedAt).toLocaleString() :
+                        const verifiedDate = user.discordVerifiedAt ? 
+                            new Date(user.discordVerifiedAt).toLocaleString() : 
                             'Unknown';
-
+                        
                         // Social verification status
-                        const socialVerified = (user.youtubeSubscribed && user.instagramFollowed) ?
-                            '<span class="status-verified">✓ Yes</span>' :
+                        const socialVerified = (user.youtubeSubscribed && user.instagramFollowed) ? 
+                            '<span class="status-verified">✓ Yes</span>' : 
                             '<span class="status-unverified">✗ No</span>';
 
                         html += `
@@ -2814,10 +1915,10 @@
                                 <td>${socialVerified}</td>
                                 <td>${verifiedDate}</td>
                                 <td>
-                                    <button onclick="unverifyUser('${user.username}')" style="margin-bottom: 0.5rem;">
+                                    <button class="danger-btn" onclick="unverifyUser('${user.username}')" style="margin-bottom: 0.5rem;">
                                         Unverify Discord
                                     </button>
-                                    <button onclick="unverifySocial('${user.username}')">
+                                    <button class="warning-btn" onclick="unverifySocial('${user.username}')">
                                         Unverify Social
                                     </button>
                                 </td>
@@ -2830,7 +1931,7 @@
                 document.getElementById('verifiedUsersTableContainer').innerHTML = html;
             } catch (error) {
                 console.error('Error loading verified users:', error);
-                document.getElementById('verifiedUsersTableContainer').innerHTML =
+                document.getElementById('verifiedUsersTableContainer').innerHTML = 
                     '<p style="color: #999;">Error loading verified users</p>';
             }
         }
@@ -2948,1216 +2049,160 @@
         });
 
         // Package Management Functions
-        let currentProductForPackages = null;
-        let allProductsData = [];
+        let currentPackages = { aimkill: {} };
 
         async function loadPackages() {
             try {
-                // Load all products to populate the dropdown
-                const productsResponse = await fetch('/api/admin/products', { credentials: 'include' });
-                const productsData = await productsResponse.json();
+                const response = await fetch('/api/admin/packages-config', { credentials: 'include' });
+                const data = await response.json();
 
-                if (productsData.success) {
-                    allProductsData = productsData.products;
-
-                    const productSelect = document.getElementById('packageProductSelect');
-                    productSelect.innerHTML = '<option value="">Select a product...</option>';
-
-                    allProductsData.forEach(product => {
-                        const option = document.createElement('option');
-                        option.value = product.productKey;
-                        option.textContent = product.displayName;
-                        productSelect.appendChild(option);
-                    });
-                }
+                currentPackages.aimkill = data.aimkill || {};
+                renderAimkillPackages();
             } catch (error) {
-                console.error('Load packages error:', error);
-                showMessage('Failed to load products', 'error', 'productPackagesMessage');
+                console.error('Error loading packages:', error);
+                showMessage('Failed to load packages', 'error', 'aimkillPackagesMessage');
             }
         }
 
-        async function loadProductPackages() {
-            const productKey = document.getElementById('packageProductSelect').value;
+        function renderAimkillPackages() {
+            const container = document.getElementById('aimkillPackagesList');
+            let html = '';
 
-            if (!productKey) {
-                document.getElementById('addPackageSection').style.display = 'none';
-                document.getElementById('product-packages-section').style.display = 'none';
-                return;
-            }
-
-            const product = allProductsData.find(p => p.productKey === productKey);
-            if (!product) return;
-
-            currentProductForPackages = product;
-
-            document.getElementById('selectedProductName').textContent = product.displayName;
-            document.getElementById('currentProductName').textContent = product.displayName;
-            document.getElementById('addPackageSection').style.display = 'block';
-            document.getElementById('product-packages-section').style.display = 'block';
-
-            // Display existing packages
-            const container = document.getElementById('productPackagesList');
-            container.innerHTML = '';
-
-            const packages = product.packages || {};
-
-            Object.entries(packages).forEach(([key, pkg]) => {
-                const packageDiv = document.createElement('div');
-                packageDiv.className = 'form-section';
-                packageDiv.style.marginBottom = '1.5rem';
-                packageDiv.innerHTML = `
-                    <h3 style="color: #fff; margin-bottom: 1rem;">${pkg.display || key}</h3>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            Object.keys(currentPackages.aimkill).forEach(key => {
+                const pkg = currentPackages.aimkill[key];
+                html += `
+                    <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px; position: relative;">
+                        <h3 style="margin-bottom: 1rem; color: #fff; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Original Key: ${key}</span>
+                            <button onclick="deleteAimkillPackage('${key}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 11px;">Delete</button>
+                        </h3>
                         <div class="form-group">
-                            <label>Display Name</label>
-                            <input type="text" data-package="${key}" data-field="display" value="${pkg.display || ''}"
+                            <label>New Package Key (Optional)</label>
+                            <input type="text" id="aimkill_${key}_newkey" value="${key}"
                                 style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
                         </div>
-                        <div class="form-group">
-                            <label>Days</label>
-                            <input type="number" data-package="${key}" data-field="days" value="${pkg.days || 0}"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Hours (optional)</label>
-                            <input type="number" data-package="${key}" data-field="hours" value="${pkg.hours || ''}"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Credits</label>
-                            <input type="number" data-package="${key}" data-field="credits" value="${pkg.credits || 0}"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-                        <div class="form-group">
-                            <label>Price ($)</label>
-                            <input type="number" step="0.01" data-package="${key}" data-field="price" value="${pkg.price || 0}"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                            <div class="form-group">
+                                <label>Display Name</label>
+                                <input type="text" id="aimkill_${key}_display" value="${pkg.display || ''}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Days</label>
+                                <input type="number" id="aimkill_${key}_days" value="${pkg.days || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Credits Required</label>
+                                <input type="number" id="aimkill_${key}_credits" value="${pkg.credits || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Price ($)</label>
+                                <input type="number" step="0.01" id="aimkill_${key}_price" value="${pkg.price || 0}"
+                                    style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
                         </div>
                     </div>
-                    <button class="danger-btn" onclick="deleteProductPackage('${key}')" style="margin-top: 1rem;">Delete Package</button>
                 `;
-                container.appendChild(packageDiv);
             });
+
+            container.innerHTML = html;
         }
 
-        async function addNewProductPackage() {
-            if (!currentProductForPackages) {
-                showMessage('Please select a product first', 'error', 'productPackagesMessage');
+        function deleteAimkillPackage(packageKey) {
+            if (!confirm(`Delete package "${packageKey}"? This action cannot be undone.`)) {
                 return;
             }
 
+            delete currentPackages.aimkill[packageKey];
+            renderAimkillPackages();
+            showMessage(`Package "${packageKey}" will be deleted when you save changes`, 'success', 'aimkillPackagesMessage');
+        }
+
+        function addNewAimkillPackage() {
             const key = document.getElementById('newPackageKey').value.trim();
             const display = document.getElementById('newPackageDisplay').value.trim();
             const days = parseInt(document.getElementById('newPackageDays').value);
-            const hours = parseInt(document.getElementById('newPackageHours').value) || null;
             const credits = parseInt(document.getElementById('newPackageCredits').value);
             const price = parseFloat(document.getElementById('newPackagePrice').value);
 
-            if (!key || !display || !days || !credits || !price) {
-                showMessage('All required fields must be filled', 'error', 'productPackagesMessage');
+            if (!key || !display || isNaN(days) || isNaN(credits) || isNaN(price)) {
+                showMessage('Please fill in all fields for the new package', 'error', 'aimkillPackagesMessage');
                 return;
             }
 
-            try {
-                const packages = currentProductForPackages.packages || {};
-
-                if (packages[key]) {
-                    showMessage('Package key already exists', 'error', 'productPackagesMessage');
-                    return;
-                }
-
-                const newPackage = { display, days, credits, price };
-                if (hours) newPackage.hours = hours;
-
-                packages[key] = newPackage;
-
-                const updateResponse = await fetch(`/api/admin/products/${currentProductForPackages._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packages }),
-                    credentials: 'include'
-                });
-
-                const result = await updateResponse.json();
-
-                if (result.success) {
-                    showMessage('Package added successfully', 'success', 'productPackagesMessage');
-                    document.getElementById('newPackageKey').value = '';
-                    document.getElementById('newPackageDisplay').value = '';
-                    document.getElementById('newPackageDays').value = '';
-                    document.getElementById('newPackageHours').value = '';
-                    document.getElementById('newPackageCredits').value = '';
-                    document.getElementById('newPackagePrice').value = '';
-
-                    // Reload products and packages
-                    await loadPackages();
-                    document.getElementById('packageProductSelect').value = currentProductForPackages.productKey;
-                    await loadProductPackages();
-                } else {
-                    showMessage(result.error || 'Failed to add package', 'error', 'productPackagesMessage');
-                }
-            } catch (error) {
-                console.error('Add package error:', error);
-                showMessage('Failed to add package', 'error', 'productPackagesMessage');
-            }
-        }
-
-        async function saveProductPackages() {
-            if (!currentProductForPackages) {
-                showMessage('Please select a product first', 'error', 'productPackagesMessage');
+            if (currentPackages.aimkill[key]) {
+                showMessage(`Package "${key}" already exists. Use a different key.`, 'error', 'aimkillPackagesMessage');
                 return;
             }
 
-            try {
-                const inputs = document.querySelectorAll('#productPackagesList input');
-                const packages = {};
+            currentPackages.aimkill[key] = {
+                display: display,
+                days: days,
+                credits: credits,
+                price: price
+            };
 
-                inputs.forEach(input => {
-                    const packageKey = input.dataset.package;
-                    const field = input.dataset.field;
-                    if (!packages[packageKey]) {
-                        packages[packageKey] = {};
-                    }
+            // Clear form
+            document.getElementById('newPackageKey').value = '';
+            document.getElementById('newPackageDisplay').value = '';
+            document.getElementById('newPackageDays').value = '';
+            document.getElementById('newPackageCredits').value = '';
+            document.getElementById('newPackagePrice').value = '';
 
-                    if (field === 'display') {
-                        packages[packageKey][field] = input.value;
-                    } else {
-                        const value = parseFloat(input.value);
-                        if (!isNaN(value) && value > 0) {
-                            packages[packageKey][field] = value;
-                        }
-                    }
-                });
-
-                const response = await fetch(`/api/admin/products/${currentProductForPackages._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packages }),
-                    credentials: 'include'
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    showMessage('Packages saved successfully', 'success', 'productPackagesMessage');
-                    // Reload to refresh data
-                    await loadPackages();
-                    document.getElementById('packageProductSelect').value = currentProductForPackages.productKey;
-                    await loadProductPackages();
-                } else {
-                    showMessage(result.error || 'Failed to save packages', 'error', 'productPackagesMessage');
-                }
-            } catch (error) {
-                console.error('Save packages error:', error);
-                showMessage('Failed to save packages', 'error', 'productPackagesMessage');
-            }
+            renderAimkillPackages();
+            showMessage(`Package "${key}" added! Click "Save All Aimkill Packages" to apply changes.`, 'success', 'aimkillPackagesMessage');
         }
 
-        async function deleteProductPackage(key) {
-            if (!currentProductForPackages) return;
-            if (!confirm(`Delete package "${key}"?`)) return;
+        async function saveAimkillPackages() {
+            const packages = {};
 
-            try {
-                const packages = { ...currentProductForPackages.packages };
-                delete packages[key];
+            Object.keys(currentPackages.aimkill).forEach(key => {
+                const newKeyInput = document.getElementById(`aimkill_${key}_newkey`);
+                const newKey = newKeyInput ? newKeyInput.value.trim() : key;
+                const packageKey = newKey || key; // Use new key if provided, otherwise use old key
 
-                const updateResponse = await fetch(`/api/admin/products/${currentProductForPackages._id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ packages }),
-                    credentials: 'include'
-                });
-
-                const result = await updateResponse.json();
-
-                if (result.success) {
-                    showMessage('Package deleted successfully', 'success', 'productPackagesMessage');
-                    await loadPackages();
-                    document.getElementById('packageProductSelect').value = currentProductForPackages.productKey;
-                    await loadProductPackages();
-                } else {
-                    showMessage(result.error || 'Failed to delete package', 'error', 'productPackagesMessage');
+                // Check if the key is already in the packages object (meaning it was renamed from another key)
+                if (packages.hasOwnProperty(packageKey) && packageKey !== key) {
+                    showMessage(`Error: Package key "${packageKey}" is duplicated. Please ensure all keys are unique.`, 'error', 'aimkillPackagesMessage');
+                    newKeyInput.style.borderColor = 'red'; // Highlight the conflicting input
+                    return; // Stop saving if duplicate key found
                 }
-            } catch (error) {
-                console.error('Delete package error:', error);
-                showMessage('Failed to delete package', 'error', 'productPackagesMessage');
-            }
-        }
 
-        // Product Management Functions
-        async function loadProducts() {
-            try {
-                const response = await fetch('/api/admin/products', {
-                    credentials: 'include'
-                });
-                const data = await response.json();
-
-                if (data.success) {
-                    renderProducts(data.products);
-                }
-            } catch (error) {
-                console.error('Load products error:', error);
-            }
-        }
-
-        function renderProducts(products) {
-            const container = document.getElementById('productsContainer');
-
-            if (!products || products.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No products created yet</p>';
-                return;
-            }
-
-            let html = '';
-            products.forEach(product => {
-                const packageCount = Object.keys(product.packages || {}).length;
-                const hasGenzauth = product.genzauthSellerKey && product.genzauthSellerKey.length > 0;
-                const hasDownloadLink = product.downloadLink && product.downloadLink.length > 0;
-
-                html += `
-                    <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                            <div>
-                                <h3 style="margin: 0; color: #fff;">${product.displayName}</h3>
-                                <p style="margin: 0.5rem 0 0 0; color: #999; font-size: 12px;">Key: ${product.productKey}</p>
-                            </div>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button onclick="editProduct('${product.productKey}')" class="secondary-btn" style="padding: 0.5rem 1rem; font-size: 11px;">Edit</button>
-                                <button onclick="deleteProduct('${product.productKey}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 11px;">Delete</button>
-                            </div>
-                        </div>
-                        <p style="color: #ccc; margin-bottom: 1rem; font-size: 13px;">${product.description || 'No description'}</p>
-                        <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px;">
-                            <p style="color: #999; font-size: 12px; margin: 0;">
-                                <strong>Packages:</strong> ${packageCount} configured<br>
-                                <strong>Status:</strong> ${product.isActive ? '✅ Active' : '❌ Inactive'}<br>
-                                <strong>GenzAuth API:</strong> ${hasGenzauth ? '✅ Configured' : '❌ Not configured'}<br>
-                                <strong>HWID Reset:</strong> ${product.allowHwidReset ? '✅ Enabled' : '❌ Disabled'}<br>
-                                <strong>Download Link:</strong> ${hasDownloadLink ? '✅ Set' : '❌ Not set'}<br>
-                                <strong>Setup Video:</strong> ${product.setupVideoLink ? '✅ Set' : '❌ Not set'}<br>
-                                <strong>Guest Video:</strong> ${product.guestVideoLink ? '✅ Set' : '❌ Not set'}<br>
-                                <strong>Announcements:</strong> ${product.announcements ? '✅ Set' : '❌ Not set'}<br>
-                                <strong>Created:</strong> ${new Date(product.createdAt).toLocaleDateString()}
-                            </p>
-                        </div>
-                    </div>
-                `;
+                packages[packageKey] = {
+                    display: document.getElementById(`aimkill_${key}_display`).value,
+                    days: parseInt(document.getElementById(`aimkill_${key}_days`).value),
+                    credits: parseInt(document.getElementById(`aimkill_${key}_credits`).value),
+                    price: parseFloat(document.getElementById(`aimkill_${key}_price`).value)
+                };
             });
 
-            container.innerHTML = html;
-        }
+            // If any duplicate key error occurred, packages might not be fully populated or might be incorrect.
+            // We need to re-validate before sending. A simple check is to see if the number of keys matches.
+            // However, direct comparison can be tricky if keys were not changed.
+            // A more robust check would involve tracking changes and ensuring no collisions.
+            // For simplicity, we'll rely on the immediate error message and prevent saving if a duplicate is detected during iteration.
 
-        async function createProduct() {
-            const productKey = document.getElementById('newProductKey').value.trim();
-            const displayName = document.getElementById('newProductDisplayName').value.trim();
-            const description = document.getElementById('newProductDescription').value.trim();
-            const genzauthKey = document.getElementById('newProductGenzauth').value.trim();
-            const downloadLink = document.getElementById('newProductDownloadLink').value.trim();
-            const setupVideoLink = document.getElementById('newProductSetupVideoLink').value.trim();
-            const guestVideoLink = document.getElementById('newProductGuestVideoLink').value.trim();
-            const announcements = document.getElementById('newProductAnnouncements').value.trim();
-            const allowHwid = document.getElementById('newProductAllowHwid').checked;
-            const maxFreeResets = parseInt(document.getElementById('newProductMaxFreeResets').value) || 5;
-            const resetPrice = parseFloat(document.getElementById('newProductResetPrice').value) || 0;
-
-            if (!productKey || !displayName) {
-                showMessage('Product key and display name are required', 'error', 'productsMessage');
-                return;
-            }
-
+            // If we reached here, it means no duplicate key was found during the iteration.
             try {
-                const response = await fetch('/api/admin/products', {
+                const response = await fetch('/api/admin/packages-config', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        productKey,
-                        displayName,
-                        description,
-                        genzauthSellerKey: genzauthKey,
-                        downloadLink,
-                        setupVideoLink,
-                        guestVideoLink,
-                        announcements,
-                        allowHwidReset: allowHwid,
-                        maxFreeHwidResets: maxFreeResets,
-                        hwidResetPrice: resetPrice
-                    }),
+                    body: JSON.stringify({ aimkill: packages }),
                     credentials: 'include'
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    showMessage('Product created successfully', 'success', 'productsMessage');
-                    document.getElementById('newProductKey').value = '';
-                    document.getElementById('newProductDisplayName').value = '';
-                    document.getElementById('newProductDescription').value = '';
-                    document.getElementById('newProductGenzauth').value = '';
-                    document.getElementById('newProductDownloadLink').value = '';
-                    document.getElementById('newProductSetupVideoLink').value = '';
-                    document.getElementById('newProductGuestVideoLink').value = '';
-                    document.getElementById('newProductAnnouncements').value = '';
-                    document.getElementById('newProductAllowHwid').checked = false;
-                    document.getElementById('newProductMaxFreeResets').value = '5';
-                    document.getElementById('newProductResetPrice').value = '0';
-                    loadProducts();
+                    showMessage('Aimkill packages updated successfully!', 'success', 'aimkillPackagesMessage');
+                    loadPackages(); // Reload to reflect any key changes and ensure state is clean
                 } else {
-                    showMessage(data.error || 'Failed to create product', 'error', 'productsMessage');
+                    showMessage(data.error || 'Failed to update Aimkill packages', 'error', 'aimkillPackagesMessage');
                 }
             } catch (error) {
-                console.error('Create product error:', error);
-                showMessage('Connection error', 'error', 'productsMessage');
-            }
-        }
-
-        async function deleteProduct(productKey) {
-            if (!confirm(`Delete product "${productKey}"? This action cannot be undone.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/admin/products/${productKey}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage('Product deleted successfully', 'success', 'productsMessage');
-                    loadProducts();
-                } else {
-                    showMessage(data.error || 'Failed to delete product', 'error', 'productsMessage');
-                }
-            } catch (error) {
-                console.error('Delete product error:', error);
-                showMessage('Error deleting product', 'error', 'productsMessage');
-            }
-        }
-
-        let editingProductKey = null;
-
-        async function editProduct(productKey) {
-            try {
-                const response = await fetch('/api/admin/products', { credentials: 'include' });
-                const data = await response.json();
-
-                if (!data.success) {
-                    showMessage('Failed to load product details', 'error', 'productsMessage');
-                    return;
-                }
-
-                const product = data.products.find(p => p.productKey === productKey);
-                if (!product) {
-                    showMessage('Product not found', 'error', 'productsMessage');
-                    return;
-                }
-
-                editingProductKey = productKey;
-
-                const editForm = `
-                    <div style="background: rgba(0,0,0,0.5); border: 1px solid #444; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
-                        <h4 style="margin: 0 0 1rem 0; color: #fff;">Edit Product: ${product.displayName}</h4>
-
-                        <div class="form-group">
-                            <label>Display Name</label>
-                            <input type="text" id="edit_displayName" value="${product.displayName || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Description</label>
-                            <textarea id="edit_description" rows="2" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">${product.description || ''}</textarea>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Download Link</label>
-                            <input type="url" id="edit_downloadLink" value="${product.downloadLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Setup Video Link (YouTube URL)</label>
-                            <input type="url" id="edit_setupVideoLink" value="${product.setupVideoLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Guest Video Link (YouTube URL)</label>
-                            <input type="url" id="edit_guestVideoLink" value="${product.guestVideoLink || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                            <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">Separate video for guests/non-authenticated users</p>
-                        </div>
-
-                        <div class="form-group">
-                            <label>GenzAuth Seller Key</label>
-                            <input type="password" id="edit_genzauthKey" placeholder="${product.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        </div>
-
-                        <div class="form-group">
-                            <label style="display: block; margin-bottom: 0.5rem; color: #999; font-size: 11px; font-weight: 700; text-transform: uppercase;">Announcements/News</label>
-                            <textarea rows="4" id="edit_announcements"
-                                style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family: monospace; resize: vertical;">${product.announcements || ''}</textarea>
-                            <p style="color: #666; font-size: 10px; margin-top: 0.25rem;">HTML supported. Leave empty to hide announcements tab.</p>
-                        </div>
-
-                        <div class="settings-list" style="margin: 1rem 0;">
-                            <div class="setting-item">
-                                <div class="setting-control">
-                                    <input type="checkbox" id="edit_allowHwidReset" class="toggle-checkbox" ${product.allowHwidReset ? 'checked' : ''}>
-                                    <label for="edit_allowHwidReset" class="toggle-label"></label>
-                                </div>
-                                <div class="setting-info">
-                                    <label class="setting-title">Allow HWID Reset</label>
-                                    <p class="setting-description">Enable HWID reset functionality for clients</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div class="form-group">
-                                <label>Max Free HWID Resets</label>
-                                <input type="number" id="edit_maxFreeResets" value="${product.maxFreeHwidResets || 5}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                            </div>
-                            <div class="form-group">
-                                <label>HWID Reset Price (USD)</label>
-                                <input type="number" id="edit_resetPrice" value="${product.hwidResetPrice || 0}" min="0" step="0.01" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                            </div>
-                        </div>
-
-                        <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
-                            <button onclick="saveProductEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
-                            <button onclick="cancelProductEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
-                        </div>
-                    </div>
-                `;
-
-                const container = document.getElementById('productsContainer');
-                container.insertAdjacentHTML('afterbegin', editForm);
-
-                document.getElementById('edit_displayName').focus();
-
-            } catch (error) {
-                console.error('Edit product error:', error);
-                showMessage('Error loading product for editing', 'error', 'productsMessage');
-            }
-        }
-
-        async function saveProductEdit() {
-            if (!editingProductKey) return;
-
-            const updatedData = {
-                displayName: document.getElementById('edit_displayName').value,
-                description: document.getElementById('edit_description').value,
-                allowHwidReset: document.getElementById('edit_allowHwidReset').checked,
-                maxFreeHwidResets: parseInt(document.getElementById('edit_maxFreeResets').value) || 5,
-                hwidResetPrice: parseFloat(document.getElementById('edit_resetPrice').value) || 0,
-                downloadLink: document.getElementById('edit_downloadLink').value.trim(),
-                setupVideoLink: document.getElementById('edit_setupVideoLink').value.trim(),
-                guestVideoLink: document.getElementById('edit_guestVideoLink').value.trim(),
-                announcements: document.getElementById('edit_announcements').value.trim()
-            };
-
-            const sellerKey = document.getElementById('edit_genzauthKey').value;
-            if (sellerKey && sellerKey.trim()) {
-                updatedData.genzauthSellerKey = sellerKey.trim();
-            }
-
-            try {
-                const response = await fetch(`/api/admin/products/${editingProductKey}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify(updatedData)
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage('Product updated successfully!', 'success', 'productsMessage');
-                    editingProductKey = null;
-                    loadProducts();
-                } else {
-                    showMessage(data.error || 'Failed to update product', 'error', 'productsMessage');
-                }
-            } catch (error) {
-                console.error('Save product error:', error);
-                showMessage('Error updating product', 'error', 'productsMessage');
-            }
-        }
-
-        function cancelProductEdit() {
-            editingProductKey = null;
-            loadProducts(); // Reload to remove the edit form
-        }
-
-        // Client Management Functions
-        async function loadClients() {
-            try {
-                // Load products for dropdown
-                const productsResponse = await fetch('/api/admin/products', {
-                    credentials: 'include'
-                });
-                const productsData = await productsResponse.json();
-
-                if (productsData.success && productsData.products) {
-                    const productSelect = document.getElementById('newClientProduct');
-                    productSelect.innerHTML = '<option value="">Select a product...</option>';
-                    productsData.products.forEach(product => {
-                        productSelect.innerHTML += `<option value="${product.productKey}" data-key="${product.productKey}">${product.displayName}</option>`;
-
-                        // Load global download links from products
-                        if (product.productKey === 'AIMKILL' && product.downloadLink) {
-                            document.getElementById('aimkillDownloadLink').value = product.downloadLink;
-                        } else if (product.productKey === 'UID_BYPASS' && product.downloadLink) {
-                            document.getElementById('uidBypassDownloadLink').value = product.downloadLink;
-                        } else if (product.productKey === 'SILENT_AIM' && product.downloadLink) {
-                            document.getElementById('silentAimDownloadLink').value = product.downloadLink;
-                        }
-                    });
-
-                    // Add change handler to show/hide fields
-                    productSelect.addEventListener('change', function() {
-                        const selectedOption = this.options[this.selectedIndex];
-                        const productKey = selectedOption.getAttribute('data-key');
-
-                        const aimkillField = document.getElementById('aimkillUsernameField');
-                        const uidField = document.getElementById('uidBypassUidField');
-
-                        // Hide both fields first
-                        aimkillField.style.display = 'none';
-                        uidField.style.display = 'none';
-
-                        // Show relevant field based on product
-                        if (productKey === 'AIMKILL') {
-                            aimkillField.style.display = 'block';
-                        } else if (productKey === 'UID_BYPASS') {
-                            uidField.style.display = 'block';
-                        }
-                    });
-                }
-
-                // Load clients
-                console.log('📥 Loading clients from /client/admin/clients...');
-                const response = await fetch('/client/admin/clients', {
-                    credentials: 'include'
-                });
-
-                console.log('📡 Response status:', response.status);
-
-                if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                    console.error('❌ Failed to load clients:', errorData);
-                    showMessage(`Failed to load clients: ${errorData.error || 'Server error'}`, 'error', 'clientsListMessage');
-                    document.getElementById('clientsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Failed to load clients. Please check console for details.</p>';
-                    return;
-                }
-
-                const data = await response.json();
-                console.log('✅ Clients data received:', data);
-
-                if (data.success) {
-                    renderClientsList(data.clients);
-                } else {
-                    showMessage(data.error || 'Failed to load clients', 'error', 'clientsListMessage');
-                }
-            } catch (error) {
-                console.error('❌ Load clients error:', error);
-                showMessage('Error loading clients: ' + error.message, 'error', 'clientsListMessage');
-                document.getElementById('clientsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Error loading clients. Please refresh the page.</p>';
-            }
-        }
-
-        function renderClientsList(clients) {
-            const container = document.getElementById('clientsList');
-
-            if (!clients || clients.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No clients found</p>';
-                return;
-            }
-
-            const html = clients.map(client => `
-                <div style="background: rgba(0,0,0,0.3); border: 1px solid #333; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-                        <div>
-                            <h4 style="color: #fff; margin: 0 0 0.5rem 0; font-size: 1.1rem;">${client.username}</h4>
-                            <span style="padding: 0.25rem 0.75rem; background: rgba(88, 101, 242, 0.2); color: #5865f2; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
-                                ${client.product ? client.product.displayName : client.productKey}
-                            </span>
-                        </div>
-                        <div style="display: flex; gap: 0.5rem;">
-                            <button onclick="toggleClientStatus('${client._id}', ${!client.isActive})" class="${client.isActive ? 'warning-btn' : 'success-btn'}" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                ${client.isActive ? 'Disable' : 'Enable'}
-                            </button>
-                            <button onclick="editClientDownloadLink('${client._id}', '${client.customDownloadLink || (client.product ? client.product.downloadLink : '')}')" class="submit-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                Edit Link
-                            </button>
-                            <button onclick="deleteClient('${client._id}', '${client.username}')" class="danger-btn" style="padding: 0.5rem 1rem; font-size: 0.9rem;">
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; font-size: 0.85rem;">
-                        ${client.assignedUsername ? `
-                        <div>
-                            <span style="color: #999;">Assigned Account:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.assignedUsername}</span>
-                        </div>
-                        <div>
-                            <span style="color: #999;">HWID Resets:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.hwidResetCount || 0}</span>
-                        </div>
-                        ` : ''}
-                        ${client.assignedUid ? `
-                        <div>
-                            <span style="color: #999;">Assigned UID:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.assignedUid}</span>
-                        </div>
-                        ` : ''}
-                        <div>
-                            <span style="color: #999;">Last Login:</span>
-                            <span style="color: #fff; font-weight: 500;">${client.lastLogin ? new Date(client.lastLogin).toLocaleString() : 'Never'}</span>
-                        </div>
-                        <div>
-                            <span style="color: #999;">Created:</span>
-                            <span style="color: #fff; font-weight: 500;">${new Date(client.createdAt).toLocaleDateString()}</span>
-                        </div>
-                    </div>
-
-                    ${client.notes ? `<div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 4px; color: #999; font-size: 0.85rem;">
-                        <strong style="color: #fff;">Notes:</strong> ${client.notes}
-                    </div>` : ''}
-
-                    <div style="margin-top: 1rem; padding: 0.75rem; background: rgba(0,0,0,0.3); border-radius: 4px; font-size: 0.85rem;">
-                        <span style="color: #999;">Download Link:</span>
-                        <span style="color: #5865f2; word-break: break-all;">${client.customDownloadLink || (client.product ? client.product.downloadLink : '') || 'Not set'}</span>
-                    </div>
-                </div>
-            `).join('');
-
-            container.innerHTML = html;
-        }
-
-        function toggleGenzAuthFields() {
-            const checkbox = document.getElementById('createGenzAuthAccount');
-            const container = document.getElementById('genzAuthFieldsContainer');
-            container.style.display = checkbox.checked ? 'block' : 'none';
-        }
-
-        async function createClient() {
-            const username = document.getElementById('newClientUsername').value.trim();
-            const password = document.getElementById('newClientPassword').value;
-            const productKey = document.getElementById('newClientProduct').value;
-            const assignedUsername = document.getElementById('newClientAssignedUsername')?.value.trim() || '';
-            const assignedUid = document.getElementById('newClientAssignedUid')?.value.trim() || '';
-            const notes = document.getElementById('newClientNotes')?.value.trim() || '';
-
-            const createGenzAuth = document.getElementById('createGenzAuthAccount')?.checked || false;
-            const genzAuthUsername = document.getElementById('genzAuthUsername')?.value.trim() || '';
-            const genzAuthPassword = document.getElementById('genzAuthPassword').value || '';
-            const genzAuthDuration = document.getElementById('genzAuthDuration').value || '30';
-
-            if (!username || !password || !productKey) {
-                showMessage('Please fill in username, password, and select a product', 'error', 'createClientMessage');
-                return;
-            }
-
-            if (createGenzAuth && (!genzAuthUsername || !genzAuthPassword)) {
-                showMessage('Please fill in GenzAuth username and password', 'error', 'createClientMessage');
-                return;
-            }
-
-            try {
-                const requestBody = {
-                    username,
-                    password,
-                    productKey,
-                    assignedUsername,
-                    assignedUid,
-                    notes
-                };
-
-                if (createGenzAuth) {
-                    requestBody.createGenzAuthAccount = true;
-                    requestBody.genzAuthUsername = genzAuthUsername;
-                    requestBody.genzAuthPassword = genzAuthPassword;
-                    requestBody.genzAuthDuration = parseInt(genzAuthDuration);
-                }
-
-                const response = await fetch('/client/admin/clients', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify(requestBody)
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    let message = 'Client created successfully!';
-                    if (data.genzAuthCreated) {
-                        message += ` GenzAuth account created: ${genzAuthUsername}`;
-                    }
-                    showMessage(message, 'success', 'createClientMessage');
-
-                    document.getElementById('newClientUsername').value = '';
-                    document.getElementById('newClientPassword').value = '';
-                    document.getElementById('newClientProduct').value = '';
-                    if (document.getElementById('newClientAssignedUsername')) document.getElementById('newClientAssignedUsername').value = '';
-                    if (document.getElementById('newClientAssignedUid')) document.getElementById('newClientAssignedUid').value = '';
-                    if (document.getElementById('newClientNotes')) document.getElementById('newClientNotes').value = '';
-                    if (document.getElementById('createGenzAuthAccount')) document.getElementById('createGenzAuthAccount').checked = false;
-                    if (document.getElementById('genzAuthUsername')) document.getElementById('genzAuthUsername').value = '';
-                    if (document.getElementById('genzAuthPassword')) document.getElementById('genzAuthPassword').value = '';
-                    if (document.getElementById('genzAuthDuration')) document.getElementById('genzAuthDuration').value = '30';
-                    toggleGenzAuthFields();
-
-                    loadClients();
-                } else {
-                    showMessage(data.error || 'Failed to create client', 'error', 'createClientMessage');
-                }
-            } catch (error) {
-                console.error('Create client error:', error);
-                showMessage('Error creating client', 'error', 'createClientMessage');
-            }
-        }
-
-        async function toggleClientStatus(clientId, newStatus) {
-            try {
-                const response = await fetch(`/client/admin/clients/${clientId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ isActive: newStatus })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage(`Client ${newStatus ? 'enabled' : 'disabled'} successfully`, 'success', 'clientsListMessage');
-                    loadClients();
-                } else {
-                    showMessage(data.error || 'Failed to update client status', 'error', 'clientsListMessage');
-                }
-            } catch (error) {
-                console.error('Toggle client status error:', error);
-                showMessage('Error updating client status', 'error', 'clientsListMessage');
-            }
-        }
-
-        async function editClientDownloadLink(clientId, currentLink) {
-            const newLink = prompt(`Enter new download link:`, currentLink || '');
-
-            if (newLink === null) return;
-
-            try {
-                const response = await fetch(`/client/admin/clients/${clientId}/download-link`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({ downloadLink: newLink })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage('Download link updated successfully', 'success', 'clientsListMessage');
-                    loadClients();
-                } else {
-                    showMessage(data.error || 'Failed to update download link', 'error', 'clientsListMessage');
-                }
-            } catch (error) {
-                console.error('Edit download link error:', error);
-                showMessage('Error updating download link', 'error', 'clientsListMessage');
-            }
-        }
-
-        async function deleteClient(clientId, username) {
-            if (!confirm(`Delete client "${username}"? This action cannot be undone.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/client/admin/clients/${clientId}`, {
-                    method: 'DELETE',
-                    credentials: 'include'
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage('Client deleted successfully', 'success', 'clientsListMessage');
-                    loadClients();
-                } else {
-                    showMessage(data.error || 'Failed to delete client', 'error', 'clientsListMessage');
-                }
-            } catch (error) {
-                console.error('Delete client error:', error);
-                showMessage('Error deleting client', 'error', 'clientsListMessage');
-            }
-        }
-
-        async function updateGlobalDownloadLinks() {
-            const aimkillLink = document.getElementById('aimkillDownloadLink').value.trim();
-            const uidBypassLink = document.getElementById('uidBypassDownloadLink').value.trim();
-            const silentAimLink = document.getElementById('silentAimDownloadLink').value.trim(); // Get the value for Silent Aim
-
-            try {
-                const response = await fetch('/client/admin/download-links', {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    credentials: 'include',
-                    body: JSON.stringify({
-                        aimkillLink,
-                        uidBypassLink,
-                        silentAimLink // Include Silent Aim link in the request
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    showMessage('Global download links updated successfully!', 'success', 'downloadLinksMessage');
-                    loadClients();
-                } else {
-                    showMessage(data.error || 'Failed to update download links', 'error', 'downloadLinksMessage');
-                }
-            } catch (error) {
-                console.error('Update download links error:', error);
-                showMessage('Error updating download links', 'error', 'downloadLinksMessage');
-            }
-        }
-
-        // Announcement Functions
-        async function loadGlobalAnnouncements() {
-            try {
-                const response = await fetch('/api/admin/global-announcements', { credentials: 'include' });
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('globalAnnouncements').value = data.announcements || '';
-                }
-            } catch (error) {
-                console.error('Error loading global announcements:', error);
-            }
-        }
-
-        async function saveGlobalAnnouncements() {
-            const announcements = document.getElementById('globalAnnouncements').value.trim();
-            try {
-                const response = await fetch('/api/admin/global-announcements', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ announcements }),
-                    credentials: 'include'
-                });
-                const data = await response.json();
-                if (response.ok) {
-                    showMessage('Global announcements updated successfully!', 'success', 'announcementsMessage');
-                } else {
-                    showMessage(data.error || 'Failed to update global announcements', 'error', 'announcementsMessage');
-                }
-            } catch (error) {
-                console.error('Error saving global announcements:', error);
-                showMessage('Connection error', 'error', 'announcementsMessage');
-            }
-        }
-
-        async function loadProductAnnouncements() {
-            try {
-                const response = await fetch('/api/admin/products', { credentials: 'include' });
-                const data = await response.json();
-                const container = document.getElementById('productAnnouncementsList');
-
-                if (!data.success || !data.products || data.products.length === 0) {
-                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No products found to display announcements.</p>';
-                    return;
-                }
-
-                let html = '';
-                data.products.forEach(product => {
-                    if (product.announcements) {
-                        html += `
-                            <div class="form-section" style="background: rgba(255,255,255,0.03); padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px;">
-                                <h4 style="color: #fff; margin-bottom: 1rem;">${product.displayName} (${product.productKey})</h4>
-                                <div style="background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 6px; color: #eee; font-size: 13px;">
-                                    ${product.announcements}
-                                </div>
-                            </div>
-                        `;
-                    }
-                });
-
-                container.innerHTML = html || '<p style="color: #999; text-align: center; padding: 2rem;">No announcements configured for any products.</p>';
-
-            } catch (error) {
-                console.error('Error loading product announcements:', error);
-                document.getElementById('productAnnouncementsList').innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">Error loading product announcements.</p>';
-            }
-        }
-
-
-        const originalSwitchTab = switchTab;
-        switchTab = function(tabName, btn) {
-            originalSwitchTab(tabName, btn);
-            if (tabName === 'clients') {
-                loadClients();
-            }
-        };
-
-        // Reseller Management Functions
-        let allProducts = [];
-
-        async function loadProductsForResellers() {
-            try {
-                const response = await fetch('/api/admin/products');
-                const data = await response.json();
-
-                if (data.success) {
-                    allProducts = data.products;
-
-                    const select = document.getElementById('resellerProductsSelect');
-                    if (select) {
-                        select.innerHTML = '';
-
-                        data.products.forEach(product => {
-                            const option = document.createElement('option');
-                            option.value = product.productKey;
-                            option.textContent = product.displayName;
-                            select.appendChild(option);
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading products:', error);
-            }
-        }
-
-        async function loadResellers() {
-            try {
-                const response = await fetch('/reseller/api/admin/resellers');
-                const data = await response.json();
-
-                const container = document.getElementById('resellersListContainer');
-
-                if (data.success && data.resellers.length > 0) {
-                    let html = '<table class="data-table" style="width: 100%;"><thead><tr>';
-                    html += '<th>Username</th><th>Email</th><th>Credits</th><th>Products</th><th>Clients Created</th><th>Status</th><th>Created</th><th>Actions</th>';
-                    html += '</tr></thead><tbody>';
-
-                    data.resellers.forEach(reseller => {
-                        const products = reseller.assignedProducts.length > 0
-                            ? reseller.assignedProducts.join(', ')
-                            : 'None';
-                        const statusColor = reseller.isActive ? '#10B981' : '#EF4444';
-                        const statusText = reseller.isActive ? 'Active' : 'Inactive';
-
-                        html += `
-                            <tr>
-                                <td><strong>${reseller.username}</strong></td>
-                                <td>${reseller.email || '-'}</td>
-                                <td><span style="color: #10B981; font-weight: 700;">${reseller.credits}</span></td>
-                                <td style="font-size: 11px;">${products}</td>
-                                <td>${reseller.totalClientsCreated || 0}</td>
-                                <td><span style="color: ${statusColor};">${statusText}</span></td>
-                                <td>${new Date(reseller.createdAt).toLocaleDateString()}</td>
-                                <td>
-                                    <button class="edit-btn" onclick='editReseller(${JSON.stringify(reseller)})' style="padding: 0.5rem 1rem; margin-right: 0.5rem; background: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer;">Edit</button>
-                                    <button class="delete-btn" onclick="deleteReseller('${reseller._id}', '${reseller.username}')" style="padding: 0.5rem 1rem; background: #EF4444; color: white; border: none; border-radius: 4px; cursor: pointer;">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-
-                    html += '</tbody></table>';
-                    container.innerHTML = html;
-                } else {
-                    container.innerHTML = '<p style="color: #999; text-align: center; padding: 2rem;">No resellers found.</p>';
-                }
-            } catch (error) {
-                console.error('Error loading resellers:', error);
-                document.getElementById('resellersListContainer').innerHTML = '<p style="color: #EF4444; text-align: center; padding: 2rem;">Error loading resellers.</p>';
-            }
-        }
-
-        async function createReseller(event) {
-            event.preventDefault();
-
-            const username = document.getElementById('newResellerUsername').value.trim();
-            const password = document.getElementById('newResellerPassword').value.trim();
-            const email = document.getElementById('newResellerEmail').value.trim();
-            const credits = parseInt(document.getElementById('newResellerCredits').value) || 0;
-            const genzauthSellerKey = document.getElementById('newResellerGenzauthKey').value.trim();
-
-            const select = document.getElementById('resellerProductsSelect');
-            const assignedProducts = Array.from(select.selectedOptions).map(option => option.value);
-
-            if (!username || !password) {
-                showMessage('Username and password are required', 'error', 'resellersMessage');
-                return;
-            }
-
-            try {
-                const response = await fetch('/reseller/api/admin/resellers', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        username,
-                        password,
-                        email,
-                        credits,
-                        genzauthSellerKey,
-                        assignedProducts
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showMessage('Reseller created successfully!', 'success', 'resellersMessage');
-                    document.getElementById('createResellerForm').reset();
-                    loadResellers();
-                } else {
-                    showMessage(data.error || 'Failed to create reseller', 'error', 'resellersMessage');
-                }
-            } catch (error) {
-                console.error('Error creating reseller:', error);
-                showMessage('An error occurred while creating reseller', 'error', 'resellersMessage');
-            }
-        }
-
-        let editingResellerId = null;
-
-        function editReseller(reseller) {
-            editingResellerId = reseller._id;
-
-            const editForm = `
-                <div id="resellerEditForm" style="background: rgba(0,0,0,0.5); border: 2px solid #3B82F6; border-radius: 8px; padding: 1.5rem; margin-bottom: 1rem;">
-                    <h4 style="margin: 0 0 1rem 0; color: #3B82F6;">Edit Reseller: ${reseller.username}</h4>
-
-                    <div class="form-group">
-                        <label>Credits</label>
-                        <input type="number" id="editResellerCredits" value="${reseller.credits}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="editResellerEmail" value="${reseller.email || ''}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                    </div>
-
-                    <div class="form-group">
-                        <label>GenzAuth Seller Key</label>
-                        <input type="password" id="editResellerGenzauthKey" placeholder="${reseller.genzauthSellerKey ? '••••••••••••' : 'Not set'}" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                        <small style="color: #999; font-size: 11px;">Leave blank to keep current key</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Assigned Products</label>
-                        <select id="editResellerProducts" multiple style="min-height: 120px; width: 100%; padding: 0.5rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
-                            ${allProducts.map(p => `
-                                <option value="${p.productKey}" ${reseller.assignedProducts.includes(p.productKey) ? 'selected' : ''}>
-                                    ${p.displayName}
-                                </option>
-                            `).join('')}
-                        </select>
-                        <small style="color: #999; font-size: 11px; margin-top: 0.5rem; display: block;">
-                            Hold Ctrl (Windows) or Cmd (Mac) to select multiple products
-                        </small>
-                    </div>
-
-                    <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
-                        <button onclick="saveResellerEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
-                        <button onclick="cancelResellerEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
-                    </div>
-                </div>
-            `;
-
-            const container = document.getElementById('resellersListContainer');
-            const existingForm = document.getElementById('resellerEditForm');
-            if (existingForm) {
-                existingForm.remove();
-            }
-            container.insertAdjacentHTML('afterbegin', editForm);
-        }
-
-        async function saveResellerEdit() {
-            if (!editingResellerId) return;
-
-            const credits = parseInt(document.getElementById('editResellerCredits').value) || 0;
-            const email = document.getElementById('editResellerEmail').value.trim();
-            const genzauthKey = document.getElementById('editResellerGenzauthKey').value.trim();
-            const select = document.getElementById('editResellerProducts');
-            const assignedProducts = Array.from(select.selectedOptions).map(option => option.value);
-
-            const updates = {
-                credits,
-                email,
-                assignedProducts
-            };
-
-            if (genzauthKey) {
-                updates.genzauthSellerKey = genzauthKey;
-            }
-
-            await updateReseller(editingResellerId, updates);
-            editingResellerId = null;
-        }
-
-        function cancelResellerEdit() {
-            editingResellerId = null;
-            const form = document.getElementById('resellerEditForm');
-            if (form) form.remove();
-        }
-
-        async function updateReseller(resellerId, updates) {
-            try {
-                const response = await fetch(`/reseller/api/admin/resellers/${resellerId}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updates)
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showMessage('Reseller updated successfully!', 'success', 'resellersMessage');
-                    const form = document.getElementById('resellerEditForm');
-                    if (form) form.remove();
-                    loadResellers();
-                } else {
-                    showMessage(data.error || 'Failed to update reseller', 'error', 'resellersMessage');
-                }
-            } catch (error) {
-                console.error('Error updating reseller:', error);
-                showMessage('An error occurred while updating reseller', 'error', 'resellersMessage');
-            }
-        }
-
-        async function deleteReseller(resellerId, username) {
-            if (!confirm(`Are you sure you want to delete reseller "${username}"? This action cannot be undone.`)) {
-                return;
-            }
-
-            try {
-                const response = await fetch(`/reseller/api/admin/resellers/${resellerId}`, {
-                    method: 'DELETE'
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    showMessage('Reseller deleted successfully!', 'success', 'resellersMessage');
-                    loadResellers();
-                } else {
-                    showMessage(data.error || 'Failed to delete reseller', 'error', 'resellersMessage');
-                }
-            } catch (error) {
-                console.error('Error deleting reseller:', error);
-                showMessage('An error occurred while deleting reseller', 'error', 'resellersMessage');
+                showMessage('Connection error', 'error', 'aimkillPackagesMessage');
             }
         }
     </script>
