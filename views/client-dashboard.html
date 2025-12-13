@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Dashboard - Dominus Corps</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            margin: 0;
+            background: linear-gradient(135deg, #0a0a0a 0%, #0f0f0f 50%, #0a0a0a 100%);
+            background-attachment: fixed;
+        }
+
+        .header {
+            background: #1a1a1a;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .header-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .username {
+            font-weight: 700;
+            color: #FFFFFF;
+            font-size: 14px;
+        }
+
+        .product-type {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-logout {
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            color: #999;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #EF4444;
+            color: white;
+            border-color: #EF4444;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0;
+            margin-bottom: 2rem;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            color: #999;
+            border: none;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 700;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab:hover {
+            background: #222;
+            color: #FFFFFF;
+        }
+
+        .tab.active {
+            background: #FFFFFF;
+            color: #000;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tab-content h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #FFFFFF;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border: 1px solid #2a2a2a;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #999;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            color: #FFFFFF;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .download-section,
+        .reset-section,
+        .setup-video-section,
+        .news-section {
+            text-align: center;
+            padding: 2rem 0;
+        }
+
+        .download-icon,
+        .setup-icon,
+        .news-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .btn-download,
+        .btn-reset,
+        .btn-setup,
+        .btn-news {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-download:hover:not(:disabled),
+        .btn-reset:hover:not(:disabled),
+        .btn-setup:hover:not(:disabled),
+        .btn-news:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-download:disabled,
+        .btn-reset:disabled,
+        .btn-setup:disabled,
+        .btn-news:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background: #10B981;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            display: none;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: #EF4444;
+            color: #EF4444;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: #10B981;
+            color: #10B981;
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            border-color: #3B82F6;
+            color: #3B82F6;
+        }
+
+        .no-link-message,
+        .no-video-message,
+        .no-announcements-message {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            background: #1a1a1a;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #2a2a2a;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Setup Video Specific Styles */
+        .setup-video-section iframe {
+            width: 100%;
+            max-width: 720px;
+            height: 405px;
+            border: none;
+            border-radius: 8px;
+            margin: 0 auto;
+        }
+
+        /* News Specific Styles */
+        .news-section {
+            text-align: left;
+        }
+
+        .news-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .news-content a {
+            color: #3B82F6;
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+                padding: 1.25rem 1rem;
+            }
+
+            .header-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .container {
+                padding: 0 1rem;
+                margin: 1.5rem auto;
+            }
+
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 11px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .setup-video-section iframe {
+                height: 315px;
+            }
+        }
+
+        /* Chat Specific Styles */
+        .chat-container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background: #1a1a1a;
+            border-radius: 8px;
+            border: 1px solid #2a2a2a;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+            max-height: 600px;
+        }
+
+        .chat-header {
+            background: #2a2a2a;
+            padding: 1rem;
+            font-weight: 700;
+            color: #FFFFFF;
+            text-align: center;
+            border-bottom: 1px solid #3a3a3a;
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .message {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background: #3B82F6;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.received {
+            background: #2a2a2a;
+            color: #FFFFFF;
+            align-self: flex-start;
+        }
+
+        .message .sender {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.7;
+            margin-bottom: 0.25rem;
+            display: block;
+        }
+
+        .chat-input-area {
+            display: flex;
+            padding: 1rem;
+            background: #2a2a2a;
+            border-top: 1px solid #3a3a3a;
+        }
+
+        #chatMessageInput {
+            flex-grow: 1;
+            background: #3a3a3a;
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            color: #FFFFFF;
+            font-size: 14px;
+            margin-right: 0.75rem;
+            outline: none;
+        }
+
+        #chatMessageInput::placeholder {
+            color: #999;
+        }
+
+        .btn-send {
+            padding: 0.75rem 1.5rem;
+            background: #FFFFFF;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-send:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Client Dashboard</h1>
+        <div class="header-info">
+            <div class="user-info">
+                <div class="username" id="headerUsername">Loading...</div>
+                <div class="product-type" id="headerProductType">Loading...</div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tabs" id="tabsContainer">
+            <button class="tab active" onclick="showTab('download')"> Download Files</button>
+            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;"> Reset
+                HWID</button>
+            <button class="tab" onclick="showTab('setup')"> Setup Guide</button>
+            <button class="tab" id="newsTabButton" onclick="showTab('news')" style="display: none;"> News</button>
+            <button class="tab" onclick="showTab('chat')">  Chat</button>
+        </div>
+
+        <div id="downloadTab" class="tab-content active">
+            <h2>Download Files</h2>
+            <div id="downloadAlert" class="alert"></div>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Product Type:</span>
+                    <span class="info-value" id="productType">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last Login:</span>
+                    <span class="info-value" id="lastLogin">-</span>
+                </div>
+            </div>
+
+            <div id="genzAuthExpirationCard" class="info-card"
+                style="display: none; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3);">
+                <div class="info-row">
+                    <span class="info-label">GenzAuth Account:</span>
+                    <span class="info-value" id="genzAuthUsername">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expires At:</span>
+                    <span class="info-value" id="genzAuthExpiry">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Remaining:</span>
+                    <span class="info-value" id="genzAuthTimeLeft" style="font-weight: 700;">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Account Status:</span>
+                    <span class="info-value" id="genzAuthStatus">-</span>
+                </div>
+            </div>
+
+            <div id="uidInfoCard" class="info-card" style="display: none;">
+                <div class="info-row">
+                    <span class="info-label">Your UID:</span>
+                    <span class="info-value" id="assignedUid">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Expires At:</span>
+                    <span class="info-value" id="uidExpiresAt">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Time Remaining:</span>
+                    <span class="info-value" id="uidTimeRemaining">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status:</span>
+                    <span class="info-value" id="uidStatus">-</span>
+                </div>
+            </div>
+
+            <div id="downloadSection" class="download-section">
+                <div class="download-icon">📥</div>
+                <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
+                    Click the button below to download your files
+                </p>
+                <a id="downloadButton" class="btn-download" href="#" target="_blank">
+                    <span>⬇️</span>
+                    <span>Download Now</span>
+                </a>
+            </div>
+
+            <div id="noLinkSection" class="no-link-message" style="display: none;">
+                <p>⚠️ No download link available. Please contact your administrator.</p>
+            </div>
+        </div>
+
+        <div id="resetTab" class="tab-content">
+            <h2>Reset HWID</h2>
+            <div id="resetAlert" class="alert"></div>
+
+            <div class="info-card">
+                <div class="info-row">
+                    <span class="info-label">Assigned Account:</span>
+                    <span class="info-value" id="assignedUsername">-</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Last HWID Reset:</span>
+                    <span class="info-value" id="lastHwidReset">-</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="resetCount">0</div>
+                    <div class="stat-label">Total Resets</div>
+                </div>
+            </div>
+
+            <div class="reset-section">
+                <p style="margin-bottom: 2rem; color: #999; font-size: 13px;">
+                    Reset the Hardware ID for your assigned account
+                </p>
+                <button class="btn-reset" onclick="resetHwid()" id="resetButton">
+                    Reset HWID
+                </button>
+            </div>
+        </div>
+
+        <div id="setupTab" class="tab-content">
+            <h2>Setup Guide</h2>
+            <div id="setupAlert" class="alert"></div>
+
+            <!-- Setup Video Card -->
+            <div id="setupVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;"> Setup Video</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="toggleSetupVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;"> PLAY</button>
+                        <a id="openSetupVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;"> OPEN</a>
+                    </div>
+                </div>
+                <div id="setupVideoPlayer" style="display: none; margin-top: 1rem;">
+                    <iframe id="setupVideoIframe" src="" allowfullscreen style="width: 100%; height: 480px; border-radius: 8px; border: none;"></iframe>
+                </div>
+                <p style="color: #666; font-size: 11px; margin: 0.5rem 0 0 0;">Watch this video for complete setup instructions</p>
+            </div>
+
+            <!-- Guest Video Card -->
+            <div id="guestVideoCard" class="info-card" style="display: none; margin-bottom: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <h3 style="margin: 0; color: #FFFFFF; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;"> Guest Video</h3>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="toggleGuestVideo" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px;"> PLAY</button>
+                        <a id="openGuestVideo" href="#" target="_blank" class="btn-setup" style="padding: 0.5rem 1rem; font-size: 12px; text-decoration: none;"> OPEN</a>
+                    </div>
+                </div>
+                <div id="guestVideoPlayer" style="display: none; margin-top: 1rem;">
+                    <iframe id="guestVideoIframe" src="" allowfullscreen style="width: 100%; height: 480px; border-radius: 8px; border: none;"></iframe>
+                </div>
+                <p style="color: #666; font-size: 11px; margin: 0.5rem 0 0 0;">Additional video content for your reference</p>
+            </div>
+
+            <div id="noVideoSection" class="no-video-message" style="display: none;">
+                <p>⚠️ No setup videos available. Please contact your administrator.</p>
+            </div>
+        </div>
+
+        <div id="newsTab" class="tab-content">
+            <h2>News & Announcements</h2>
+            <div id="newsAlert" class="alert"></div>
+            <div id="newsContent" class="news-content">
+                <p style="text-align: center; color: #999; padding: 2rem;">Loading announcements...</p>
+            </div>
+        </div>
+
+        <!-- Chat Tab Content -->
+        <div id="chatTab" class="tab-content">
+            <h2> Chat with Support</h2>
+            <div class="chat-container">
+                <div class="chat-header">Support Chat</div>
+                <div class="chat-messages" id="chatMessages">
+                    <p style="text-align: center; color: #666; padding: 1rem;">Connecting to chat...</p>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" id="chatMessageInput" placeholder="Type your message..." disabled>
+                    <button class="btn-send" onclick="sendMessage()" disabled>Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let clientData = null;
+        let expirationRefreshInterval = null;
+        let clientSocket = null; // Socket.IO client instance
+        let currentClientUser = null;
+        let isClientSending = false;
+
+        // Initialize Socket.IO connection for the client
+        function initializeClientChat() {
+            if (clientSocket && clientSocket.connected) {
+                console.log('Chat already connected');
+                // Re-enable input even if already connected
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) input.disabled = false;
+                if (sendBtn) sendBtn.disabled = false;
+                return;
+            }
+
+            clientSocket = io();
+
+            clientSocket.on('connect', () => {
+                console.log('Connected to chat server');
+                const messagesContainer = document.getElementById('chatMessages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: #10B981; padding: 1rem;">Connected to support chat. Type your message below.</p>';
+                }
+
+                if (currentClientUser) {
+                    clientSocket.emit('join-chat', {
+                        username: currentClientUser.username,
+                        userType: 'client'
+                    });
+                }
+
+                // Enable input immediately
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) {
+                    input.disabled = false;
+                    input.placeholder = 'Type your message to support...';
+                }
+                if (sendBtn) {
+                    sendBtn.disabled = false;
+                }
+
+                // Load chat history upon successful connection
+                loadChatHistory();
+            });
+
+            clientSocket.on('disconnect', () => {
+                console.log('Disconnected from chat server');
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input) input.disabled = true;
+                if (sendBtn) sendBtn.disabled = true;
+
+                const messagesContainer = document.getElementById('chatMessages');
+                if (messagesContainer) {
+                    messagesContainer.innerHTML = '<p style="text-align: center; color: #EF4444; padding: 1rem;">Disconnected. Reconnecting...</p>';
+                }
+            });
+
+            clientSocket.on('chat_message', (msg) => {
+                displayMessage(msg, false);
+            });
+
+            clientSocket.on('admin_message', (msg) => {
+                displayMessage(msg, false);
+            });
+
+            clientSocket.on('error', (err) => {
+                console.error('Chat server error:', err);
+            });
+        }
+
+        function displayMessage(msg, isSent) {
+            const messagesContainer = document.getElementById('chatMessages');
+            if (!messagesContainer) return;
+
+            // Clear connection message if present
+            if (messagesContainer.querySelector('p')) {
+                messagesContainer.innerHTML = '';
+            }
+
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('message');
+
+            const isSentByMe = isSent || (currentClientUser && msg.senderName === currentClientUser.username);
+
+            if (isSentByMe) {
+                messageElement.classList.add('sent');
+                messageElement.innerHTML = `<span class="sender">You</span>${msg.text || msg.message}`;
+            } else {
+                messageElement.classList.add('received');
+                const senderLabel = msg.senderType === 'admin' ? 'Support' : msg.senderName || 'Admin';
+                messageElement.innerHTML = `<span class="sender">${senderLabel}</span>${msg.text || msg.message}`;
+            }
+
+            messagesContainer.appendChild(messageElement);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatMessageInput');
+            const messageText = input.value.trim();
+
+            if (!messageText) return;
+
+            if (clientSocket && clientSocket.connected && currentClientUser) {
+                const messageData = {
+                    text: messageText,
+                    senderId: currentClientUser.username,
+                    senderName: currentClientUser.username,
+                    senderType: 'client'
+                };
+
+                // Send to server (don't display immediately, wait for server echo)
+                clientSocket.emit('chat_message', messageData);
+                input.value = '';
+            } else {
+                alert('Chat is not connected. Please refresh the page.');
+            }
+        }
+
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => tab.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            const activeTabButton = document.querySelector(`.tab[onclick="showTab('${tabName}')"]`);
+            if (activeTabButton) {
+                activeTabButton.classList.add('active');
+            }
+
+            const tabContent = document.getElementById(`${tabName}Tab`);
+            if (tabContent) {
+                tabContent.classList.add('active');
+            }
+
+            // Re-enable chat input when switching to chat tab
+            if (tabName === 'chat') {
+                const input = document.getElementById('chatMessageInput');
+                const sendBtn = document.querySelector('.btn-send');
+                if (input && clientSocket && clientSocket.connected) {
+                    input.disabled = false;
+                    input.focus();
+                }
+                if (sendBtn && clientSocket && clientSocket.connected) {
+                    sendBtn.disabled = false;
+                }
+            }
+        }
+
+        function showAlert(elementId, message, type) {
+            const alertElement = document.getElementById(elementId);
+            if (!alertElement) return;
+
+            alertElement.className = `alert alert-${type} show`;
+            alertElement.textContent = message;
+
+            setTimeout(() => {
+                alertElement.classList.remove('show');
+            }, 5000);
+        }
+
+        function showError(message) {
+            showAlert('downloadAlert', message, 'error');
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'error');
+            }
+            if (document.getElementById('setupTab').classList.contains('active')) {
+                showAlert('setupAlert', message, 'error');
+            }
+            if (document.getElementById('newsTab').classList.contains('active')) {
+                showAlert('newsAlert', message, 'error');
+            }
+            if (document.getElementById('chatTab').classList.contains('active')) {
+                showAlert('chatAlert', message, 'error');
+            }
+        }
+
+        function showSuccess(message) {
+            showAlert('downloadAlert', message, 'success');
+            if (document.getElementById('resetTab').classList.contains('active')) {
+                showAlert('resetAlert', message, 'success');
+            }
+        }
+
+        async function loadClientData() {
+            try {
+                const response = await fetch('/client/api/info', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: {
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    console.error('Not authenticated - received HTML instead of JSON');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (response.status === 401 || data.error === 'Not authenticated') {
+                    console.error('Session expired - redirecting to login');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                if (response.ok && data.success) {
+                    clientData = data.client;
+                    currentClientUser = data.client; // Set current user for chat
+                    updateUI();
+                } else {
+                    showError(data.error || 'Failed to load client data');
+                }
+            } catch (error) {
+                console.error('Load client data error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        function updateUI() {
+            if (!clientData) return;
+
+            const productName = clientData.productInfo ? clientData.productInfo.displayName : clientData.productKey;
+
+            document.getElementById('headerUsername').textContent = clientData.username;
+            document.getElementById('headerProductType').textContent = productName;
+            document.getElementById('productType').textContent = productName;
+
+            const lastLogin = clientData.lastLogin ? new Date(clientData.lastLogin).toLocaleString() : 'Never';
+            document.getElementById('lastLogin').textContent = lastLogin;
+
+            const hasHwidReset = clientData.productInfo && clientData.productInfo.allowHwidReset;
+            const hasUid = clientData.assignedUid !== null && clientData.assignedUid !== undefined;
+
+            if (hasHwidReset) {
+                document.getElementById('resetTabButton').style.display = 'block';
+                document.getElementById('assignedUsername').textContent = clientData.assignedUsername || 'Not assigned';
+
+                const lastReset = clientData.lastHwidReset ? new Date(clientData.lastHwidReset).toLocaleString() : 'Never';
+                document.getElementById('lastHwidReset').textContent = lastReset;
+                document.getElementById('resetCount').textContent = clientData.hwidResetCount || 0;
+            } else {
+                document.getElementById('resetTabButton').style.display = 'none';
+            }
+
+            if (hasUid) {
+                document.getElementById('uidInfoCard').style.display = 'block';
+                document.getElementById('assignedUid').textContent = clientData.assignedUid;
+
+                if (clientData.uidExpiresAt) {
+                    const expiresAt = new Date(clientData.uidExpiresAt);
+                    document.getElementById('uidExpiresAt').textContent = expiresAt.toLocaleString();
+
+                    const now = new Date();
+                    const timeLeft = expiresAt - now;
+
+                    if (timeLeft > 0) {
+                        const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        document.getElementById('uidTimeRemaining').textContent = `${days} days, ${hours} hours`;
+                        document.getElementById('uidStatus').textContent = '✅ Active';
+                        document.getElementById('uidStatus').style.color = '#10B981';
+                    } else {
+                        document.getElementById('uidTimeRemaining').textContent = 'Expired';
+                        document.getElementById('uidStatus').textContent = '❌ Expired';
+                        document.getElementById('uidStatus').style.color = '#EF4444';
+                    }
+                } else {
+                    document.getElementById('uidExpiresAt').textContent = 'Not set';
+                    document.getElementById('uidTimeRemaining').textContent = '-';
+                    document.getElementById('uidStatus').textContent = 'Unknown';
+                }
+            } else {
+                document.getElementById('uidInfoCard').style.display = 'none';
+            }
+
+            if (!hasHwidReset && document.getElementById('resetTab').classList.contains('active')) {
+                showTab('download');
+            }
+
+            // Download Link Logic
+            const hasDownloadLink = clientData.hasDownloadLink;
+            if (hasDownloadLink && clientData.downloadLink && clientData.downloadLink.trim() !== '') {
+                document.getElementById('downloadButton').href = clientData.downloadLink;
+                document.getElementById('downloadSection').style.display = 'block';
+                document.getElementById('noLinkSection').style.display = 'none';
+            } else {
+                document.getElementById('downloadSection').style.display = 'none';
+                document.getElementById('noLinkSection').style.display = 'block';
+                showAlert('downloadAlert', 'No download link has been configured. Please contact your administrator.', 'info');
+            }
+
+            // Video Logic
+            const setupVideoLink = clientData.setupVideoLink;
+            const guestVideoLink = clientData.guestVideoLink;
+            const setupVideoCard = document.getElementById('setupVideoCard');
+            const guestVideoCard = document.getElementById('guestVideoCard');
+            const noVideoSection = document.getElementById('noVideoSection');
+
+            let hasAnyVideo = false;
+
+            // Setup Video
+            if (setupVideoLink && setupVideoLink.trim() !== '') {
+                hasAnyVideo = true;
+                let embedUrl = convertToEmbedUrl(setupVideoLink);
+                document.getElementById('setupVideoIframe').src = embedUrl;
+                document.getElementById('openSetupVideo').href = setupVideoLink;
+                setupVideoCard.style.display = 'block';
+
+                const toggleBtn = document.getElementById('toggleSetupVideo');
+                if (toggleBtn) {
+                    toggleBtn.onclick = function() {
+                        toggleVideoPlayer('setupVideoPlayer', 'toggleSetupVideo');
+                    };
+                }
+            } else {
+                setupVideoCard.style.display = 'none';
+            }
+
+            // Guest Video
+            if (guestVideoLink && guestVideoLink.trim() !== '') {
+                hasAnyVideo = true;
+                let embedUrl = convertToEmbedUrl(guestVideoLink);
+                document.getElementById('guestVideoIframe').src = embedUrl;
+                document.getElementById('openGuestVideo').href = guestVideoLink;
+                guestVideoCard.style.display = 'block';
+
+                const toggleBtn = document.getElementById('toggleGuestVideo');
+                if (toggleBtn) {
+                    toggleBtn.onclick = function() {
+                        toggleVideoPlayer('guestVideoPlayer', 'toggleGuestVideo');
+                    };
+                }
+            } else {
+                guestVideoCard.style.display = 'none';
+            }
+
+            noVideoSection.style.display = hasAnyVideo ? 'none' : 'block';
+
+            // News/Announcements Logic
+            const announcements = clientData.announcements;
+            const newsContent = document.getElementById('newsContent');
+            const newsTabButton = document.getElementById('newsTabButton');
+
+            if (announcements && announcements.trim() !== '') {
+                newsTabButton.style.display = 'block';
+                newsContent.innerHTML = announcements;
+            } else {
+                newsTabButton.style.display = 'none';
+                newsContent.innerHTML = '<p style="text-align: center; color: #999; padding: 2rem;">No announcements at this time.</p>';
+            }
+        }
+
+        async function resetHwid() {
+            if (!clientData) return;
+
+            if (!clientData.productInfo || !clientData.productInfo.allowHwidReset) {
+                showError('HWID reset is not available for your product');
+                return;
+            }
+
+            if (!clientData.assignedUsername) {
+                showError('No assigned username configured. Please contact your administrator.');
+                return;
+            }
+
+            if (!confirm(`Reset HWID for ${clientData.assignedUsername}?`)) {
+                return;
+            }
+
+            const resetButton = document.getElementById('resetButton');
+            resetButton.disabled = true;
+            resetButton.textContent = 'RESETTING...';
+
+            try {
+                const response = await fetch('/client/api/reset-hwid', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    showSuccess(data.message);
+
+                    clientData.hwidResetCount = data.resetCount;
+                    clientData.lastHwidReset = data.lastReset;
+                    updateUI();
+                } else {
+                    showError(data.error || 'HWID reset failed');
+                }
+            } catch (error) {
+                console.error('Reset HWID error:', error);
+                showError('Error resetting HWID. Please try again.');
+            } finally {
+                resetButton.disabled = false;
+                resetButton.textContent = ' RESET HWID';
+            }
+        }
+
+        async function loadGenzAuthExpiration() {
+            try {
+                const response = await fetch('/client/api/genzauth-expiration', {
+                    method: 'GET',
+                    credentials: 'include',
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                const card = document.getElementById('genzAuthExpirationCard');
+
+                if (response.ok && data.success && data.hasAccount) {
+                    card.style.display = 'block';
+                    document.getElementById('genzAuthUsername').textContent = data.username || '-';
+                    document.getElementById('genzAuthExpiry').textContent = data.expiresAtFormatted || '-';
+                    document.getElementById('genzAuthTimeLeft').textContent = data.timeLeft || '-';
+
+                    const statusEl = document.getElementById('genzAuthStatus');
+                    if (data.isActive) {
+                        statusEl.textContent = '✅ Active';
+                        statusEl.style.color = '#10B981';
+                        card.style.background = 'rgba(16, 185, 129, 0.1)';
+                        card.style.borderColor = 'rgba(16, 185, 129, 0.3)';
+                    } else {
+                        statusEl.textContent = '❌ Expired';
+                        statusEl.style.color = '#EF4444';
+                        card.style.background = 'rgba(239, 68, 68, 0.1)';
+                        card.style.borderColor = 'rgba(239, 68, 68, 0.3)';
+                    }
+                } else {
+                    card.style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Load GenzAuth expiration error:', error);
+            }
+        }
+
+        function convertToEmbedUrl(videoUrl) {
+            let embedUrl = videoUrl;
+            if (embedUrl.includes('youtube.com/watch?v=')) {
+                const videoId = embedUrl.split('v=')[1].split('&')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            } else if (embedUrl.includes('youtu.be/')) {
+                const videoId = embedUrl.split('youtu.be/')[1].split('?')[0];
+                embedUrl = `https://www.youtube.com/embed/${videoId}`;
+            }
+            return embedUrl;
+        }
+
+        function toggleVideoPlayer(playerElementId, buttonElementId) {
+            const player = document.getElementById(playerElementId);
+            const button = document.getElementById(buttonElementId);
+
+            if (player.style.display === 'none' || player.style.display === '') {
+                player.style.display = 'block';
+                button.textContent = ' HIDE';
+            } else {
+                player.style.display = 'none';
+                button.textContent = ' PLAY';
+            }
+        }
+
+        async function logout() {
+            if (expirationRefreshInterval) {
+                clearInterval(expirationRefreshInterval);
+            }
+            if (clientSocket) {
+                clientSocket.disconnect();
+            }
+
+            try {
+                await fetch('/client/api/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                window.location.href = '/login';
+            } catch (error) {
+                console.error('Logout error:', error);
+                window.location.href = '/login';
+            }
+        }
+
+        async function loadChatHistory() {
+            try {
+                const response = await fetch(`/client/api/chat/history?withUser=admin`, { credentials: 'include' });
+                const data = await response.json();
+
+                if (data.success && data.messages) {
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = '';
+
+                    data.messages.forEach(msg => {
+                        displayMessage({
+                            text: msg.message,
+                            senderName: msg.senderUsername,
+                            senderType: msg.senderType
+                        }, false);
+                    });
+                } else {
+                    console.log('No chat history found or error:', data);
+                }
+            } catch (error) {
+                console.error('Error loading chat history:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatMessageInput = document.getElementById('chatMessageInput');
+            const sendButton = document.querySelector('.btn-send');
+
+            if (chatMessageInput) {
+                chatMessageInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+
+            if (sendButton) {
+                sendButton.addEventListener('click', sendMessage);
+            }
+
+            // Load client data first, then initialize chat
+            loadClientData().then(() => {
+                loadGenzAuthExpiration();
+                expirationRefreshInterval = setInterval(() => {
+                    loadGenzAuthExpiration();
+                }, 30000);
+
+                // Initialize chat after client data is loaded
+                setTimeout(() => {
+                    initializeClientChat();
+                }, 1000);
+            });
+        });
+
+    </script>
+</body>
+
+</html>
