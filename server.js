@@ -141,6 +141,52 @@ io.on('connection', (socket) => {
 });
 
 
+// OAuth Token Refresh Middleware
+async function refreshDiscordTokenIfNeeded(user) {
+  if (!user || !user.discordRefreshToken || !user.discordTokenExpiresAt) {
+    return user;
+  }
+
+  const now = new Date();
+  const expiresAt = new Date(user.discordTokenExpiresAt);
+  const timeUntilExpiry = expiresAt - now;
+  const oneHourMs = 60 * 60 * 1000;
+
+  if (timeUntilExpiry > oneHourMs) {
+    return user; // Token still valid
+  }
+
+  // Token expiring soon or already expired - refresh it
+  try {
+    console.log(`🔄 Refreshing Discord token for ${user.username}`);
+    
+    const tokenResponse = await axios.post('https://discord.com/api/oauth2/token', {
+      client_id: process.env.DISCORD_CLIENT_ID,
+      client_secret: process.env.DISCORD_CLIENT_SECRET,
+      grant_type: 'refresh_token',
+      refresh_token: user.discordRefreshToken
+    }, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      timeout: 5000
+    });
+
+    user.discordAccessToken = tokenResponse.data.access_token;
+    if (tokenResponse.data.refresh_token) {
+      user.discordRefreshToken = tokenResponse.data.refresh_token;
+    }
+    
+    const newExpiresAt = new Date(Date.now() + (tokenResponse.data.expires_in * 1000));
+    user.discordTokenExpiresAt = newExpiresAt;
+    
+    await user.save();
+    console.log(`✅ Discord token refreshed for ${user.username}`);
+  } catch (error) {
+    console.error(`⚠️ Discord token refresh failed for ${user.username}:`, error.message);
+  }
+
+  return user;
+}
+
 app.get('/health', (req, res) => {
   res.status(200).json({
     status: 'ok',
@@ -1162,26 +1208,6 @@ app.get('/api/packages', requireAuth, async (req, res) => {
     const user = await User.findOne({ username: req.session.user.username });
     const packages = await getPackages();
     const uidPackages = packages.uid;
-
-    if (user.isGuest) {
-      // Get admin-configured max duration
-      const adminUser = await User.findOne({ username: 'admin' });
-      const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-
-      // Filter packages based on max allowed duration
-      const allowedDurations = ['1day', '3days', '7days', '15days', '30days'];
-      const maxDurationIndex = allowedDurations.indexOf(maxDuration);
-
-      const guestPackages = {};
-      allowedDurations.slice(0, maxDurationIndex + 1).forEach(duration => {
-        if (uidPackages[duration]) {
-          guestPackages[duration] = uidPackages[duration];
-        }
-      });
-
-      return res.json(guestPackages);
-    }
-
     res.json(uidPackages);
   } catch (error) {
     console.error('Error fetching packages:', error);
@@ -1194,64 +1220,6 @@ app.get('/api/aimkill-packages', requireAuth, async (req, res) => {
     const user = await User.findOne({ username: req.session.user.username });
     const packages = await getPackages();
     const aimkillPackages = packages.aimkill;
-
-    if (user.isGuest) {
-      // Get admin-configured max duration
-      const adminUser = await User.findOne({ username: 'admin' });
-      const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-
-      // Convert maxDuration to match Aimkill package keys (e.g., '3days' -> '3day')
-      const maxDurationKey = maxDuration.replace('days', 'day');
-
-      // Get max duration in days for comparison
-      const maxDurationPackage = aimkillPackages[maxDurationKey];
-
-      let maxDays;
-      if (!maxDurationPackage) {
-        console.error(`Guest max duration '${maxDuration}' not found in Aimkill packages. Computing max days from configured value.`);
-
-        // Parse duration string to extract numeric days (supports formats like "1day", "3days", "10days", etc.)
-        const match = maxDuration.match(/^(\d+)days?$/);
-        if (!match) {
-          console.error(`Invalid guestPassMaxDuration format: ${maxDuration}`);
-          return res.status(400).json({
-            error: 'Guest pass configuration error. Please contact administrator to fix the duration settings.'
-          });
-        }
-
-        maxDays = parseInt(match[1], 10);
-      } else {
-        maxDays = maxDurationPackage.days;
-      }
-
-      // Validate maxDays is a finite number
-      if (typeof maxDays !== 'number' || !isFinite(maxDays) || maxDays <= 0) {
-        console.error(`Invalid maxDays computed: ${maxDays}`);
-        return res.status(400).json({
-          error: 'Guest pass configuration error. Please contact administrator to fix the duration settings.'
-        });
-      }
-
-      // Filter packages based on max allowed days (only include packages with valid numeric days)
-      const guestPackages = {};
-      Object.keys(aimkillPackages).forEach(packageKey => {
-        const pkg = aimkillPackages[packageKey];
-        if (pkg && typeof pkg.days === 'number' && isFinite(pkg.days) && pkg.days > 0 && pkg.days <= maxDays) {
-          guestPackages[packageKey] = pkg;
-        }
-      });
-
-      // Ensure we're not returning empty packages
-      if (Object.keys(guestPackages).length === 0) {
-        console.error('No Aimkill packages qualify for guest max duration');
-        return res.status(400).json({
-          error: 'No Aimkill packages are currently available for guest users. Please contact administrator.'
-        });
-      }
-
-      return res.json(guestPackages);
-    }
-
     res.json(aimkillPackages);
   } catch (error) {
     console.error('Error fetching Aimkill packages:', error);
@@ -1259,8 +1227,8 @@ app.get('/api/aimkill-packages', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, require2FAForUID, async (req, res) => {
-  const { uid, packageId } = req.body;
+app.post('/api/create-uid', requireAuth, checkUserPaused, require2FAForUID, async (req, res) => {
+  const { uid, packageId, productKey } = req.body;
   const username = req.session.user.username;
 
   const packages = await getPackages();
@@ -1271,49 +1239,22 @@ app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, req
 
   try {
     const user = await User.findOne({ username });
+    let isGuestFree = false;
 
     if (user.isGuest) {
-      if (!user.discordVerified) {
-        return res.status(403).json({
-          error: 'Discord verification required. Please authorize with Discord to create UIDs.',
-          requiresDiscord: true,
-          discordAuthUrl: '/auth/discord'
-        });
+      const product = await Product.findOne({ productKey: productKey || 'UID_BYPASS' });
+      if (!product || !product.licenseKeyConfig?.allowGuestFreeKeys) {
+        return res.status(403).json({ error: 'Free UID creation is disabled for this product. Please upgrade your account.' });
       }
+      isGuestFree = true;
+    }
 
-      if (user.guestPassUsed) {
-        return res.status(403).json({
-          error: 'Guest pass already used. Contact admin to upgrade your account for more UIDs.',
-          guestPassUsed: true
-        });
-      }
-
-      // Get admin-configured max duration
-      const adminUser = await User.findOne({ username: 'admin' });
-      const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-
-      // Validate guest is using allowed duration
-      const allowedDurations = ['1day', '3days', '7days', '15days', '30days'];
-      const maxDurationIndex = allowedDurations.indexOf(maxDuration);
-      const requestedDurationIndex = allowedDurations.indexOf(packageId);
-
-      if (requestedDurationIndex === -1 || requestedDurationIndex > maxDurationIndex) {
-        return res.status(403).json({
-          error: `Guests can only use up to ${maxDuration.replace('days', ' Days').replace('day', ' Day')}.`,
-          guestOnly: true,
-          maxAllowedDuration: maxDuration
-        });
-      }
-
-      console.log(`✅ Guest user ${username} using free pass`);
-    } else {
-      if (user.credits < selectedPackage.credits) {
-        return res.status(400).json({
-          error: 'Insufficient credits',
-          required: selectedPackage.credits,
-          current: user.credits
-        });
-      }
+    if (!isGuestFree && user.credits < selectedPackage.credits) {
+      return res.status(400).json({
+        error: 'Insufficient credits',
+        required: selectedPackage.credits,
+        current: user.credits
+      });
     }
 
     const existingUID = await UID.findOne({ uid });
@@ -1345,15 +1286,8 @@ app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, req
     const apiUrl = `${process.env.BASE_URL}?api=${process.env.API_KEY}&action=create&uid=${uid}&duration=${selectedPackage.hours}`;
     await axios.post(apiUrl, {}, { timeout: 10000 });
 
-    if (user.isGuest) {
-      user.guestPassUsed = true;
-      user.guestPassType = packageId;
-      user.guestPassExpiresAt = new Date(Date.now() + selectedPackage.hours * 60 * 60 * 1000);
-      await user.save();
-    } else {
-      user.credits -= selectedPackage.credits;
-      await user.save();
-    }
+    user.credits -= selectedPackage.credits;
+    await user.save();
 
     const expiresAt = new Date(Date.now() + selectedPackage.hours * 60 * 60 * 1000);
     await UID.create({
@@ -1364,41 +1298,37 @@ app.post('/api/create-uid', requireAuth, checkGuestFreeUID, checkUserPaused, req
       status: 'active'
     });
 
-    if (!user.isGuest) {
-      const creditValue = 10;
-      const subtotal = selectedPackage.credits * creditValue;
-      const tax = subtotal * 0.18;
-      const total = subtotal + tax;
+    const creditValue = 10;
+    const subtotal = selectedPackage.credits * creditValue;
+    const tax = subtotal * 0.18;
+    const total = subtotal + tax;
 
-      await Invoice.create({
-        invoiceNumber: await generateInvoiceNumber(),
-        username,
-        type: 'uid_creation',
-        amount: subtotal,
-        credits: selectedPackage.credits,
-        packageName: selectedPackage.name,
-        uid,
-        subtotal,
-        tax,
-        taxRate: 18,
-        total,
-        status: 'paid',
-        paymentMethod: 'credit_deduction',
-        notes: `UID created with ${selectedPackage.name} package`
-      });
-    }
+    await Invoice.create({
+      invoiceNumber: await generateInvoiceNumber(),
+      username,
+      type: 'uid_creation',
+      amount: subtotal,
+      credits: selectedPackage.credits,
+      packageName: selectedPackage.name,
+      uid,
+      subtotal,
+      tax,
+      taxRate: 18,
+      total,
+      status: 'paid',
+      paymentMethod: 'credit_deduction',
+      notes: `UID created with ${selectedPackage.name} package`
+    });
 
-    await logActivity(username, 'uid-create', user.isGuest ? `Guest used free pass: ${uid}` : `Created UID ${uid} with ${selectedPackage.name} package`);
-    await notifyUIDCreated(username, uid, selectedPackage.name, user.isGuest ? 0 : selectedPackage.credits);
+    await logActivity(username, 'uid-create', `Created UID ${uid} with ${selectedPackage.name} package`);
+    await notifyUIDCreated(username, uid, selectedPackage.name, selectedPackage.credits);
 
     res.json({
       success: true,
       uid,
       package: selectedPackage.name,
-      creditsUsed: user.isGuest ? 0 : selectedPackage.credits,
-      creditsRemaining: user.credits,
-      isGuest: user.isGuest,
-      guestPassUsed: user.guestPassUsed
+      creditsUsed: selectedPackage.credits,
+      creditsRemaining: user.credits
     });
   } catch (error) {
     console.error('UID creation error:', error.message);
@@ -2894,67 +2824,16 @@ app.get('/api/guest-social-verification', requireAuth, async (req, res) => {
   }
 });
 
-app.post('/api/aimkill/create-keys', requireAuth, checkGuestFreeAimkill, checkUserPaused, async (req, res) => {
+app.post('/api/aimkill/create-keys', requireAuth, checkUserPaused, async (req, res) => {
   try {
     const user = await User.findOne({ username: req.session.user.username });
 
-    // ALLOW GUESTS - Don't check account type for guests
-    if (!user.isGuest && user.accountType !== 'AIMKILL') {
-      return res.status(403).json({ error: 'Not an Aimkill account' });
+    if (user.isGuest) {
+      return res.status(403).json({ error: 'Free Aimkill key creation is disabled. Please upgrade your account.' });
     }
 
-    // Check if it's a guest and validate
-    if (user.isGuest) {
-      if (!user.discordVerified) {
-        return res.status(403).json({
-          error: 'Discord verification required. Please authorize with Discord to create Aimkill keys.',
-          requiresDiscord: true,
-          discordAuthUrl: '/auth/discord'
-        });
-      }
-
-      if (user.guestPassUsed) {
-        return res.status(403).json({
-          error: 'Guest pass already used. Contact admin to upgrade your account for more keys.',
-          guestPassUsed: true
-        });
-      }
-
-      // Check social media verification if required
-      const adminUser = await User.findOne({ username: 'admin' });
-      if (adminUser && adminUser.requireSocialVerification) {
-        if (!user.youtubeSubscribed || !user.instagramFollowed) {
-          return res.status(403).json({
-            error: 'Please subscribe to YouTube and follow on Instagram first',
-            requiresSocial: true
-          });
-        }
-      }
-
-      const { duration, quantity, durationName } = req.body;
-
-      // Guests limited to 1 key
-      if (quantity > 1) {
-        return res.status(403).json({
-          error: 'Guests can only create 1 key at a time',
-          guestOnly: true
-        });
-      }
-
-      // Get max duration from admin settings
-      const maxDuration = adminUser?.guestPassMaxDuration || '1day';
-      const maxDays = parseInt(maxDuration.match(/\d+/)?.[0]) || 1;
-      const requestedDays = parseInt(duration) || 1;
-
-      if (requestedDays > maxDays) {
-        return res.status(403).json({
-          error: `Guests can only create keys up to ${maxDays} day${maxDays > 1 ? 's' : ''}`,
-          guestOnly: true,
-          maxAllowedDuration: maxDuration
-        });
-      }
-
-      console.log(`✅ Guest user ${req.session.user.username} using free pass for Aimkill key`);
+    if (user.accountType !== 'AIMKILL') {
+      return res.status(403).json({ error: 'Not an Aimkill account' });
     }
 
     const { duration, quantity, durationName } = req.body;
@@ -3024,24 +2903,16 @@ app.post('/api/aimkill/create-keys', requireAuth, checkGuestFreeAimkill, checkUs
     // Calculate actual credits used based on keys created
     const actualCreditsUsed = keys.length * creditsPerKey;
 
-    // Update user
-    if (!user.isGuest) {
-      user.credits -= actualCreditsUsed;
-      console.log(`💳 Deducted ${actualCreditsUsed} credits. Remaining: ${user.credits}`);
-    } else {
-      user.guestPassUsed = true;
-      user.guestPassType = durationName;
-      user.guestPassExpiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
-    }
+    // Update user credits
+    user.credits -= actualCreditsUsed;
+    console.log(`💳 Deducted ${actualCreditsUsed} credits. Remaining: ${user.credits}`);
     await user.save();
 
     const summary = failedKeys.length > 0
       ? `Created ${keys.length}/${quantity} keys. Failed: ${failedKeys.join(', ')}`
       : `Created ${quantity} keys successfully`;
 
-    const logMsg = user.isGuest
-      ? `Guest created ${keys.length} FREE Aimkill key(s)`
-      : `Created ${keys.length} Aimkill key(s) for ${actualCreditsUsed} credits`;
+    const logMsg = `Created ${keys.length} Aimkill key(s) for ${actualCreditsUsed} credits`;
 
     await logActivity(req.session.user.username, 'aimkill-keys-create', logMsg);
 
@@ -3051,9 +2922,8 @@ app.post('/api/aimkill/create-keys', requireAuth, checkGuestFreeAimkill, checkUs
       message: summary,
       created: keys.length,
       failed: failedKeys.length,
-      creditsUsed: user.isGuest ? 0 : actualCreditsUsed,
-      creditsRemaining: user.credits,
-      isGuest: user.isGuest
+      creditsUsed: actualCreditsUsed,
+      creditsRemaining: user.credits
     });
   } catch (error) {
     console.error('❌ Create Aimkill keys error:', error.message);
@@ -3948,7 +3818,7 @@ app.post('/api/admin/products', requireAuth, requireAdmin, async (req, res) => {
 app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req, res) => {
   try {
     const { productKey } = req.params;
-    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink } = req.body;
+    const { displayName, description, packages, isActive, announcements, genzauthSellerKey, allowHwidReset, maxFreeHwidResets, hwidResetPrice, downloadLink, setupVideoLink, guestVideoLink, licenseKeyConfig } = req.body;
 
     const product = await Product.findOne({ productKey });
     if (!product) {
@@ -3976,6 +3846,7 @@ app.put('/api/admin/products/:productKey', requireAuth, requireAdmin, async (req
     if (downloadLink !== undefined) product.downloadLink = downloadLink;
     if (setupVideoLink !== undefined) product.setupVideoLink = setupVideoLink;
     if (guestVideoLink !== undefined) product.guestVideoLink = guestVideoLink;
+    if (licenseKeyConfig !== undefined) product.licenseKeyConfig = licenseKeyConfig;
 
     await product.save();
 

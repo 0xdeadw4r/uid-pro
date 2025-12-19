@@ -106,6 +106,13 @@ const clientSchema = new mongoose.Schema({
     gracePeriodDays: {
         type: Number,
         default: 0
+    },
+
+    // Account Type
+    accountType: {
+        type: String,
+        enum: ['free', 'license'],
+        default: 'license'
     }
 }, {
     timestamps: true

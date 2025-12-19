@@ -3421,6 +3421,71 @@
                             </div>
                         </div>
 
+                        <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.1); margin: 1.5rem 0;">
+                        <h4 style="color: #fff; margin: 1rem 0;">License Key System Configuration</h4>
+
+                        <div class="settings-list">
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="edit_licenseKeyEnabled" class="toggle-checkbox" ${product.licenseKeyConfig?.enabled ? 'checked' : ''}>
+                                    <label for="edit_licenseKeyEnabled" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Enable License Keys</label>
+                                    <p class="setting-description">Allow clients to receive license keys for this product</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem;">
+                            <div class="form-group">
+                                <label>License Key Type</label>
+                                <select id="edit_licenseKeyType" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                                    <option value="disabled" ${product.licenseKeyConfig?.type === 'disabled' ? 'selected' : ''}>Disabled</option>
+                                    <option value="per_package" ${product.licenseKeyConfig?.type === 'per_package' ? 'selected' : ''}>Per Package</option>
+                                    <option value="per_client" ${product.licenseKeyConfig?.type === 'per_client' ? 'selected' : ''}>Per Client</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Cost Per Key (Credits)</label>
+                                <input type="number" id="edit_licenseKeyCost" value="${product.licenseKeyConfig?.costPerKey || 0}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div class="form-group">
+                                <label>Free Keys Included</label>
+                                <input type="number" id="edit_freeKeysIncluded" value="${product.licenseKeyConfig?.freeKeysIncluded || 0}" min="0" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                            <div class="form-group">
+                                <label>Free Panel Days</label>
+                                <input type="number" id="edit_freePanelDays" value="${product.licenseKeyConfig?.freePanelDays || 3}" min="1" style="width: 100%; padding: 0.75rem; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff;">
+                            </div>
+                        </div>
+
+                        <div class="settings-list" style="margin: 1rem 0;">
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="edit_allowFreePanels" class="toggle-checkbox" ${product.licenseKeyConfig?.allowFreePanels ? 'checked' : ''}>
+                                    <label for="edit_allowFreePanels" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Allow Free Panels</label>
+                                    <p class="setting-description">Allow free trial accounts with license keys</p>
+                                </div>
+                            </div>
+                            <div class="setting-item">
+                                <div class="setting-control">
+                                    <input type="checkbox" id="edit_allowGuestFreeKeys" class="toggle-checkbox" ${product.licenseKeyConfig?.allowGuestFreeKeys ? 'checked' : ''}>
+                                    <label for="edit_allowGuestFreeKeys" class="toggle-label"></label>
+                                </div>
+                                <div class="setting-info">
+                                    <label class="setting-title">Allow Guest Free Keys</label>
+                                    <p class="setting-description">Allow guest users to create free license keys for this product</p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div style="display: flex; gap: 0.5rem; margin-top: 1.5rem;">
                             <button onclick="saveProductEdit()" class="success-btn" style="flex: 1;">Save Changes</button>
                             <button onclick="cancelProductEdit()" class="secondary-btn" style="flex: 1;">Cancel</button>
@@ -3451,7 +3516,16 @@
                 downloadLink: document.getElementById('edit_downloadLink').value.trim(),
                 setupVideoLink: document.getElementById('edit_setupVideoLink').value.trim(),
                 guestVideoLink: document.getElementById('edit_guestVideoLink').value.trim(),
-                announcements: document.getElementById('edit_announcements').value.trim()
+                announcements: document.getElementById('edit_announcements').value.trim(),
+                licenseKeyConfig: {
+                    enabled: document.getElementById('edit_licenseKeyEnabled').checked,
+                    type: document.getElementById('edit_licenseKeyType').value,
+                    costPerKey: parseInt(document.getElementById('edit_licenseKeyCost').value) || 0,
+                    freeKeysIncluded: parseInt(document.getElementById('edit_freeKeysIncluded').value) || 0,
+                    allowFreePanels: document.getElementById('edit_allowFreePanels').checked,
+                    freePanelDays: parseInt(document.getElementById('edit_freePanelDays').value) || 3,
+                    allowGuestFreeKeys: document.getElementById('edit_allowGuestFreeKeys').checked
+                }
             };
 
             const sellerKey = document.getElementById('edit_genzauthKey').value;

@@ -63,8 +63,8 @@ async function makeRequest(type, additionalParams = {}, customSellerKey = null) 
     }
 }
 
-async function addLicense(expiry, amount = 1) {
-    const SELLER_KEY = await getSellerKey();
+async function addLicense(expiry, amount = 1, customSellerKey = null) {
+    const SELLER_KEY = customSellerKey || await getSellerKey();
 
     if (!SELLER_KEY) {
         const testLicense = generateTestLicense();
@@ -80,7 +80,7 @@ async function addLicense(expiry, amount = 1) {
     const result = await makeRequest('add', {
         expiry: expiry.toString(),
         amount: amount.toString()
-    });
+    }, customSellerKey);
 
     if (result.success) {
         const key = result.data?.[0] || result.license || result.key || result.license_key || (result.licenses && result.licenses[0]);

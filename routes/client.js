@@ -1136,4 +1136,30 @@ router.post('/admin/bulk-reset-hwid-count', isAdminOrOwner, async (req, res) => 
     }
 });
 
+// Get client profile with license key info
+router.get('/api/profile', isClient, async (req, res) => {
+    try {
+        const client = await Client.findById(req.session.clientId);
+        if (!client) {
+            return res.status(404).json({ error: 'Client not found' });
+        }
+
+        res.json({
+            success: true,
+            client: {
+                username: client.username,
+                productKey: client.productKey,
+                licenseKey: client.licenseKey,
+                licenseKeyExpiresAt: client.licenseKeyExpiresAt,
+                licenseKeyStatus: client.licenseKeyStatus,
+                accountExpiresAt: client.accountExpiresAt,
+                isActive: client.isActive
+            }
+        });
+    } catch (error) {
+        console.error('Get profile error:', error);
+        res.status(500).json({ error: 'Failed to get profile' });
+    }
+});
+
 module.exports = router;

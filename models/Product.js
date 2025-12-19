@@ -71,6 +71,47 @@ const productSchema = new mongoose.Schema({
         type: String,
         default: ''
     },
+    // License Key System Configuration
+    licenseKeyConfig: {
+        enabled: {
+            type: Boolean,
+            default: false
+        },
+        type: {
+            type: String,
+            enum: ['per_package', 'per_client', 'disabled'],
+            default: 'disabled'
+        },
+        costPerKey: {
+            type: Number,
+            default: 0
+        },
+        freeKeysIncluded: {
+            type: Number,
+            default: 0
+        },
+        keyFormat: {
+            type: String,
+            enum: ['genzauth', 'custom'],
+            default: 'genzauth'
+        },
+        allowFreePanels: {
+            type: Boolean,
+            default: false
+        },
+        freePanelDays: {
+            type: Number,
+            default: 3
+        },
+        autoAssignKeys: {
+            type: Boolean,
+            default: true
+        },
+        allowGuestFreeKeys: {
+            type: Boolean,
+            default: false
+        }
+    },
     settings: {
         type: Map,
         of: mongoose.Schema.Types.Mixed,

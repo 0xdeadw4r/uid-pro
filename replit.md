@@ -62,18 +62,15 @@ Fully customizable package configuration stored in MongoDB:
 - **Database Storage**: All package configurations stored in PackageConfig MongoDB collection
 - **Default Packages**: System initializes with sensible defaults on first run
 
-### Guest Pass System
-Free guest accounts have limited one-time access:
-- **Requirements**: Must verify with Discord OAuth before using pass
-- **Customizable Duration**: Admins can configure maximum allowed duration (1, 3, 7, 15, or 30 days)
-- **Dynamic Package Filtering**: Guests only see packages up to the admin-configured max duration
-- **One-Time Use**: Once guest pass is used, account is locked from creating more items
-- **Expiration Tracking**: Guest pass expiration date is recorded when used
-- **Admin Control**: 
-  - Enable/disable guest free UID creation
-  - Enable/disable guest free Aimkill creation
-  - Set maximum duration for guest passes (1day to 30days)
-- Applies to both UID creation and Aimkill key/account creation endpoints
+### License Key System
+Flexible per-product license key configuration:
+- **License Key Creation**: Admins, resellers, and guests (if enabled per product)
+- **Product-Level Control**: Admins can toggle `allowGuestFreeKeys` per product from the Products admin panel
+- **Guest Free Keys**: When enabled for a product, guest users can create free license keys from the guest dashboard
+- **Universal Guest Dashboard**: Guest dashboard now shows all available products, with free key options for configured products
+- **Credit System**: Non-guest users spend credits to create keys; guests create free keys if product allows
+- **Admin Configuration**: Toggle "Allow Guest Free Keys" in Product edit form under License Key System Configuration
+- **Invoice Tracking**: Free guest keys tracked with `paymentMethod: 'free_guest'` in invoices
 
 ### Guest Video Management
 Admins can configure a setup video that appears for all guests:

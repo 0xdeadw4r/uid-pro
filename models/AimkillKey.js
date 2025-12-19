@@ -42,6 +42,11 @@ const aimkillKeySchema = new mongoose.Schema({
     }
 });
 
+// Create indexes for efficient queries
+// For user accounts, uniqueness is validated in the application code
+aimkillKeySchema.index({ username: 1, type: 1 });
+aimkillKeySchema.index({ type: 1 });
+
 // Method to update status based on expiry
 aimkillKeySchema.methods.updateStatus = function () {
     if (new Date() > this.expiresAt) {

@@ -429,10 +429,23 @@
             <div class="form-section">
                 <div class="section-header">
                     <h2>Create New Client Account</h2>
-                    <p>Fill in the details below to create a new client account</p>
+                    <p>Choose whether to create a user account or generate a license key</p>
                 </div>
 
-                <form id="createClientForm" onsubmit="createClient(event)">
+                <div style="display: flex; gap: 3rem; margin-bottom: 2.5rem; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: #FFF; font-weight: 600;">
+                        <input type="radio" name="clientType" value="user" checked onchange="switchClientType()" style="width: 18px; height: 18px; cursor: pointer;">
+                        User Account (Username/Password)
+                    </label>
+                    <label style="display: flex; align-items: center; gap: 0.75rem; cursor: pointer; color: #FFF; font-weight: 600;">
+                        <input type="radio" name="clientType" value="license" onchange="switchClientType()" style="width: 18px; height: 18px; cursor: pointer;">
+                        License Key
+                    </label>
+                </div>
+
+                <!-- User Account Form -->
+                <div style="background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 2rem; margin-bottom: 2rem;">
+                <form id="userAccountForm" onsubmit="createClient(event)">
                     <div class="form-group">
                         <label>Product</label>
                         <select id="clientProduct" required>
@@ -454,7 +467,10 @@
 
                     <div class="form-group">
                         <label>Client Password</label>
-                        <input type="password" id="clientPassword" placeholder="Enter password..." required>
+                        <div style="display: flex; gap: 0.5rem; align-items: center;">
+                            <input type="password" id="clientPassword" placeholder="Enter password..." style="flex: 1;">
+                            <button type="button" onclick="generateClientPassword()" style="padding: 0.5rem 1rem; background: #3B82F6; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">Auto-Gen</button>
+                        </div>
                     </div>
 
                     <div class="form-group" id="uidField" style="display: none;">
@@ -463,10 +479,43 @@
                         <p style="color: #999; font-size: 11px; margin-top: 0.5rem;">Required for UID Bypass product. Enter numbers only.</p>
                     </div>
 
-                    <button type="submit" class="btn-primary">Create Client Account</button>
+                    <button type="submit" class="btn-primary">Create User Account</button>
                 </form>
+                </div>
+
+                <!-- License Key Form -->
+                <div style="background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 2rem; margin-bottom: 2rem; display: none;" id="licenseFormContainer">
+                <form id="licenseKeyForm" onsubmit="generateLicenseKey(event)">
+                    <div class="form-group">
+                        <label>Product</label>
+                        <select id="licenseProduct" required>
+                            <option value="">Select a product...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Duration (Days)</label>
+                        <input type="number" id="licenseDuration" placeholder="30" value="30" min="1" required>
+                    </div>
+
+                    <button type="submit" class="btn-primary">Generate License Key</button>
+                </form>
+                </div>
+
+                <div id="generatedCredentials" style="display: none; margin-top: 2rem; background: rgba(16, 185, 129, 0.15); border: 1px solid #10B981; border-radius: 8px; padding: 1.5rem;">
+                    <div style="color: #10B981; font-weight: 600; margin-bottom: 1rem;">✓ Account Created Successfully</div>
+                    <div id="credentialsContent"></div>
+                </div>
+
+                <div style="margin-top: 3rem;">
+                    <h3 style="color: #FFFFFF; font-size: 1rem; margin-bottom: 1rem; text-transform: uppercase; letter-spacing: 1px;">Generated Keys History</h3>
+                    <div id="licensesContainer" style="background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 1.5rem;">
+                        <p style="color: #999;">Loading keys...</p>
+                    </div>
+                </div>
             </div>
         </div>
+
 
         <div id="clients-tab" class="tab-content">
             <div class="card">
@@ -527,6 +576,20 @@
                             option.value = product.productKey;
                             option.textContent = product.displayName;
                             productSelect.appendChild(option);
+                        });
+                    }
+
+                    // Populate license key product dropdown
+                    const licenseProduct = document.getElementById('licenseProduct');
+                    if (licenseProduct) {
+                        licenseProduct.innerHTML = '<option value="">Select a product...</option>';
+                        productsData.forEach(product => {
+                            if (product.productKey === 'AIMKILL') {
+                                const option = document.createElement('option');
+                                option.value = product.productKey;
+                                option.textContent = product.displayName;
+                                licenseProduct.appendChild(option);
+                            }
                         });
                     }
 
@@ -617,7 +680,28 @@
             if (productSelect) {
                 productSelect.addEventListener('change', loadPackages);
             }
+            loadProfile();
+            loadAllLicenses();
         });
+
+        function switchClientType() {
+            const type = document.querySelector('input[name="clientType"]:checked').value;
+            const userFormContainer = document.getElementById('userAccountForm').parentElement;
+            const licenseFormContainer = document.getElementById('licenseFormContainer');
+            
+            userFormContainer.style.display = type === 'user' ? 'block' : 'none';
+            licenseFormContainer.style.display = type === 'license' ? 'block' : 'none';
+            document.getElementById('generatedCredentials').style.display = 'none';
+        }
+
+        function generateClientPassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%';
+            let pwd = '';
+            for (let i = 0; i < 12; i++) {
+                pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            document.getElementById('clientPassword').value = pwd;
+        }
 
         async function createClient(event) {
             event.preventDefault();
@@ -628,33 +712,13 @@
             const password = document.getElementById('clientPassword').value.trim();
             const uid = document.getElementById('clientUid').value.trim();
 
-            if (!productKey) {
-                showAlert('Please select a product', 'error');
-                return;
-            }
-
-            if (!packageKey) {
-                showAlert('Please select a package', 'error');
-                return;
-            }
-
-            if (!username) {
-                showAlert('Please enter a username', 'error');
-                return;
-            }
-
-            if (!password) {
-                showAlert('Please enter a password', 'error');
+            if (!productKey || !packageKey || !username || !password) {
+                showAlert('Please fill all required fields', 'error');
                 return;
             }
 
             if (productKey === 'UID_BYPASS' && !uid) {
                 showAlert('Please enter a UID for UID Bypass product', 'error');
-                return;
-            }
-
-            if (productKey === 'UID_BYPASS' && !/^[0-9]+$/.test(uid)) {
-                showAlert('UID must contain only numbers', 'error');
                 return;
             }
 
@@ -683,23 +747,40 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    let successMsg = `Client account created successfully! Username: ${username}`;
-                    if (productKey === 'UID_BYPASS' && uid) {
-                        successMsg += ` | UID: ${uid}`;
-                    }
-                    showAlert(successMsg, 'success');
-                    document.getElementById('createClientForm').reset();
+                    const credsDiv = document.getElementById('generatedCredentials');
+                    const expiresAt = new Date(data.client.expiresAt);
+                    credsDiv.innerHTML = `
+                        <div style="color: #10B981; font-weight: 600; margin-bottom: 1rem;">✓ ${data.client.username} Account Created</div>
+                        <div style="background: #0a0a0a; padding: 1rem; border-radius: 4px; border: 1px solid #2a2a2a; margin-bottom: 1rem;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <div style="color: #999; font-size: 12px; margin-bottom: 0.25rem;">USERNAME</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #FFFFFF; font-family: monospace; flex: 1;">${data.client.username}</span>
+                                    <button onclick="copyToClipboard('${data.client.username}')" style="padding: 0.5rem 1rem; background: #10B981; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">Copy</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div style="color: #999; font-size: 12px; margin-bottom: 0.25rem;">PASSWORD</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span style="color: #FFFFFF; font-family: monospace; flex: 1; word-break: break-all;">${data.client.password}</span>
+                                    <button onclick="copyToClipboard('${data.client.password}')" style="padding: 0.5rem 1rem; background: #10B981; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">Copy</button>
+                                </div>
+                            </div>
+                            <div style="margin-top: 1rem; color: #999; font-size: 12px;">
+                                Expires: ${expiresAt.toLocaleDateString()} ${expiresAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                        </div>
+                    `;
+                    credsDiv.style.display = 'block';
+                    
+                    document.getElementById('userAccountForm').reset();
                     document.getElementById('clientPackage').innerHTML = '<option value="">Select a package...</option>';
                     document.getElementById('clientPackage').disabled = true;
-                    document.getElementById('uidField').style.display = 'none';
-
+                    
                     resellerData.credits = data.creditsRemaining;
                     document.getElementById('resellerCredits').textContent = `Credits: ${data.creditsRemaining}`;
                     document.getElementById('profileCredits').textContent = data.creditsRemaining;
-                    
-                    if (data.warning) {
-                        showAlert(data.warning, 'error');
-                    }
+                    showAlert('Account created successfully!', 'success');
                 } else {
                     showAlert(data.error || 'Failed to create client', 'error');
                 }
@@ -708,7 +789,139 @@
                 showAlert('An error occurred. Please try again.', 'error');
             } finally {
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Client Account';
+                submitBtn.textContent = 'Create User Account';
+            }
+        }
+
+        async function generateLicenseKey(event) {
+            event.preventDefault();
+            const duration = document.getElementById('licenseDuration').value;
+
+            if (!duration || duration <= 0) {
+                showAlert('Please enter a valid duration', 'error');
+                return;
+            }
+
+            const btn = event.target.querySelector('button[type="submit"]');
+            btn.disabled = true;
+            btn.textContent = 'Generating...';
+
+            try {
+                const response = await fetch('/reseller/api/generate-license-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ duration: parseInt(duration) })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const credsDiv = document.getElementById('generatedCredentials');
+                    const expiresAt = new Date(data.licenseKey.expiresAt);
+                    credsDiv.innerHTML = `
+                        <div style="color: #10B981; font-weight: 600; margin-bottom: 1rem;">✓ License Key Generated</div>
+                        <div style="background: #0a0a0a; padding: 1rem; border-radius: 4px; border: 1px solid #2a2a2a; margin-bottom: 1rem;">
+                            <div style="color: #999; font-size: 12px; margin-bottom: 0.5rem;">LICENSE KEY</div>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <span style="color: #FFFFFF; font-family: monospace; flex: 1; word-break: break-all;">${data.licenseKey.key}</span>
+                                <button onclick="copyToClipboard('${data.licenseKey.key}')" style="padding: 0.5rem 1rem; background: #10B981; color: white; border: none; border-radius: 4px; cursor: pointer; white-space: nowrap;">Copy</button>
+                            </div>
+                            <div style="margin-top: 1rem; color: #999; font-size: 12px;">
+                                Expires: ${expiresAt.toLocaleDateString()} ${expiresAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                            </div>
+                        </div>
+                    `;
+                    credsDiv.style.display = 'block';
+                    document.getElementById('licenseKeyForm').reset();
+                    showAlert('License key generated successfully!', 'success');
+                    loadAllLicenses();
+                } else {
+                    showAlert(data.error || 'Failed to generate key', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showAlert('An error occurred', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Generate License Key';
+            }
+        }
+
+        async function loadAllLicenses() {
+            try {
+                const response = await fetch('/reseller/api/my-licenses');
+                const data = await response.json();
+
+                if (data.success && data.licenses.length > 0) {
+                    const container = document.getElementById('licensesContainer');
+                    const table = document.createElement('table');
+                    table.className = 'table';
+                    table.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>License Key</th>
+                                <th>Duration (Days)</th>
+                                <th>Expires</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.licenses.map(license => {
+                                const expiresAt = new Date(license.expiresAt);
+                                const createdAt = new Date(license.createdAt);
+                                return `
+                                    <tr>
+                                        <td style="font-family: monospace; color: #10B981; font-weight: 600;">${license.key}</td>
+                                        <td>${license.duration}</td>
+                                        <td>${expiresAt.toLocaleDateString()}</td>
+                                        <td><span style="padding: 0.25rem 0.75rem; border-radius: 4px; background: ${license.status === 'active' ? 'rgba(16, 185, 129, 0.2); color: #10B981;' : 'rgba(239, 68, 68, 0.2); color: #EF4444;'}">${license.status.toUpperCase()}</span></td>
+                                        <td>${createdAt.toLocaleDateString()}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    `;
+                    container.innerHTML = '';
+                    container.appendChild(table);
+                } else {
+                    document.getElementById('licensesContainer').innerHTML = '<p style="color: #999;">No license keys generated yet</p>';
+                }
+            } catch (error) {
+                console.error('Error loading licenses:', error);
+            }
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showAlert('Copied to clipboard!', 'success');
+            }).catch(() => {
+                showAlert('Failed to copy', 'error');
+            });
+        }
+
+        async function deleteClient(clientId) {
+            if (!confirm('Are you sure you want to delete this client?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/reseller/api/delete-client/${clientId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showAlert('Client deleted successfully', 'success');
+                    loadClients(); // Reload the list
+                } else {
+                    showAlert(data.error || 'Failed to delete client', 'error');
+                }
+            } catch (error) {
+                console.error('Error deleting client:', error);
+                showAlert('An error occurred', 'error');
             }
         }
 
@@ -728,25 +941,47 @@
                                     <th>Product</th>
                                     <th>Package</th>
                                     <th>UID</th>
-                                    <th>Expires</th>
+                                    <th>Expires In</th>
+                                    <th>Expiration Date</th>
                                     <th>Status</th>
-                                    <th>Created</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                ${data.clients.map(client => `
+                                ${data.clients.map(client => {
+                                    let expiresAt;
+                                    try {
+                                        expiresAt = new Date(client.expiresAt);
+                                        if (isNaN(expiresAt.getTime())) {
+                                            expiresAt = new Date();
+                                        }
+                                    } catch (e) {
+                                        expiresAt = new Date();
+                                    }
+                                    const now = new Date();
+                                    const daysLeft = Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24));
+                                    const expiresSoon = daysLeft <= 7 && daysLeft > 0;
+                                    const isExpired = daysLeft <= 0;
+                                    const dateStr = expiresAt.toLocaleDateString() + ' ' + expiresAt.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                                    return `
                                     <tr>
                                         <td>${client.username}</td>
                                         <td>${client.product?.displayName || client.productKey}</td>
                                         <td>${client.packageName || client.package}</td>
                                         <td>${client.assignedUid || '-'}</td>
-                                        <td>${new Date(client.expiresAt).toLocaleDateString()}</td>
-                                        <td style="color: ${client.isActive ? '#10B981' : '#EF4444'};">
-                                            ${client.isActive ? 'Active' : 'Inactive'}
+                                        <td style="color: ${isExpired ? '#EF4444' : (expiresSoon ? '#FFA500' : '#10B981')}; font-weight: 600;">
+                                            ${isExpired ? 'Expired' : (daysLeft + ' days')}
                                         </td>
-                                        <td>${new Date(client.createdAt).toLocaleDateString()}</td>
+                                        <td style="color: #FFFFFF;">${dateStr}</td>
+                                        <td style="color: ${!isExpired && client.isActive ? '#10B981' : '#EF4444'};">
+                                            ${!isExpired && client.isActive ? 'Active' : (isExpired ? 'Expired' : 'Inactive')}
+                                        </td>
+                                        <td>
+                                            <button onclick="deleteClient('${client._id}')" style="padding: 0.4rem 0.8rem; background: #EF4444; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">Delete</button>
+                                        </td>
                                     </tr>
-                                `).join('')}
+                                    `;
+                                }).join('')}
                             </tbody>
                         </table>
                     `;
