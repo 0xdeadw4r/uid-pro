@@ -910,9 +910,8 @@
                     // Remove 's' and handle 'day' vs 'days'
                     const normalize = (d) => {
                         if (!d) return '';
-                        let clean = d.toLowerCase().replace(/s$/, ''); // remove trailing 's'
-                        if (clean === 'lifetime') return 'lifetime';
-                        return clean;
+                        // Remove spaces and 's' from end, lowercase
+                        return d.toLowerCase().replace(/\s+/g, '').replace(/s$/, '');
                     };
                     
                     const normalizedDuration = normalize(duration);
@@ -926,10 +925,11 @@
                     });
                     
                     // Only show the package if it matches the maxDuration allowed in settings
-                    if (pkg && pkg.display && normalizedDuration === normalizedMaxDuration) {
+                    // Fallback: If maxDuration is empty or "all", show all
+                    if (!maxDuration || maxDuration === 'all' || normalizedDuration === normalizedMaxDuration) {
                         const option = document.createElement('option');
                         option.value = duration;
-                        option.textContent = `${pkg.display} - FREE`;
+                        option.textContent = `${pkg.display || duration} - FREE`;
                         select.appendChild(option);
                     }
                 });
