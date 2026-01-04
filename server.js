@@ -262,41 +262,85 @@ async function cleanupExpiredUIDs() {
   }
 }
 
+// ===== AUTOMATIC DISCORD TOKEN REFRESH SYSTEM =====
+async function refreshAllExpiredDiscordTokens() {
+  try {
+    const now = new Date();
+    // Refresh tokens expiring in the next 24 hours or already expired
+    const soon = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    
+    const usersToRefresh = await User.find({
+      discordRefreshToken: { $ne: null },
+      discordTokenExpiresAt: { $lt: soon }
+    });
+
+    if (usersToRefresh.length === 0) {
+      return { refreshed: 0, failed: 0 };
+    }
+
+    console.log(`🔄 Found ${usersToRefresh.length} users with expiring Discord tokens`);
+    
+    let refreshedCount = 0;
+    let failedCount = 0;
+
+    for (const user of usersToRefresh) {
+      try {
+        await refreshDiscordTokenIfNeeded(user);
+        refreshedCount++;
+      } catch (err) {
+        failedCount++;
+        console.error(`❌ Failed to refresh token for ${user.username}: ${err.message}`);
+      }
+    }
+
+    console.log(`✅ Token refresh cycle complete: ${refreshedCount} refreshed, ${failedCount} failed`);
+    return { refreshed: refreshedCount, failed: failedCount };
+  } catch (error) {
+    console.error('❌ Discord token refresh job error:', error.message);
+    return { refreshed: 0, failed: 0 };
+  }
+}
+
 // Run cleanup every 5 minutes
 let cleanupInterval = null;
+let tokenRefreshInterval = null;
 let cleanupStarted = false;
 
-function startExpiredUIDCleanup() {
+function startBackgroundJobs() {
   // Guard against multiple interval registrations on reconnect
   if (cleanupStarted) {
-    console.log('🧹 Cleanup already scheduled, skipping duplicate registration');
+    console.log('🧹 Background jobs already scheduled, skipping duplicate registration');
     return;
   }
   cleanupStarted = true;
   
-  // Clear any existing interval (safety check)
-  if (cleanupInterval) {
-    clearInterval(cleanupInterval);
-    cleanupInterval = null;
-  }
+  // Clear any existing intervals
+  if (cleanupInterval) clearInterval(cleanupInterval);
+  if (tokenRefreshInterval) clearInterval(tokenRefreshInterval);
   
-  // Run initial cleanup after 10 seconds to allow DB connection
+  // Run initial jobs after 10-15 seconds to allow DB connection
   setTimeout(async () => {
-    console.log('🧹 Running initial expired UID cleanup...');
+    console.log('🧹 Running initial background jobs...');
     await cleanupExpiredUIDs();
+    await refreshAllExpiredDiscordTokens();
   }, 10000);
   
-  // Then run every 5 minutes
+  // UID Cleanup every 5 minutes
   cleanupInterval = setInterval(async () => {
     await cleanupExpiredUIDs();
   }, 5 * 60 * 1000);
+
+  // Token Refresh every 6 hours
+  tokenRefreshInterval = setInterval(async () => {
+    await refreshAllExpiredDiscordTokens();
+  }, 6 * 60 * 60 * 1000);
   
-  console.log('✅ Automatic expired UID cleanup scheduled (every 5 minutes)');
+  console.log('✅ Automatic background jobs scheduled (UID cleanup & Token refresh)');
 }
 
 mongoose.connection.on('connected', () => {
   console.log('✅ MongoDB connected');
-  startExpiredUIDCleanup();
+  startBackgroundJobs();
 });
 
 mongoose.connection.on('error', (err) => {
@@ -351,6 +395,21 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+// Admin Routes
+app.post('/admin/refresh-all-tokens', requireAuth, requireMainSuperAdmin, async (req, res) => {
+  try {
+    const stats = await refreshAllExpiredDiscordTokens();
+    res.json({
+      success: true,
+      message: `Mass token refresh complete: ${stats.refreshed} success, ${stats.failed} failed`,
+      stats
+    });
+  } catch (error) {
+    console.error('Mass token refresh error:', error);
+    res.status(500).json({ error: 'Failed to execute mass token refresh' });
+  }
+});
 
 const clientRoutes = require('./routes/client');
 app.use('/client', clientRoutes);
@@ -1923,19 +1982,24 @@ app.post('/api/admin/reset-network', requireAuth, requireAdmin, async (req, res)
 });
 
 app.post('/api/admin/restore-members', requireAuth, requireMainSuperAdmin, async (req, res) => {
-  const { newGuildId, botToken } = req.body;
+  const { newGuildId, botToken, limit, skipUsers } = req.body;
 
   if (!newGuildId || !botToken) {
     return res.status(400).json({ error: 'Guild ID and Bot Token required' });
   }
 
   try {
-    const results = await restoreAllMembers(newGuildId, botToken);
+    const options = {
+      limit: limit ? parseInt(limit) : null,
+      skipUsernames: skipUsers ? skipUsers.split(',').map(u => u.trim()).filter(u => u !== '') : []
+    };
+
+    const results = await restoreAllMembers(newGuildId, botToken, options);
 
     await logActivity(
       req.session.user.username,
       'admin',
-      `Restored ${results.success} members to new server ${newGuildId}`
+      `Restored ${results.success} members to new server ${newGuildId} (Limit: ${limit || 'None'})`
     );
 
     res.json({

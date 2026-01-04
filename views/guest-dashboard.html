@@ -905,7 +905,28 @@
 
                 Object.keys(aimkillPackages).forEach(duration => {
                     const pkg = aimkillPackages[duration];
-                    if (pkg && pkg.display) {
+                    
+                    // Normalize duration keys for comparison
+                    // Remove 's' and handle 'day' vs 'days'
+                    const normalize = (d) => {
+                        if (!d) return '';
+                        let clean = d.toLowerCase().replace(/s$/, ''); // remove trailing 's'
+                        if (clean === 'lifetime') return 'lifetime';
+                        return clean;
+                    };
+                    
+                    const normalizedDuration = normalize(duration);
+                    const normalizedMaxDuration = normalize(maxDuration);
+                    
+                    console.log('Comparing durations:', { 
+                        original: duration, 
+                        normalized: normalizedDuration, 
+                        max: maxDuration, 
+                        normalizedMax: normalizedMaxDuration 
+                    });
+                    
+                    // Only show the package if it matches the maxDuration allowed in settings
+                    if (pkg && pkg.display && normalizedDuration === normalizedMaxDuration) {
                         const option = document.createElement('option');
                         option.value = duration;
                         option.textContent = `${pkg.display} - FREE`;
@@ -1204,6 +1225,20 @@
 
                 const response = await fetch('/api/guest-settings', { credentials: 'include' });
                 const settings = await response.json();
+
+                // Update UID package selection based on guest settings
+                const packageSelect = document.getElementById('packageSelect');
+                if (packageSelect) {
+                    const durationMap = {
+                        '1day': '1 Day',
+                        '3days': '3 Days',
+                        '7days': '7 Days',
+                        '15days': '15 Days',
+                        '30days': '30 Days'
+                    };
+                    const display = durationMap[settings.guestPassMaxDuration] || '1 Day';
+                    packageSelect.innerHTML = `<option value="${settings.guestPassMaxDuration}">${display} - FREE</option>`;
+                }
 
                 let statusHTML = '<div class="status-indicator status-verified">Discord Verified</div>';
 

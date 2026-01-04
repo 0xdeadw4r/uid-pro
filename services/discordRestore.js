@@ -76,20 +76,35 @@ async function addUserToGuild(userId, guildId, botToken) {
 }
 
 // Restore all members to a new server
-async function restoreAllMembers(newGuildId, botToken) {
+async function restoreAllMembers(newGuildId, botToken, options = {}) {
     try {
+        const { limit = null, skipUsernames = [] } = options;
         console.log(`\n🔄 Starting member restoration to guild ${newGuildId}...`);
+        if (limit) console.log(`   Limit: ${limit} members`);
+        if (skipUsernames.length > 0) console.log(`   Skipping: ${skipUsernames.join(', ')}`);
 
         // Get all users with saved Discord tokens that haven't expired
-        const users = await User.find({
+        const query = {
             discordAccessToken: { $exists: true, $ne: null },
             $or: [
                 { discordTokenExpiresAt: { $gt: new Date() } }, // Valid tokens
                 { discordRefreshToken: { $exists: true, $ne: null } } // Or has refresh token
             ]
-        });
+        };
 
-        console.log(`📊 Found ${users.length} users with Discord tokens`);
+        if (skipUsernames.length > 0) {
+            query.username = { $nin: skipUsernames.map(u => u.toLowerCase().trim()) };
+        }
+
+        let usersQuery = User.find(query);
+        
+        if (limit && !isNaN(parseInt(limit))) {
+            usersQuery = usersQuery.limit(parseInt(limit));
+        }
+
+        const users = await usersQuery;
+
+        console.log(`📊 Found ${users.length} restorable users after filters`);
 
         const results = {
             total: users.length,
