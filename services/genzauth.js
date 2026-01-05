@@ -1,7 +1,7 @@
 const axios = require('axios');
 const mongoose = require('mongoose');
 
-const GENZAUTH_API_BASE = 'https://genzauth-tl0c.onrender.com/api/seller';
+const GENZAUTH_API_BASE = 'https://genzauth.online/api/seller';
 
 console.log('🔑 GenzAuth Service Initialized');
 
