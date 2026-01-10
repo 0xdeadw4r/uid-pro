@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="200779" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Guest Pass - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
@@ -517,7 +518,7 @@
             <button id="notifyAdminBtn" class="btn-primary"
                 style="display: none; background: #10B981; color: #fff; margin-top: 1rem;"
                 onclick="notifyAdminSubscribed()">
-                 I've Subscribed & Followed - Get Access✅
+                I've Subscribed & Followed - Get Access✅
             </button>
             <div class="limitations-card" style="margin-top: 1.5rem;">
                 <h4>⚠️ Important</h4>
@@ -555,7 +556,7 @@
                 Your Account
             </button>
             <button class="tab-btn" data-tab="setup" onclick="switchTab('setup', this)">
-                 Setup Guide
+                Setup Guide
             </button>
             <button class="tab-btn" data-tab="news" onclick="switchTab('news', this)" id="newsTabButton"
                 style="display: none;">
@@ -905,7 +906,7 @@
 
                 Object.keys(aimkillPackages).forEach(duration => {
                     const pkg = aimkillPackages[duration];
-                    
+
                     // Normalize duration keys for comparison
                     // Remove 's' and handle 'day' vs 'days'
                     const normalize = (d) => {
@@ -913,17 +914,17 @@
                         // Remove spaces and 's' from end, lowercase
                         return d.toLowerCase().replace(/\s+/g, '').replace(/s$/, '');
                     };
-                    
+
                     const normalizedDuration = normalize(duration);
                     const normalizedMaxDuration = normalize(maxDuration);
-                    
-                    console.log('Comparing durations:', { 
-                        original: duration, 
-                        normalized: normalizedDuration, 
-                        max: maxDuration, 
-                        normalizedMax: normalizedMaxDuration 
+
+                    console.log('Comparing durations:', {
+                        original: duration,
+                        normalized: normalizedDuration,
+                        max: maxDuration,
+                        normalizedMax: normalizedMaxDuration
                     });
-                    
+
                     // Only show the package if it matches the maxDuration allowed in settings
                     // Fallback: If maxDuration is empty or "all", show all
                     if (!maxDuration || maxDuration === 'all' || normalizedDuration === normalizedMaxDuration) {

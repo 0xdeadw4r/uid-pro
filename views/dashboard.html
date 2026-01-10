@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="200779" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - 𝐃𝐨𝐦𝐢𝐧𝐮𝐬™ 𝐂𝐨𝐫𝐩𝐬</title>
@@ -527,14 +528,14 @@
                                 <td style="padding: 1rem; color: #e0e0e0; font-family: monospace;">${key.key}</td>
                                 <td style="padding: 1rem; color: #999;">${key.createdBy}</td>
                                 <td style="padding: 1rem; color: ${statusColor}; font-weight: 700; text-transform: capitalize;">${key.status}</td>
-                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', { 
-                                    year: 'numeric', 
-                                    month: '2-digit', 
-                                    day: '2-digit', 
-                                    hour: '2-digit', 
-                                    minute: '2-digit',
-                                    hour12: false 
-                                })}</td>
+                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        })}</td>
                                 <td style="padding: 1rem; color: #999;">${key.timeLeft}</td>
                                 <td style="padding: 1rem;">
                                     <button onclick="deleteLicenseKey('${key.key}')"
@@ -592,14 +593,14 @@
                                 <td style="padding: 1rem; color: #e0e0e0; font-family: monospace;">${key.username}</td>
                                 <td style="padding: 1rem; color: #999;">${key.createdBy}</td>
                                 <td style="padding: 1rem; color: ${statusColor}; font-weight: 700; text-transform: capitalize;">${key.status}</td>
-                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', { 
-                                    year: 'numeric', 
-                                    month: '2-digit', 
-                                    day: '2-digit', 
-                                    hour: '2-digit', 
-                                    minute: '2-digit',
-                                    hour12: false 
-                                })}</td>
+                                <td style="padding: 1rem; color: #999;">${new Date(key.expiresAt).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        })}</td>
                                 <td style="padding: 1rem; color: #999;">${key.timeLeft}</td>
                                 <td style="padding: 1rem;">
                                     <button onclick="deleteAimkillUserKey('${key.username}')"
@@ -702,7 +703,7 @@
                     document.getElementById('aimkillLink').classList.remove('nav-hidden');
                     document.getElementById('packagesLink').classList.add('nav-hidden');
                     document.getElementById('userTypeDesc').textContent = 'Manage your Aimkill license keys and user accounts';
-                    
+
                     // Load Aimkill data
                     loadAimkillLicenseKeys();
                     loadAimkillKeys();
@@ -713,7 +714,7 @@
                     document.getElementById('packagesLink').classList.remove('nav-hidden');
                     document.getElementById('aimkillLink').classList.add('nav-hidden');
                     document.getElementById('userTypeDesc').textContent = 'Manage your account and UIDs in one place';
-                    
+
                     // Check 2FA for UID accounts
                     check2FAStatus();
                 }

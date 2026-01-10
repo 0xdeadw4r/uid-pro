@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+    <script src="https://quge5.com/88/tag.min.js" data-zone="200779" async data-cfasync="false"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Client Dashboard - Dominus Corps</title>
@@ -123,8 +125,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .tab-content h2 {
@@ -169,18 +178,23 @@
             font-size: 14px;
         }
 
-        .download-section, .reset-section, .setup-section {
+        .download-section,
+        .reset-section,
+        .setup-section {
             text-align: center;
             padding: 2rem 0;
         }
 
-        .download-icon, .setup-icon {
+        .download-icon,
+        .setup-icon {
             font-size: 3rem;
             margin-bottom: 1rem;
             opacity: 0.5;
         }
 
-        .btn-download, .btn-reset, .btn-setup {
+        .btn-download,
+        .btn-reset,
+        .btn-setup {
             display: inline-flex;
             align-items: center;
             gap: 0.75rem;
@@ -198,12 +212,16 @@
             letter-spacing: 0.5px;
         }
 
-        .btn-download:hover:not(:disabled), .btn-reset:hover:not(:disabled), .btn-setup:hover:not(:disabled) {
+        .btn-download:hover:not(:disabled),
+        .btn-reset:hover:not(:disabled),
+        .btn-setup:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 30px rgba(255, 255, 255, 0.3);
         }
 
-        .btn-download:disabled, .btn-reset:disabled, .btn-setup:disabled {
+        .btn-download:disabled,
+        .btn-reset:disabled,
+        .btn-setup:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
@@ -302,7 +320,8 @@
         }
 
         .setup-input-group input[type="text"] {
-            width: calc(100% - 2rem); /* Account for padding */
+            width: calc(100% - 2rem);
+            /* Account for padding */
             padding: 0.75rem 1rem;
             background: #2a2a2a;
             border: 1px solid #3a3a3a;
@@ -375,6 +394,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h1>Client Dashboard</h1>
@@ -390,7 +410,8 @@
     <div class="container">
         <div class="tabs" id="tabsContainer">
             <button class="tab active" onclick="showTab('download')">📦 Download Files</button>
-            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset HWID</button>
+            <button class="tab" id="resetTabButton" onclick="showTab('reset')" style="display: none;">🔄 Reset
+                HWID</button>
             <button class="tab" id="setupTabButton" onclick="showTab('setup')">🎥 Setup Guide</button>
             <button class="tab" id="newsTabButton" style="display: none;">📰 News</button>
         </div>
@@ -471,7 +492,8 @@
                 </div>
             </div>
 
-            <div id="resetLimitWarning" class="info-card" style="display: none; background: #2a1a1a; border: 1px solid #ff4444; margin-bottom: 2rem;">
+            <div id="resetLimitWarning" class="info-card"
+                style="display: none; background: #2a1a1a; border: 1px solid #ff4444; margin-bottom: 2rem;">
                 <p style="color: #ff4444; margin: 0; font-size: 14px; text-align: center;">
                     ⚠️ <span id="limitWarningText"></span>
                 </p>
@@ -499,7 +521,9 @@
             </div>
 
             <div id="setupVideoPlayerContainer">
-                <iframe id="setupVideoIframe" width="100%" height="400" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="border-radius: 8px; display: none;"></iframe>
+                <iframe id="setupVideoIframe" width="100%" height="400" src="" frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen style="border-radius: 8px; display: none;"></iframe>
             </div>
             <div id="noVideoSection" class="no-link-message" style="display: none;">
                 <p>⚠️ No setup video available. Please contact your administrator.</p>
@@ -929,4 +953,5 @@
         }, 500);
     </script>
 </body>
+
 </html>
